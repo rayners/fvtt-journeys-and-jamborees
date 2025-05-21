@@ -1,0 +1,26 @@
+<div class="travel-role-section">
+    <label class="travel-role-label">{{localize "J&J.travelRoles.pathfinder"}}</label>
+    <select name="system.roles.pathfinder" class="pathfinder-select">
+        <option value="">— {{localize "J&J.travelRoles.selectPathfinder"}} —</option>
+        
+        {{#if activeCharacters.length}}
+        <optgroup label="{{localize 'J&J.characterStatus.active'}}">
+            {{#each activeCharacters}}
+            <option value="{{this.id}}" {{#if (eq this.id ../system.roles.pathfinder)}}selected{{/if}}>
+                {{this.name}} ({{localize "J&J.skills.bushcraft"}}: {{this.bushcraft}})
+            </option>
+            {{/each}}
+        </optgroup>
+        {{/if}}
+        
+        {{#if travelingCharacters.length}}
+        <optgroup label="{{localize 'J&J.characterStatus.traveling'}} ({{localize 'J&J.travelRoles.unavailable'}})">
+            {{#each travelingCharacters}}
+            <option value="{{this.id}}" disabled>
+                {{this.name}} ({{localize "J&J.skills.bushcraft"}}: {{this.bushcraft}})
+            </option>
+            {{/each}}
+        </optgroup>
+        {{/if}}
+    </select>
+</div>

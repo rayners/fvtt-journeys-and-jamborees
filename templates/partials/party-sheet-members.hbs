@@ -1,0 +1,130 @@
+{{!-- Members Tab --}}
+<div class="tab members" data-group="primary" data-tab="members">
+    <div class="party-management">
+        <div class="section-header">
+            <h2>{{localize "J&J.ui.party-sheet.yourCharacter"}}</h2>
+        </div>
+        
+        {{#each characters as |character|}}
+            {{#if character.owner}}
+                <div class="character-entry">
+                    <div class="portrait-container">
+                        <img class="character-portrait thumbnail" src="{{character.img}}" title="{{character.name}}" />
+                    </div>
+                    <div class="character-name">{{character.name}}</div>
+                    <div class="character-status">
+                        <select class="character-status-select" data-character-id="{{character.id}}">
+                            <option value="active" {{#if character.isActive}}selected{{/if}}>{{localize "J&J.characterStatus.active"}}</option>
+                            <option value="traveling" {{#if character.isTraveling}}selected{{/if}}>{{localize "J&J.characterStatus.traveling"}}</option>
+                            <option value="stayingBehind" {{#if character.isStayingBehind}}selected{{/if}}>{{localize "J&J.characterStatus.stayingBehind"}}</option>
+                        </select>
+                        
+                        {{#if character.isTraveling}}
+                            <div class="downtime-activity">
+                                <select class="downtime-select" data-character-id="{{character.id}}">
+                                    <option value="none">{{localize "J&J.downtimeActivity.none"}}</option>
+                                    <option value="hunting">{{localize "J&J.downtimeActivity.hunting"}}</option>
+                                    <option value="fishing">{{localize "J&J.downtimeActivity.fishing"}}</option>
+                                    <option value="foraging">{{localize "J&J.downtimeActivity.foraging"}}</option>
+                                    <option value="crafting">{{localize "J&J.downtimeActivity.crafting"}}</option>
+                                    <option value="healing">{{localize "J&J.downtimeActivity.healing"}}</option>
+                                </select>
+                            </div>
+                        {{/if}}
+                    </div>
+                </div>
+            {{/if}}
+        {{/each}}
+        
+        <div class="section-header">
+            <h2>{{localize "J&J.ui.party-sheet.restOfParty"}}</h2>
+        </div>
+        
+        <div class="party-characters">
+            {{#each characters as |character|}}
+                {{#unless character.owner}}
+                    <div class="character-entry">
+                        <div class="portrait-container">
+                            <img class="character-portrait thumbnail" src="{{character.img}}" title="{{character.name}}" />
+                        </div>
+                        <div class="character-info">
+                            <div class="character-name">{{character.name}}</div>
+                            <div class="player-name" style="color: {{character.userColor}};">{{character.playerName}}</div>
+                        </div>
+                        <div class="character-status-display">
+                            {{#if character.isActive}}{{localize "J&J.characterStatus.active"}}{{/if}}
+                            {{#if character.isTraveling}}{{localize "J&J.characterStatus.traveling"}}{{/if}}
+                            {{#if character.isStayingBehind}}{{localize "J&J.characterStatus.stayingBehind"}}{{/if}}
+                        </div>
+                    </div>
+                {{/unless}}
+            {{/each}}
+        </div>
+        
+        <div class="section-header">
+            <h2>{{localize "J&J.ui.party-sheet.travelRoles"}}</h2>
+        </div>
+        
+        <div class="travel-roles">
+            <div class="role-entry">
+                <div class="role-name">{{travelRoles.pathfinder.name}}</div>
+                <div class="role-character">
+                    {{#if travelRoles.pathfinder.characterName}}
+                        {{travelRoles.pathfinder.characterName}} ({{travelRoles.pathfinder.skillValue}})
+                    {{else}}
+                        {{localize "J&J.travelRoles.unassigned"}}
+                    {{/if}}
+                </div>
+                <div class="role-actions">
+                    {{#each characters as |character|}}
+                        {{#if character.isActive}}
+                            <a class="assign-role" data-character-id="{{character.id}}" data-role="pathfinder">
+                                {{localize "J&J.travelRoles.assign"}} {{character.name}} ({{character.bushcraft}})
+                            </a>
+                        {{/if}}
+                    {{/each}}
+                </div>
+            </div>
+            
+            <div class="role-entry">
+                <div class="role-name">{{travelRoles.lookout.name}}</div>
+                <div class="role-character">
+                    {{#if travelRoles.lookout.characterName}}
+                        {{travelRoles.lookout.characterName}} ({{travelRoles.lookout.skillValue}})
+                    {{else}}
+                        {{localize "J&J.travelRoles.unassigned"}}
+                    {{/if}}
+                </div>
+                <div class="role-actions">
+                    {{#each characters as |character|}}
+                        {{#if character.isActive}}
+                            <a class="assign-role" data-character-id="{{character.id}}" data-role="lookout">
+                                {{localize "J&J.travelRoles.assign"}} {{character.name}} ({{character.awareness}})
+                            </a>
+                        {{/if}}
+                    {{/each}}
+                </div>
+            </div>
+            
+            <div class="role-entry">
+                <div class="role-name">{{travelRoles.quartermaster.name}}</div>
+                <div class="role-character">
+                    {{#if travelRoles.quartermaster.characterName}}
+                        {{travelRoles.quartermaster.characterName}} ({{travelRoles.quartermaster.skillValue}})
+                    {{else}}
+                        {{localize "J&J.travelRoles.unassigned"}}
+                    {{/if}}
+                </div>
+                <div class="role-actions">
+                    {{#each characters as |character|}}
+                        {{#if character.isActive}}
+                            <a class="assign-role" data-character-id="{{character.id}}" data-role="quartermaster">
+                                {{localize "J&J.travelRoles.assign"}} {{character.name}} ({{character.bartering}})
+                            </a>
+                        {{/if}}
+                    {{/each}}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

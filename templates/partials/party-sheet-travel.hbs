@@ -1,0 +1,110 @@
+{{!-- Travel Tab --}}
+<div class="tab travel" data-group="primary" data-tab="travel">
+    <div class="travel-management">
+        <div class="journey-actions">
+            <button type="button" class="roll-pathfinding">
+                <i class="fas fa-map-signs"></i> {{localize "J&J.travelActions.findPath"}}
+            </button>
+            <button type="button" class="random-encounter">
+                <i class="fas fa-dice-d20"></i> {{localize "J&J.travelActions.randomEncounter"}}
+            </button>
+            <button type="button" class="roll-weather">
+                <i class="fas fa-cloud-sun-rain"></i> {{localize "J&J.travelActions.rollWeather"}}
+            </button>
+            <button type="button" class="make-camp">
+                <i class="fas fa-campground"></i> {{localize "J&J.travelActions.makeCamp"}}
+            </button>
+        </div>
+        
+        {{!-- Travel Roles Section --}}
+        <div class="travel-roles-section">
+            <div class="section-header">
+                <h2>{{localize "J&J.ui.party-sheet.travelRoles"}}</h2>
+            </div>
+            
+            {{!-- Include the pathfinder selector partial --}}
+            {{> "modules/journeys-and-jamborees/templates/partials/pathfinder-selector.hbs"}}
+            
+            {{!-- Future: Add similar selectors for lookout and quartermaster --}}
+        </div>
+
+        <div class="travel-tracker">
+            <div class="section-header">
+                <h2>{{localize "J&J.ui.party-sheet.currentJourney"}}</h2>
+            </div>
+            
+            <div class="journey-details">
+                <div class="journey-field">
+                    <label>{{localize "J&J.journey.origin"}}</label>
+                    <input type="text" name="system.journey.origin" value="{{system.journey.origin}}">
+                </div>
+                <div class="journey-field">
+                    <label>{{localize "J&J.journey.destination"}}</label>
+                    <input type="text" name="system.journey.destination" value="{{system.journey.destination}}">
+                </div>
+                <div class="journey-field">
+                    <label>{{localize "J&J.journey.distance"}}</label>
+                    <div class="distance-container">
+                        <input type="number" name="system.journey.distance" value="{{system.journey.distance}}" class="journey-distance">
+                        <span>{{localize "J&J.ui.party-sheet.km"}}</span>
+                    </div>
+                </div>
+                <div class="journey-field">
+                    <label>{{localize "J&J.journey.traveled"}}</label>
+                    <div class="distance-container">
+                        <input type="number" name="system.journey.traveled" value="{{system.journey.traveled}}" class="journey-traveled">
+                        <span>{{localize "J&J.ui.party-sheet.km"}}</span>
+                    </div>
+                </div>
+                <div class="journey-field">
+                    <label>{{localize "J&J.journey.remaining"}}</label>
+                    <div class="distance-container journey-remaining">
+                        <span>{{journeyRemaining}}</span>
+                        <span>{{localize "J&J.ui.party-sheet.km"}}</span>
+                    </div>
+                </div>
+                <div class="journey-field">
+                    <label>{{localize "J&J.journey.terrain"}}</label>
+                    <select name="system.journey.terrain">
+                        <option value="road" {{#if (eq system.journey.terrain "road")}}selected{{/if}}>{{localize "J&J.terrain.road"}}</option>
+                        <option value="plains" {{#if (eq system.journey.terrain "plains")}}selected{{/if}}>{{localize "J&J.terrain.plains"}}</option>
+                        <option value="forest" {{#if (eq system.journey.terrain "forest")}}selected{{/if}}>{{localize "J&J.terrain.forest"}}</option>
+                        <option value="hills" {{#if (eq system.journey.terrain "hills")}}selected{{/if}}>{{localize "J&J.terrain.hills"}}</option>
+                        <option value="mountains" {{#if (eq system.journey.terrain "mountains")}}selected{{/if}}>{{localize "J&J.terrain.mountains"}}</option>
+                        <option value="swamp" {{#if (eq system.journey.terrain "swamp")}}selected{{/if}}>{{localize "J&J.terrain.swamp"}}</option>
+                        <option value="desert" {{#if (eq system.journey.terrain "desert")}}selected{{/if}}>{{localize "J&J.terrain.desert"}}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="journey-log">
+            <div class="section-header">
+                <h2>{{localize "J&J.ui.party-sheet.journeyLog"}}</h2>
+            </div>
+            
+            <div class="journey-entries">
+                {{#if journeyEntries.length}}
+                    {{#each journeyEntries as |entry|}}
+                        <div class="journey-entry" data-entry-id="{{entry.id}}">
+                            <div class="entry-timestamp">{{entry.timestamp}}</div>
+                            <div class="entry-content">{{entry.content}}</div>
+                            <div class="entry-controls">
+                                <a class="entry-delete" data-entry-id="{{entry.id}}"><i class="fas fa-trash"></i></a>
+                            </div>
+                        </div>
+                    {{/each}}
+                {{else}}
+                    <p class="hint">{{localize "J&J.ui.party-sheet.noJourneyEntries"}}</p>
+                {{/if}}
+            </div>
+            
+            <div class="add-journey-entry">
+                <textarea name="newJourneyEntry" placeholder="{{localize 'J&J.ui.party-sheet.addJourneyEntryPlaceholder'}}"></textarea>
+                <button type="button" class="add-entry">
+                    <i class="fas fa-plus"></i> {{localize "J&J.ui.party-sheet.addEntry"}}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

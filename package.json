@@ -1,0 +1,30 @@
+{
+  "name": "journeys-and-jamborees",
+  "version": "0.1.0",
+  "description": "A party management system for Dragonbane in Foundry VTT",
+  "main": "dist/module.js",
+  "scripts": {
+    "build": "rollup -c",
+    "watch": "rollup -c -w",
+    "lint": "eslint src",
+    "prepare": "npm run build"
+  },
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^15.0.0",
+    "@rollup/plugin-typescript": "^11.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.59.0",
+    "@typescript-eslint/parser": "^5.59.0",
+    "eslint": "^8.38.0",
+    "rollup": "^3.20.2",
+    "rollup-plugin-copy": "^3.4.0",
+    "rollup-plugin-livereload": "^2.0.5",
+    "rollup-plugin-scss": "^4.0.0",
+    "rollup-plugin-serve": "^2.0.2",
+    "sass": "^1.62.0",
+    "tslib": "^2.5.0",
+    "typescript": "^5.0.4",
+    "fvtt-types": "github:League-of-Foundry-Developers/foundry-vtt-types#main"
+  }
+}

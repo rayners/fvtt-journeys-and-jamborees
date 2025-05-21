@@ -1,0 +1,2 @@
+/* You would typically place an actual image file here. 
+   This is just a placeholder text file to indicate where to put the parchment background image. */

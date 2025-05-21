@@ -1,0 +1,513 @@
+<form class="{{cssClass}}" autocomplete="off">
+    <header class="sheet-header party-header">
+        <div class="image-container">
+            <img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}"/>
+            <h1>
+                <input name="name" type="text" value="{{actor.name}}" placeholder="Party Name"/>
+            </h1>
+        </div>
+        <div class="party-stats-container">
+            <div class="party-stats">
+                <!-- Party stats summary instead of attributes -->
+                <div class="stat-panel members">
+                    <label class="heading stat-label">{{localize "J&J.ui.party-sheet.members"}}</label>
+                    <span class="stat-value">{{activeMembers}}/{{totalMembers}}</span>
+                </div>
+                <div class="stat-panel rations">
+                    <label class="heading stat-label">{{localize "J&J.ui.party-sheet.rations"}}</label>
+                    <span class="stat-value {{#unless system.hasEnoughRations}}low-resource{{/unless}}">{{system.resources.rations}}</span>
+                </div>
+                <div class="stat-panel water">
+                    <label class="heading stat-label">{{localize "J&J.ui.party-sheet.water"}}</label>
+                    <span class="stat-value {{#unless system.hasEnoughWater}}low-resource{{/unless}}">{{system.resources.water}}</span>
+                </div>
+                <div class="stat-panel movement">
+                    <label class="heading stat-label">{{localize "J&J.ui.party-sheet.movement"}}</label>
+                    <span class="stat-value">{{system.movement.value}} {{localize "J&J.ui.party-sheet.km"}}</span>
+                </div>
+            </div>
+            
+            <!-- Party conditions or travel status indicators -->
+            <div class="travel-status">
+                <div class="status-panel traveling" title="{{localize "J&J.travelStatus.traveling"}}">
+                    <input class="status-input" name="system.status.traveling" type="checkbox" {{checked system.status.traveling}} />
+                    <label class="status-label">{{localize "J&J.travelStatus.traveling"}}</label>
+                </div>
+                <div class="status-panel resting" title="{{localize "J&J.travelStatus.resting"}}">
+                    <input class="status-input" name="system.status.resting" type="checkbox" {{checked system.status.resting}} />
+                    <label class="status-label">{{localize "J&J.travelStatus.resting"}}</label>
+                </div>
+                <div class="status-panel camping" title="{{localize "J&J.travelStatus.camping"}}">
+                    <input class="status-input" name="system.status.camping" type="checkbox" {{checked system.status.camping}} />
+                    <label class="status-label">{{localize "J&J.travelStatus.camping"}}</label>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div class="sheet-content">
+        {{!-- Sheet Tab Navigation --}}
+        <nav class="sheet-tabs tabs" data-group="primary">
+          {{!-- Default tab is specified in party-sheet.js --}}
+          <a class="item" data-tab="members">{{localize "J&J.ui.party-sheet.members"}}</a>
+          <a class="item" data-tab="travel">{{localize "J&J.ui.party-sheet.travel"}}</a>
+          <a class="item" data-tab="inventory">{{localize "J&J.ui.party-sheet.inventory"}}</a>
+          <a class="item" data-tab="journal">{{localize "J&J.ui.party-sheet.journal"}}</a>
+          <a class="item" data-tab="settings">{{localize "J&J.ui.party-sheet.settings"}}</a>
+        </nav>
+
+        {{!-- Sheet Body --}}
+        <section class="sheet-body">
+            {{!-- Members Tab --}}
+            <div class="tab members" data-group="primary" data-tab="members">
+                <div class="party-management">
+                    <div class="section-header">
+                        <h2>{{localize "J&J.ui.party-sheet.yourCharacter"}}</h2>
+                    </div>
+                    
+                    {{#each characters as |character|}}
+                        {{#if character.owner}}
+                            <div class="character-entry">
+                                <div class="portrait-container">
+                                    <img class="character-portrait thumbnail" src="{{character.img}}" title="{{character.name}}" />
+                                </div>
+                                <div class="character-name">{{character.name}}</div>
+                                <div class="character-status">
+                                    <select class="character-status-select" data-character-id="{{character.id}}">
+                                        <option value="active" {{#if character.isActive}}selected{{/if}}>{{localize "J&J.characterStatus.active"}}</option>
+                                        <option value="traveling" {{#if character.isTraveling}}selected{{/if}}>{{localize "J&J.characterStatus.traveling"}}</option>
+                                        <option value="stayingBehind" {{#if character.isStayingBehind}}selected{{/if}}>{{localize "J&J.characterStatus.stayingBehind"}}</option>
+                                    </select>
+                                    
+                                    {{#if character.isTraveling}}
+                                        <div class="downtime-activity">
+                                            <select class="downtime-select" data-character-id="{{character.id}}">
+                                                <option value="none">{{localize "J&J.downtimeActivity.none"}}</option>
+                                                <option value="hunting">{{localize "J&J.downtimeActivity.hunting"}}</option>
+                                                <option value="fishing">{{localize "J&J.downtimeActivity.fishing"}}</option>
+                                                <option value="foraging">{{localize "J&J.downtimeActivity.foraging"}}</option>
+                                                <option value="crafting">{{localize "J&J.downtimeActivity.crafting"}}</option>
+                                                <option value="healing">{{localize "J&J.downtimeActivity.healing"}}</option>
+                                            </select>
+                                        </div>
+                                    {{/if}}
+                                </div>
+                            </div>
+                        {{/if}}
+                    {{/each}}
+                    
+                    <div class="section-header">
+                        <h2>{{localize "J&J.ui.party-sheet.restOfParty"}}</h2>
+                    </div>
+                    
+                    <div class="party-characters">
+                        {{#each characters as |character|}}
+                            {{#unless character.owner}}
+                                <div class="character-entry">
+                                    <div class="portrait-container">
+                                        <img class="character-portrait thumbnail" src="{{character.img}}" title="{{character.name}}" />
+                                    </div>
+                                    <div class="character-info">
+                                        <div class="character-name">{{character.name}}</div>
+                                        <div class="player-name" style="color: {{character.userColor}};">{{character.playerName}}</div>
+                                    </div>
+                                    <div class="character-status-display">
+                                        {{#if character.isActive}}{{localize "J&J.characterStatus.active"}}{{/if}}
+                                        {{#if character.isTraveling}}{{localize "J&J.characterStatus.traveling"}}{{/if}}
+                                        {{#if character.isStayingBehind}}{{localize "J&J.characterStatus.stayingBehind"}}{{/if}}
+                                    </div>
+                                </div>
+                            {{/unless}}
+                        {{/each}}
+                    </div>
+                    
+                    <div class="section-header">
+                        <h2>{{localize "J&J.ui.party-sheet.travelRoles"}}</h2>
+                    </div>
+                    
+                    <div class="travel-roles">
+                        {{> "journeys-and-jamborees.partials.pathfinder-selector"}}
+                        
+                        <div class="travel-role-section">
+                            <label class="travel-role-label">{{localize "J&J.travelRoles.lookout"}}</label>
+                            <select name="system.roles.lookout" class="lookout-select">
+                                <option value="">— {{localize "J&J.travelRoles.selectLookout"}} —</option>
+                                
+                                {{#if activeCharacters.length}}
+                                <optgroup label="{{localize 'J&J.characterStatus.active'}}">
+                                    {{#each activeCharacters}}
+                                    <option value="{{this.id}}" {{#if (eq this.id ../system.roles.lookout)}}selected{{/if}}>
+                                        {{this.name}} ({{localize "J&J.skills.awareness"}}: {{this.awareness}})
+                                    </option>
+                                    {{/each}}
+                                </optgroup>
+                                {{/if}}
+                                
+                                {{#if travelingCharacters.length}}
+                                <optgroup label="{{localize 'J&J.characterStatus.traveling'}} ({{localize 'J&J.travelRoles.unavailable'}})">
+                                    {{#each travelingCharacters}}
+                                    <option value="{{this.id}}" disabled>
+                                        {{this.name}} ({{localize "J&J.skills.awareness"}}: {{this.awareness}})
+                                    </option>
+                                    {{/each}}
+                                </optgroup>
+                                {{/if}}
+                            </select>
+                        </div>
+                        
+                        <div class="travel-role-section">
+                            <label class="travel-role-label">{{localize "J&J.travelRoles.quartermaster"}}</label>
+                            <select name="system.roles.quartermaster" class="quartermaster-select">
+                                <option value="">— {{localize "J&J.travelRoles.selectQuartermaster"}} —</option>
+                                
+                                {{#if activeCharacters.length}}
+                                <optgroup label="{{localize 'J&J.characterStatus.active'}}">
+                                    {{#each activeCharacters}}
+                                    <option value="{{this.id}}" {{#if (eq this.id ../system.roles.quartermaster)}}selected{{/if}}>
+                                        {{this.name}} ({{localize "J&J.skills.bartering"}}: {{this.bartering}})
+                                    </option>
+                                    {{/each}}
+                                </optgroup>
+                                {{/if}}
+                                
+                                {{#if travelingCharacters.length}}
+                                <optgroup label="{{localize 'J&J.characterStatus.traveling'}} ({{localize 'J&J.travelRoles.unavailable'}})">
+                                    {{#each travelingCharacters}}
+                                    <option value="{{this.id}}" disabled>
+                                        {{this.name}} ({{localize "J&J.skills.bartering"}}: {{this.bartering}})
+                                    </option>
+                                    {{/each}}
+                                </optgroup>
+                                {{/if}}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {{!-- Travel Tab --}}
+            <div class="tab travel" data-group="primary" data-tab="travel">
+                <div class="travel-management">
+                    <div class="journey-actions">
+                        <button type="button" class="roll-pathfinding">
+                            <i class="fas fa-map-signs"></i> {{localize "J&J.travelActions.findPath"}}
+                        </button>
+                        <button type="button" class="random-encounter">
+                            <i class="fas fa-dice-d20"></i> {{localize "J&J.travelActions.randomEncounter"}}
+                        </button>
+                        <button type="button" class="roll-weather">
+                            <i class="fas fa-cloud-sun-rain"></i> {{localize "J&J.travelActions.rollWeather"}}
+                        </button>
+                        <button type="button" class="make-camp">
+                            <i class="fas fa-campground"></i> {{localize "J&J.travelActions.makeCamp"}}
+                        </button>
+                        <button type="button" class="toggle-mounted {{#if system.movement.isMounted}}active{{/if}}">
+                            <i class="fas fa-horse"></i> {{#if system.movement.isMounted}}{{localize "J&J.travelActions.dismount"}}{{else}}{{localize "J&J.travelActions.mount"}}{{/if}}
+                        </button>
+                    </div>
+
+                    <div class="travel-tracker">
+                        <div class="section-header">
+                            <h2>{{localize "J&J.ui.party-sheet.currentJourney"}}</h2>
+                        </div>
+                        
+                        <div class="journey-details">
+                            <div class="journey-field">
+                                <label>{{localize "J&J.journey.origin"}}</label>
+                                <input type="text" name="system.journey.origin" value="{{system.journey.origin}}">
+                            </div>
+                            <div class="journey-field">
+                                <label>{{localize "J&J.journey.destination"}}</label>
+                                <input type="text" name="system.journey.destination" value="{{system.journey.destination}}">
+                            </div>
+                            <div class="journey-field">
+                                <label>{{localize "J&J.journey.distance"}}</label>
+                                <div class="distance-container">
+                                    <input type="number" name="system.journey.distance" value="{{system.journey.distance}}" class="journey-distance">
+                                    <span>{{localize "J&J.ui.party-sheet.km"}}</span>
+                                </div>
+                            </div>
+                            <div class="journey-field">
+                                <label>{{localize "J&J.journey.traveled"}}</label>
+                                <div class="distance-container">
+                                    <input type="number" name="system.journey.traveled" value="{{system.journey.traveled}}" class="journey-traveled">
+                                    <span>{{localize "J&J.ui.party-sheet.km"}}</span>
+                                </div>
+                            </div>
+                            <div class="journey-field">
+                                <label>{{localize "J&J.journey.remaining"}}</label>
+                                <div class="distance-container journey-remaining">
+                                    <span>{{journeyRemaining}}</span>
+                                    <span>{{localize "J&J.ui.party-sheet.km"}}</span>
+                                </div>
+                            </div>
+                            <div class="journey-field">
+                                <label>{{localize "J&J.journey.terrain"}}</label>
+                                <select name="system.journey.terrain">
+                                    <option value="road" {{#if (eq system.journey.terrain "road")}}selected{{/if}}>{{localize "J&J.terrain.road"}}</option>
+                                    <option value="plains" {{#if (eq system.journey.terrain "plains")}}selected{{/if}}>{{localize "J&J.terrain.plains"}}</option>
+                                    <option value="forest" {{#if (eq system.journey.terrain "forest")}}selected{{/if}}>{{localize "J&J.terrain.forest"}}</option>
+                                    <option value="hills" {{#if (eq system.journey.terrain "hills")}}selected{{/if}}>{{localize "J&J.terrain.hills"}}</option>
+                                    <option value="mountains" {{#if (eq system.journey.terrain "mountains")}}selected{{/if}}>{{localize "J&J.terrain.mountains"}}</option>
+                                    <option value="swamp" {{#if (eq system.journey.terrain "swamp")}}selected{{/if}}>{{localize "J&J.terrain.swamp"}}</option>
+                                    <option value="desert" {{#if (eq system.journey.terrain "desert")}}selected{{/if}}>{{localize "J&J.terrain.desert"}}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="journey-log">
+                        <div class="section-header">
+                            <h2>{{localize "J&J.ui.party-sheet.journeyLog"}}</h2>
+                        </div>
+                        
+                        <div class="journey-entries">
+                            {{#if journeyEntries.length}}
+                                {{#each journeyEntries as |entry|}}
+                                    <div class="journey-entry" data-entry-id="{{entry.id}}">
+                                        <div class="entry-timestamp">{{entry.timestamp}}</div>
+                                        <div class="entry-content">{{entry.content}}</div>
+                                        <div class="entry-controls">
+                                            <a class="entry-delete" data-entry-id="{{entry.id}}"><i class="fas fa-trash"></i></a>
+                                        </div>
+                                    </div>
+                                {{/each}}
+                            {{else}}
+                                <p class="hint">{{localize "J&J.ui.party-sheet.noJourneyEntries"}}</p>
+                            {{/if}}
+                        </div>
+                        
+                        <div class="add-journey-entry">
+                            <textarea name="newJourneyEntry" placeholder="{{localize 'J&J.ui.party-sheet.addJourneyEntryPlaceholder'}}"></textarea>
+                            <button type="button" class="add-entry">
+                                <i class="fas fa-plus"></i> {{localize "J&J.ui.party-sheet.addEntry"}}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{!-- Inventory Tab --}}
+            <div class="tab inventory" data-group="primary" data-tab="inventory">
+                <div class="resource-management">
+                    <div class="section-header">
+                        <h2>{{localize "J&J.ui.party-sheet.resources"}}</h2>
+                    </div>
+                    
+                    <div class="resources-container">
+                        <div class="resource-block {{#unless system.hasEnoughRations}}resource-warning{{/unless}}">
+                            <label>{{localize "J&J.resources.rations"}}:</label>
+                            <div class="resource-controls">
+                                <a class="resource-control remove-resource" data-resource-type="rations"><i class="fas fa-minus"></i></a>
+                                <span class="resource-value">{{system.resources.rations}}</span>
+                                <a class="resource-control add-resource" data-resource-type="rations"><i class="fas fa-plus"></i></a>
+                            </div>
+                            <div class="resource-actions">
+                                <button type="button" class="distribute-resources" data-resource-type="rations">
+                                    <i class="fas fa-utensils"></i> {{localize "J&J.resources.distribute"}}
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="resource-block {{#unless system.hasEnoughWater}}resource-warning{{/unless}}">
+                            <label>{{localize "J&J.resources.water"}}:</label>
+                            <div class="resource-controls">
+                                <a class="resource-control remove-resource" data-resource-type="water"><i class="fas fa-minus"></i></a>
+                                <span class="resource-value">{{system.resources.water}}</span>
+                                <a class="resource-control add-resource" data-resource-type="water"><i class="fas fa-plus"></i></a>
+                            </div>
+                            <div class="resource-actions">
+                                <button type="button" class="distribute-resources" data-resource-type="water">
+                                    <i class="fas fa-tint"></i> {{localize "J&J.resources.distribute"}}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="party-inventory">
+                    <div class="section-header inventory-header flexrow">
+                        <h2>{{localize "J&J.ui.party-sheet.partyInventory"}}</h2>
+                        <div class="item-controls">
+                            <a class="item-control item-create" title="{{localize 'J&J.inventory.createItem'}}" data-type="item">
+                                <i class="fas fa-plus"></i> {{localize "J&J.inventory.add"}}
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Scrollable content container -->
+                    <div class="inventory-content">
+                        <ol class="items-list inventory-list">
+                            {{#each actor.items as |item id|}}
+                            {{#if item.isItem}}
+                            <li class="item flexrow" data-item-id="{{item._id}}">
+                                <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24" height="24"/></div>
+                                <div class="item-name">{{item.name}}</div>
+                                <div class="item-quantity">
+                                    {{#if item.system.quantity}}
+                                    <span class="quantity">{{item.system.quantity}}</span>
+                                    {{/if}}
+                                </div>
+                                <div class="item-weight">
+                                    {{#if item.system.weight}}
+                                    <span class="weight">{{item.system.weight}}</span>
+                                    {{/if}}
+                                </div>
+                                <div class="item-controls">
+                                    <a class="item-control item-edit" title="{{localize 'J&J.inventory.editItem'}}"><i class="fas fa-edit"></i></a>
+                                    <a class="item-control item-delete" title="{{localize 'J&J.inventory.deleteItem'}}"><i class="fas fa-trash"></i></a>
+                                </div>
+                            </li>
+                            {{/if}}
+                            {{/each}}
+                            
+                            {{#unless hasItems}}
+                            <li class="item flexrow empty-item">
+                                <div class="item-name">{{localize "J&J.inventory.noItems"}}</div>
+                            </li>
+                            {{/unless}}
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            {{!-- Journal Tab --}}
+            <div class="tab journal" data-group="primary" data-tab="journal">
+                <div class="party-journal">
+                    <div class="section-header">
+                        <h2>{{localize "J&J.ui.party-sheet.partyJournal"}}</h2>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>{{localize "J&J.journal.description"}}</label>
+                        {{editor system.description target="system.description" button=true owner=owner editable=editable}}
+                    </div>
+                    
+                    <div class="section-header">
+                        <h2>{{localize "J&J.ui.party-sheet.notes"}}</h2>
+                    </div>
+                    
+                    <div class="form-group">
+                        <textarea name="system.notes" rows="10">{{system.notes}}</textarea>
+                    </div>
+                    
+                    <div class="journal-linked-entries">
+                        <div class="section-header">
+                            <h2>{{localize "J&J.ui.party-sheet.linkedJournals"}}</h2>
+                            <div class="journal-controls">
+                                <a class="journal-control link-journal" title="{{localize 'J&J.journal.linkJournal'}}">
+                                    <i class="fas fa-link"></i> {{localize "J&J.journal.link"}}
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <ol class="linked-journals-list">
+                            {{#each linkedJournals as |journal|}}
+                            <li class="linked-journal flexrow" data-journal-id="{{journal.id}}">
+                                <div class="journal-name">
+                                    <a class="open-journal" data-journal-id="{{journal.id}}">{{journal.name}}</a>
+                                </div>
+                                <div class="journal-controls">
+                                    <a class="journal-control unlink-journal" data-journal-id="{{journal.id}}" title="{{localize 'J&J.journal.unlinkJournal'}}">
+                                        <i class="fas fa-unlink"></i>
+                                    </a>
+                                </div>
+                            </li>
+                            {{/each}}
+                            
+                            {{#unless linkedJournals.length}}
+                            <li class="linked-journal flexrow empty-journal">
+                                <div class="journal-name">{{localize "J&J.journal.noLinkedJournals"}}</div>
+                            </li>
+                            {{/unless}}
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            {{!-- Settings Tab --}}
+            <div class="tab settings" data-group="primary" data-tab="settings">
+                <div class="party-settings">
+                    <div class="section-header">
+                        <h2>{{localize "J&J.ui.party-sheet.travelSettings"}}</h2>
+                    </div>
+                    
+                    <div class="settings-grid">
+                        <div class="setting-field">
+                            <label>{{localize "J&J.settings.baseMovement"}}</label>
+                            <div class="setting-input">
+                                <input type="number" name="system.settings.baseMovement" value="{{system.settings.baseMovement}}">
+                                <span>{{localize "J&J.ui.party-sheet.km"}}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-field">
+                            <label>{{localize "J&J.settings.rationsPerDay"}}</label>
+                            <div class="setting-input">
+                                <input type="number" name="system.settings.rationsPerDay" value="{{system.settings.rationsPerDay}}">
+                            </div>
+                        </div>
+                        
+                        <div class="setting-field">
+                            <label>{{localize "J&J.settings.waterPerDay"}}</label>
+                            <div class="setting-input">
+                                <input type="number" name="system.settings.waterPerDay" value="{{system.settings.waterPerDay}}">
+                            </div>
+                        </div>
+                        
+                        <div class="setting-field">
+                            <label>{{localize "J&J.settings.encounterChance"}}</label>
+                            <div class="setting-input">
+                                <input type="number" name="system.settings.encounterChance" value="{{system.settings.encounterChance}}">
+                                <span>%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section-header">
+                        <h2>{{localize "J&J.ui.party-sheet.displaySettings"}}</h2>
+                    </div>
+                    
+                    <div class="settings-grid">
+                        <div class="setting-field">
+                            <label>{{localize "J&J.settings.tokenScale"}}</label>
+                            <div class="setting-input">
+                                <input type="number" step="0.1" name="system.settings.tokenScale" value="{{system.settings.tokenScale}}">
+                            </div>
+                        </div>
+                        
+                        <div class="setting-field checkbox-field">
+                            <label>{{localize "J&J.settings.showPartyHud"}}</label>
+                            <div class="setting-input">
+                                <input type="checkbox" name="system.settings.showPartyHud" {{checked system.settings.showPartyHud}}>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-field checkbox-field">
+                            <label>{{localize "J&J.settings.autoConsume"}}</label>
+                            <div class="setting-input">
+                                <input type="checkbox" name="system.settings.autoConsume" {{checked system.settings.autoConsume}}>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-field checkbox-field">
+                            <label>{{localize "J&J.settings.showWarnings"}}</label>
+                            <div class="setting-input">
+                                <input type="checkbox" name="system.settings.showWarnings" {{checked system.settings.showWarnings}}>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section-header">
+                        <h2>{{localize "J&J.ui.party-sheet.dangerZone"}}</h2>
+                    </div>
+                    
+                    <div class="danger-zone">
+                        <button type="button" class="reset-party-data">
+                            <i class="fas fa-exclamation-triangle"></i> {{localize "J&J.settings.resetPartyData"}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</form>

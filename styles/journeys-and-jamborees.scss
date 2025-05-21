@@ -1,0 +1,831 @@
+/* Main Sheet Styling for Journeys & Jamborees */
+.dragonbane.sheet.actor.party {
+  min-width: 670px;
+  min-height: 580px;
+  
+  .window-content {
+    /* Use the Dragonbane system dialog background */
+    background-image: url('/systems/dragonbane/art/ui/dialog-bg.webp');
+    background-size: cover;
+    padding: 8px;
+    font-family: var(--font-primary);
+  }
+  
+  /* Header Styling - Mirrors Dragonbane character sheet */
+  .sheet-header.party-header {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #8d6e51;
+    padding-bottom: 8px;
+    
+    .image-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-right: 10px;
+      
+      .profile-img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border: 2px solid #8d6e51;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      
+      h1 {
+        margin: 5px 0 0 0;
+        padding: 0;
+        
+        input {
+          width: 100%;
+          height: 28px;
+          font-size: 18px;
+          font-weight: bold;
+          margin: 0;
+          background: transparent;
+          border: none;
+          color: var(--color-text-dark-primary);
+          text-align: center;
+        }
+      }
+    }
+    
+    .party-stats-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      
+      .party-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-bottom: 8px;
+        
+        .stat-panel {
+          background: rgba(143, 110, 83, 0.2);
+          border: 1px solid #8d6e51;
+          border-radius: 4px;
+          padding: 6px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          
+          .stat-label {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 4px;
+            color: #5d4333;
+          }
+          
+          .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            min-width: 40px;
+            
+            &.low-resource {
+              color: #a10;
+            }
+          }
+        }
+      }
+      
+      .travel-status {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        
+        .status-panel {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(143, 110, 83, 0.1);
+          border: 1px solid #8d6e51;
+          border-radius: 4px;
+          padding: 4px;
+          
+          .status-input {
+            margin-right: 6px;
+          }
+          
+          .status-label {
+            font-size: 13px;
+            font-weight: 500;
+          }
+          
+          &:hover {
+            background: rgba(143, 110, 83, 0.2);
+          }
+        }
+      }
+    }
+  }
+  
+  /* Sheet Content */
+  .sheet-content {
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 130px);
+  }
+  
+  /* Sheet Tabs - Mirrors Dragonbane character sheet */
+  .sheet-tabs.tabs {
+    margin: 0 0 -1px 0;
+    flex: 0 0 30px;
+    font-size: 14px;
+    display: flex;
+    border-bottom: none;
+
+    .item {
+      margin: 0 4px 0 0;
+      padding: 6px 4px 4px 4px;
+      border-radius: 4px 4px 0 0;
+      border: 1px solid #8d6e51;
+      border-bottom: none;
+      background: rgba(143, 110, 83, 0.2);
+      color: #5d4333;
+      position: relative;
+      line-height: 20px;
+      text-align: center;
+      flex: 1;
+      min-width: 60px;
+      font-weight: 500;
+      
+      &.active {
+        background: rgba(143, 110, 83, 0.4);
+        z-index: 1;
+        
+        &:after {
+          content: "";
+          position: absolute;
+          bottom: -1px;
+          left: 0;
+          right: 0;
+          height: 1px;
+          background: rgba(143, 110, 83, 0.4);
+        }
+      }
+      
+      &:hover {
+        background: rgba(143, 110, 83, 0.3);
+      }
+    }
+  }
+  
+  /* Tab Content */
+  .sheet-body {
+    flex: 1;
+    overflow-y: auto;
+    background: rgba(143, 110, 83, 0.1);
+    border: 1px solid #8d6e51;
+    border-radius: 0 0 4px 4px;
+    padding: 10px;
+    
+    .tab {
+      height: 100%;
+      overflow-y: auto;
+      /* Don't use display: flex here as it conflicts with Foundry's tab switching */
+    }
+  }
+  
+  /* Section Headers */
+  .section-header {
+    margin: 10px 0 5px 0;
+    border-bottom: 1px solid #8d6e51;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    h2 {
+      font-size: 16px;
+      font-weight: bold;
+      margin: 0 0 5px 0;
+      color: #5d4333;
+    }
+  }
+  
+  /* Resource Container */
+  .resources-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+    
+    .resource-block {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      background: rgba(143, 110, 83, 0.1);
+      border-radius: 4px;
+      border: 1px solid #8d6e51;
+      min-width: 170px;
+      
+      &.resource-warning {
+        background: rgba(255, 200, 200, 0.3);
+        border-color: #a10;
+      }
+      
+      label {
+        font-weight: bold;
+        color: #5d4333;
+      }
+      
+      .resource-controls {
+        display: flex;
+        align-items: center;
+        
+        .resource-value {
+          background: rgba(143, 110, 83, 0.2);
+          padding: 2px 6px;
+          border-radius: 3px;
+          min-width: 24px;
+          text-align: center;
+          margin: 0 4px;
+          font-weight: bold;
+        }
+        
+        .resource-control {
+          cursor: pointer;
+          padding: 2px 4px;
+          
+          &:hover {
+            color: #8d6e51;
+          }
+        }
+      }
+      
+      .resource-actions {
+        margin-left: auto;
+        
+        button {
+          background: rgba(143, 110, 83, 0.2);
+          border: 1px solid #8d6e51;
+          border-radius: 3px;
+          padding: 2px 6px;
+          font-size: 11px;
+          
+          &:hover {
+            background: rgba(143, 110, 83, 0.3);
+          }
+        }
+      }
+    }
+  }
+  
+  /* Action Buttons - Grid Layout */
+  .action-buttons, .journey-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 8px;
+    margin-bottom: 10px;
+    
+    button {
+      padding: 6px 8px;
+      background: rgba(143, 110, 83, 0.2);
+      border: 1px solid #8d6e51;
+      border-radius: 3px;
+      font-size: 13px;
+      text-align: center;
+      color: #5d4333;
+      cursor: pointer;
+      
+      &:hover {
+        background: rgba(143, 110, 83, 0.3);
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+      }
+      
+      i {
+        margin-right: 4px;
+      }
+    }
+  }
+  
+  /* Character Entries */
+  .party-management {
+    /* Party section styling */
+    .character-entry {
+      display: grid;
+      grid-template-columns: 60px 1fr 120px;
+      margin-bottom: 8px;
+      padding: 6px;
+      background: rgba(143, 110, 83, 0.1);
+      border-radius: 4px;
+      border: 1px solid #8d6e51;
+      align-items: center;
+      
+      &:hover {
+        background: rgba(143, 110, 83, 0.2);
+      }
+      
+      .portrait-container {
+        display: flex;
+        justify-content: center;
+        
+        .character-portrait {
+          width: 48px;
+          height: 48px;
+          border-radius: 4px;
+          border: 1px solid #8d6e51;
+          object-fit: cover;
+        }
+      }
+      
+      .character-info, .character-name {
+        padding-left: 5px;
+        
+        .character-name {
+          font-weight: bold;
+          color: #5d4333;
+          line-height: 1.2;
+        }
+        
+        .player-name {
+          font-size: 0.85em;
+          font-weight: 300;
+          line-height: 1;
+          margin-top: -2px;
+          opacity: 0.9;
+          text-shadow: 0 0 1px rgba(0, 0, 0, 0.2);
+        }
+      }
+      
+      .character-status {
+        display: flex;
+        flex-direction: column;
+        width: 120px;
+        
+        select {
+          width: 110px;
+          padding: 3px;
+          margin: 0;
+          background: rgba(143, 110, 83, 0.1);
+          border: 1px solid #8d6e51;
+          border-radius: 3px;
+          font-size: 12px;
+          
+          &:focus {
+            background: rgba(143, 110, 83, 0.2);
+          }
+        }
+        
+        .downtime-activity {
+          margin-top: 5px;
+          
+          select {
+            width: 110px;
+          }
+        }
+      }
+      
+      .character-status-display {
+        padding: 3px 6px;
+        background: rgba(143, 110, 83, 0.2);
+        border-radius: 3px;
+        font-size: 12px;
+        text-align: center;
+        width: 110px;
+      }
+    }
+  }
+  
+  /* Travel Roles */
+  .travel-roles {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 8px 0 1rem 0;
+  }
+
+  /* Role Selector Styling */
+  .travel-role-section {
+    background: rgba(143, 110, 83, 0.1);
+    border: 1px solid #8d6e51;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    
+    .travel-role-label {
+      min-width: 120px;
+      font-weight: bold;
+      color: #5d4333;
+      padding-right: 10px;
+    }
+    
+    .pathfinder-select,
+    .lookout-select,
+    .quartermaster-select {
+      flex: 1;
+      min-width: 200px;
+      padding: 5px;
+      background: rgba(143, 110, 83, 0.1);
+      border: 1px solid #8d6e51;
+      border-radius: 4px;
+      
+      &:focus {
+        background: rgba(143, 110, 83, 0.2);
+      }
+      
+      option:disabled {
+        color: #8d6e51;
+        font-style: italic;
+      }
+      
+      optgroup {
+        font-weight: bold;
+        margin-top: 5px;
+        
+        &:first-of-type {
+          margin-top: 0;
+        }
+      }
+    }
+  }
+  
+  /* Travel Tab */
+  .travel-management {
+    .journey-details {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 10px 0;
+      
+      .journey-field {
+        display: flex;
+        flex-direction: column;
+        
+        label {
+          font-weight: bold;
+          margin-bottom: 4px;
+          color: #5d4333;
+        }
+        
+        input, select {
+          background: rgba(143, 110, 83, 0.1);
+          border: 1px solid #8d6e51;
+          border-radius: 3px;
+          padding: 4px;
+          
+          &:focus {
+            background: rgba(143, 110, 83, 0.2);
+          }
+        }
+        
+        .distance-container {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          
+          input {
+            width: 70px;
+          }
+        }
+      }
+    }
+    
+    .journey-log {
+      margin-top: 15px;
+      
+      .journey-entries {
+        background: rgba(143, 110, 83, 0.1);
+        border: 1px solid #8d6e51;
+        border-radius: 4px;
+        padding: 10px;
+        min-height: 150px;
+        max-height: 300px;
+        overflow-y: auto;
+        margin-bottom: 10px;
+        
+        .hint {
+          color: #8d6e51;
+          font-style: italic;
+          text-align: center;
+          padding: 20px 0;
+        }
+        
+        .journey-entry {
+          padding: 6px;
+          border-bottom: 1px solid rgba(143, 110, 83, 0.3);
+          margin-bottom: 6px;
+          
+          .entry-timestamp {
+            font-size: 11px;
+            color: #8d6e51;
+            margin-bottom: 3px;
+          }
+          
+          .entry-content {
+            line-height: 1.4;
+          }
+          
+          .entry-controls {
+            text-align: right;
+            opacity: 0.5;
+            
+            &:hover {
+              opacity: 1;
+            }
+            
+            a {
+              cursor: pointer;
+              
+              &:hover {
+                color: #5d4333;
+              }
+            }
+          }
+        }
+      }
+      
+      .add-journey-entry {
+        display: flex;
+        gap: 6px;
+        
+        textarea {
+          flex: 1;
+          background: rgba(143, 110, 83, 0.1);
+          border: 1px solid #8d6e51;
+          border-radius: 4px;
+          padding: 6px;
+          min-height: 60px;
+          resize: vertical;
+          
+          &:focus {
+            background: rgba(143, 110, 83, 0.2);
+          }
+        }
+        
+        button {
+          align-self: flex-end;
+        }
+      }
+    }
+  }
+  
+  /* Inventory tab structure */
+  .tab.inventory[data-tab="inventory"] {
+    /* Fixed header */
+    .inventory-header {
+      padding: 5px;
+      font-weight: bold;
+      border-bottom: 1px solid #8d6e51;
+      background: rgba(143, 110, 83, 0.2);
+      flex: 0 0 auto;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      
+      .item-image {
+        flex: 0 0 30px;
+      }
+      
+      .item-name {
+        flex: 1;
+      }
+      
+      .item-controls {
+        flex: 0 0 80px;
+        text-align: right;
+        
+        a {
+          background: rgba(143, 110, 83, 0.2);
+          padding: 2px 6px;
+          border-radius: 3px;
+          font-size: 12px;
+          cursor: pointer;
+          
+          &:hover {
+            background: rgba(143, 110, 83, 0.3);
+            color: #5d4333;
+          }
+        }
+      }
+    }
+    
+    /* Scrollable content area */
+    .inventory-content {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 5px;
+      max-height: 350px;
+    }
+    
+    .items-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    
+    /* Item styling */
+    .item {
+      padding: 6px;
+      border-bottom: 1px solid rgba(143, 110, 83, 0.3);
+      display: flex;
+      align-items: center;
+      
+      &.empty-item {
+        padding: 10px 5px;
+        font-style: italic;
+        color: #8d6e51;
+      }
+      
+      &:hover {
+        background: rgba(143, 110, 83, 0.1);
+      }
+      
+      .item-image {
+        flex: 0 0 24px;
+        margin-right: 8px;
+        
+        img {
+          border: 1px solid #8d6e51;
+          border-radius: 3px;
+        }
+      }
+      
+      .item-name {
+        flex: 1;
+      }
+      
+      .item-quantity, .item-weight {
+        flex: 0 0 40px;
+        text-align: center;
+        font-size: 12px;
+      }
+      
+      .item-controls {
+        flex: 0 0 60px;
+        text-align: right;
+        
+        a {
+          margin-left: 8px;
+          
+          &:hover {
+            color: #5d4333;
+          }
+        }
+      }
+    }
+  }
+  
+  /* Journal Tab */
+  .tab.journal[data-tab="journal"] {
+    .form-group {
+      margin-bottom: 15px;
+      
+      label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #5d4333;
+      }
+      
+      textarea {
+        width: 100%;
+        background: rgba(143, 110, 83, 0.1);
+        border: 1px solid #8d6e51;
+        border-radius: 4px;
+        padding: 6px;
+        
+        &:focus {
+          background: rgba(143, 110, 83, 0.2);
+        }
+      }
+    }
+    
+    .journal-controls {
+      a {
+        background: rgba(143, 110, 83, 0.2);
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 12px;
+        cursor: pointer;
+        
+        &:hover {
+          background: rgba(143, 110, 83, 0.3);
+          color: #5d4333;
+        }
+      }
+    }
+    
+    .linked-journals-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      
+      .linked-journal {
+        padding: 6px;
+        border-bottom: 1px solid rgba(143, 110, 83, 0.3);
+        display: flex;
+        align-items: center;
+        
+        &.empty-journal {
+          padding: 10px 5px;
+          font-style: italic;
+          color: #8d6e51;
+        }
+        
+        &:hover {
+          background: rgba(143, 110, 83, 0.1);
+        }
+        
+        .journal-name {
+          flex: 1;
+          
+          a {
+            cursor: pointer;
+            
+            &:hover {
+              color: #5d4333;
+              text-decoration: underline;
+            }
+          }
+        }
+        
+        .journal-controls {
+          flex: 0 0 30px;
+          text-align: right;
+          
+          a {
+            &:hover {
+              color: #5d4333;
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  /* Settings Tab */
+  .tab.settings[data-tab="settings"] {
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 15px;
+      
+      .setting-field {
+        display: flex;
+        flex-direction: column;
+        
+        label {
+          font-weight: bold;
+          margin-bottom: 4px;
+          color: #5d4333;
+        }
+        
+        .setting-input {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          
+          input[type="number"] {
+            width: 70px;
+            background: rgba(143, 110, 83, 0.1);
+            border: 1px solid #8d6e51;
+            border-radius: 3px;
+            padding: 4px;
+            
+            &:focus {
+              background: rgba(143, 110, 83, 0.2);
+            }
+          }
+        }
+        
+        &.checkbox-field {
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+          
+          label {
+            margin-bottom: 0;
+          }
+        }
+      }
+    }
+    
+    .danger-zone {
+      margin-top: 20px;
+      text-align: center;
+      
+      button {
+        background: rgba(161, 16, 0, 0.2);
+        border: 1px solid #a10;
+        color: #a10;
+        padding: 6px 12px;
+        border-radius: 4px;
+        
+        &:hover {
+          background: rgba(161, 16, 0, 0.3);
+        }
+      }
+    }
+  }
+}

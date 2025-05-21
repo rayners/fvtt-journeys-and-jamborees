@@ -1,0 +1,38 @@
+<div class="party-hud">
+  <div class="party-hud-header">
+    <h3>{{party.name}}</h3>
+  </div>
+  
+  <div class="party-hud-content">
+    <div class="party-resources">
+      <div class="resource">
+        <span class="resource-label">{{localize "J&J.resources.rations"}}:</span> 
+        <span class="resource-value">{{party.system.resources.rations}}</span>
+        <a class="resource-control add-resource" data-resource-type="rations"><i class="fas fa-plus"></i></a>
+        <a class="resource-control remove-resource" data-resource-type="rations"><i class="fas fa-minus"></i></a>
+      </div>
+      <div class="resource">
+        <span class="resource-label">{{localize "J&J.resources.water"}}:</span> 
+        <span class="resource-value">{{party.system.resources.water}}</span>
+        <a class="resource-control add-resource" data-resource-type="water"><i class="fas fa-plus"></i></a>
+        <a class="resource-control remove-resource" data-resource-type="water"><i class="fas fa-minus"></i></a>
+      </div>
+    </div>
+    
+    <div class="party-status">
+      <div class="status-item">
+        <span class="status-label">{{localize "J&J.characterStatus.active"}}:</span> 
+        <span class="status-value">{{party.system.activeCount}}</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">{{localize "J&J.characterStatus.traveling"}}:</span> 
+        <span class="status-value">{{party.system.travelingCount}}</span>
+      </div>
+    </div>
+    
+    <div class="party-actions">
+      <a class="party-action make-camp" title="{{localize "J&J.travelActions.makeCamp"}}"><i class="fas fa-campground"></i> {{localize "J&J.travelActions.makeCamp"}}</a>
+      <a class="party-action distribute-rations" title="{{localize "J&J.resources.distribute"}}"><i class="fas fa-utensils"></i> {{localize "J&J.resources.distribute"}}</a>
+    </div>
+  </div>
+</div>

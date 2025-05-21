@@ -1,0 +1,53 @@
+{{!-- Journal Tab --}}
+<div class="tab journal" data-group="primary" data-tab="journal">
+    <div class="party-journal">
+        <div class="section-header">
+            <h2>{{localize "J&J.ui.party-sheet.partyJournal"}}</h2>
+        </div>
+        
+        <div class="form-group">
+            <label>{{localize "J&J.journal.description"}}</label>
+            {{editor system.description target="system.description" button=true owner=owner editable=editable}}
+        </div>
+        
+        <div class="section-header">
+            <h2>{{localize "J&J.ui.party-sheet.notes"}}</h2>
+        </div>
+        
+        <div class="form-group">
+            <textarea name="system.notes" rows="10">{{system.notes}}</textarea>
+        </div>
+        
+        <div class="journal-linked-entries">
+            <div class="section-header">
+                <h2>{{localize "J&J.ui.party-sheet.linkedJournals"}}</h2>
+                <div class="journal-controls">
+                    <a class="journal-control link-journal" title="{{localize 'J&J.journal.linkJournal'}}">
+                        <i class="fas fa-link"></i> {{localize "J&J.journal.link"}}
+                    </a>
+                </div>
+            </div>
+            
+            <ol class="linked-journals-list">
+                {{#each linkedJournals as |journal|}}
+                <li class="linked-journal flexrow" data-journal-id="{{journal.id}}">
+                    <div class="journal-name">
+                        <a class="open-journal" data-journal-id="{{journal.id}}">{{journal.name}}</a>
+                    </div>
+                    <div class="journal-controls">
+                        <a class="journal-control unlink-journal" data-journal-id="{{journal.id}}" title="{{localize 'J&J.journal.unlinkJournal'}}">
+                            <i class="fas fa-unlink"></i>
+                        </a>
+                    </div>
+                </li>
+                {{/each}}
+                
+                {{#unless linkedJournals.length}}
+                <li class="linked-journal flexrow empty-journal">
+                    <div class="journal-name">{{localize "J&J.journal.noLinkedJournals"}}</div>
+                </li>
+                {{/unless}}
+            </ol>
+        </div>
+    </div>
+</div>

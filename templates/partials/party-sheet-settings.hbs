@@ -1,0 +1,84 @@
+{{!-- Settings Tab --}}
+<div class="tab settings" data-group="primary" data-tab="settings">
+    <div class="party-settings">
+        <div class="section-header">
+            <h2>{{localize "J&J.ui.party-sheet.travelSettings"}}</h2>
+        </div>
+        
+        <div class="settings-grid">
+            <div class="setting-field">
+                <label>{{localize "J&J.settings.baseMovement"}}</label>
+                <div class="setting-input">
+                    <input type="number" name="system.settings.baseMovement" value="{{system.settings.baseMovement}}">
+                    <span>{{localize "J&J.ui.party-sheet.km"}}</span>
+                </div>
+            </div>
+            
+            <div class="setting-field">
+                <label>{{localize "J&J.settings.rationsPerDay"}}</label>
+                <div class="setting-input">
+                    <input type="number" name="system.settings.rationsPerDay" value="{{system.settings.rationsPerDay}}">
+                </div>
+            </div>
+            
+            <div class="setting-field">
+                <label>{{localize "J&J.settings.waterPerDay"}}</label>
+                <div class="setting-input">
+                    <input type="number" name="system.settings.waterPerDay" value="{{system.settings.waterPerDay}}">
+                </div>
+            </div>
+            
+            <div class="setting-field">
+                <label>{{localize "J&J.settings.encounterChance"}}</label>
+                <div class="setting-input">
+                    <input type="number" name="system.settings.encounterChance" value="{{system.settings.encounterChance}}">
+                    <span>%</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section-header">
+            <h2>{{localize "J&J.ui.party-sheet.displaySettings"}}</h2>
+        </div>
+        
+        <div class="settings-grid">
+            <div class="setting-field">
+                <label>{{localize "J&J.settings.tokenScale"}}</label>
+                <div class="setting-input">
+                    <input type="number" step="0.1" name="system.settings.tokenScale" value="{{system.settings.tokenScale}}">
+                </div>
+            </div>
+            
+            <div class="setting-field checkbox-field">
+                <label>{{localize "J&J.settings.showPartyHud"}}</label>
+                <div class="setting-input">
+                    <input type="checkbox" name="system.settings.showPartyHud" {{checked system.settings.showPartyHud}}>
+                </div>
+            </div>
+            
+            <div class="setting-field checkbox-field">
+                <label>{{localize "J&J.settings.autoConsume"}}</label>
+                <div class="setting-input">
+                    <input type="checkbox" name="system.settings.autoConsume" {{checked system.settings.autoConsume}}>
+                </div>
+            </div>
+            
+            <div class="setting-field checkbox-field">
+                <label>{{localize "J&J.settings.showWarnings"}}</label>
+                <div class="setting-input">
+                    <input type="checkbox" name="system.settings.showWarnings" {{checked system.settings.showWarnings}}>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section-header">
+            <h2>{{localize "J&J.ui.party-sheet.dangerZone"}}</h2>
+        </div>
+        
+        <div class="danger-zone">
+            <button type="button" class="reset-party-data">
+                <i class="fas fa-exclamation-triangle"></i> {{localize "J&J.settings.resetPartyData"}}
+            </button>
+        </div>
+    </div>
+</div>

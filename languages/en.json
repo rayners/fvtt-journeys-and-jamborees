@@ -1,0 +1,125 @@
+{
+  "J&J": {
+    "ui": {
+      "party-sheet": {
+        "members": "Members",
+        "rations": "Rations",
+        "water": "Water",
+        "movement": "Movement",
+        "km": "km",
+        "inventory": "Inventory",
+        "journal": "Journal",
+        "settings": "Settings",
+        "travel": "Travel",
+        "yourCharacter": "Your Character",
+        "restOfParty": "Rest of Party",
+        "travelRoles": "Travel Roles",
+        "partyInventory": "Party Inventory",
+        "currentJourney": "Current Journey",
+        "journeyLog": "Journey Log",
+        "noJourneyEntries": "No journey entries yet",
+        "addJourneyEntryPlaceholder": "Enter a new journey event...",
+        "addEntry": "Add Entry",
+        "notes": "Notes",
+        "linkedJournals": "Linked Journals",
+        "travelSettings": "Travel Settings",
+        "displaySettings": "Display Settings",
+        "dangerZone": "Danger Zone",
+        "resources": "Resources"
+      }
+    },
+    "travelStatus": {
+      "traveling": "Traveling",
+      "resting": "Resting",
+      "camping": "Camping"
+    },
+    "travelRoles": {
+      "unassigned": "Unassigned",
+      "assign": "Assign",
+      "pathfinder": "Pathfinder",
+      "lookout": "Lookout",
+      "quartermaster": "Quartermaster",
+      "selectPathfinder": "Select Pathfinder",
+      "selectLookout": "Select Lookout",
+      "selectQuartermaster": "Select Quartermaster",
+      "unavailable": "Unavailable"
+    },
+    "character": {
+      "role": "Role"
+    },
+    "characterStatus": {
+      "active": "Active",
+      "traveling": "Traveling",
+      "stayingBehind": "Staying Behind"
+    },
+    "downtimeActivity": {
+      "none": "None",
+      "hunting": "Hunting",
+      "fishing": "Fishing",
+      "foraging": "Foraging", 
+      "crafting": "Crafting",
+      "healing": "Healing"
+    },
+    "travelActions": {
+      "findPath": "Find Path",
+      "randomEncounter": "Random Encounter",
+      "rollWeather": "Roll Weather",
+      "makeCamp": "Make Camp",
+      "mount": "Mount",
+      "dismount": "Dismount"
+    },
+    "journey": {
+      "origin": "Origin",
+      "destination": "Destination",
+      "distance": "Distance",
+      "traveled": "Traveled",
+      "remaining": "Remaining",
+      "terrain": "Terrain"
+    },
+    "terrain": {
+      "road": "Road",
+      "plains": "Plains",
+      "forest": "Forest",
+      "hills": "Hills",
+      "mountains": "Mountains",
+      "swamp": "Swamp",
+      "desert": "Desert"
+    },
+    "resources": {
+      "rations": "Rations",
+      "water": "Water",
+      "distribute": "Distribute"
+    },
+    "inventory": {
+      "createItem": "Create Item",
+      "add": "Add",
+      "editItem": "Edit Item",
+      "deleteItem": "Delete Item",
+      "noItems": "No items in party inventory"
+    },
+    "journal": {
+      "description": "Description",
+      "linkJournal": "Link Journal",
+      "link": "Link",
+      "unlinkJournal": "Unlink Journal",
+      "noLinkedJournals": "No linked journals"
+    },
+    "settings": {
+      "baseMovement": "Base Movement",
+      "rationsPerDay": "Rations Per Day",
+      "waterPerDay": "Water Per Day",
+      "encounterChance": "Encounter Chance",
+      "tokenScale": "Token Scale",
+      "showPartyHud": "Show Party HUD",
+      "autoConsume": "Auto-consume Resources",
+      "showWarnings": "Show Warnings",
+      "resetPartyData": "Reset Party Data"
+    },
+    "skills": {
+      "bushcraft": "Bushcraft",
+      "awareness": "Awareness",
+      "bartering": "Bartering"
+    }
+  },
+  "TYPES.Actor.journeys-and-jamborees.party": "Party"
+}
