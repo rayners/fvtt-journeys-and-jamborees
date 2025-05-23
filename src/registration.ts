@@ -2,7 +2,6 @@
 import { PartyActorType } from './party-actor';
 import { PartyModel } from './party-model';
 import { PartyActorSheet } from './party-sheet';
-import { debugLog, inspectActorConfig, findAllActorTypeReferences, inspectCreateActorDialog } from './debug';
 
 /**
  * Handles registration of the party actor type with Foundry VTT
@@ -13,13 +12,6 @@ export const registerPartyActorType = function() {
   const namespacedType = "journeys-and-jamborees.party";
   const doubleNamespacedType = "journeys-and-jamborees.journeys-and-jamborees.party";
   
-  debugLog('Registration', 'Starting party actor type registration');
-  inspectActorConfig();
-  findAllActorTypeReferences('party');
-  findAllActorTypeReferences('journeys-and-jamborees');
-  
-  // Clean up any existing registrations first
-  debugLog('Registration', 'Current Actor types:', CONFIG.Actor.types);
   
   // Register the actor type only once
   console.log('Journeys & Jamborees | Registering party actor type');
@@ -45,22 +37,14 @@ export const registerPartyActorType = function() {
 
   // 2. Add to actor types array
   if (CONFIG.Actor?.types) {
-    // Log types before cleanup
-    debugLog('Registration', 'Actor types before cleanup:', [...CONFIG.Actor.types]);
-    
     // Remove any existing 'party' or legacy types from the array
     CONFIG.Actor.types = CONFIG.Actor.types.filter(type => {
-      const shouldRemove = type.includes('party') || type.includes('journeys-and-jamborees');
-      if (shouldRemove) {
-        debugLog('Registration', `Removing type: ${type}`);
-      }
-      return !shouldRemove;
+      return !(type.includes('party') || type.includes('journeys-and-jamborees'));
     });
     
     // Add both our types
     CONFIG.Actor.types.push(cleanType);
     CONFIG.Actor.types.push(namespacedType);
-    debugLog('Registration', 'Actor types after cleanup:', [...CONFIG.Actor.types]);
   } else {
     console.warn('Journeys & Jamborees | CONFIG.Actor.types not available yet');
   }
@@ -96,16 +80,12 @@ export const registerPartyActorType = function() {
   
   // Clean up and register type labels
   if (CONFIG.Actor?.typeLabels) {
-    // Log existing labels before cleanup
-    debugLog('Registration', 'Type labels before cleanup:', {...CONFIG.Actor.typeLabels});
-    
     // Specifically target the problematic double-namespaced key
     delete CONFIG.Actor.typeLabels[doubleNamespacedType];
     
     // Remove any existing party labels
     for (const key in CONFIG.Actor.typeLabels) {
       if (key.includes('party') || key.includes('journeys-and-jamborees')) {
-        debugLog('Registration', `Removing type label key: ${key}`);
         delete CONFIG.Actor.typeLabels[key];
       }
     }
@@ -113,9 +93,6 @@ export const registerPartyActorType = function() {
     // Set our clean labels for both types
     CONFIG.Actor.typeLabels[cleanType] = 'Party';
     CONFIG.Actor.typeLabels[namespacedType] = 'Party';
-    
-    // Log after cleanup
-    debugLog('Registration', 'Type labels after cleanup:', {...CONFIG.Actor.typeLabels});
     console.log('Journeys & Jamborees | Type label registered');
   }
   
@@ -136,10 +113,6 @@ export const registerPartyActorType = function() {
   console.log('Journeys & Jamborees | Translations registered');
   console.log('Journeys & Jamborees | Party actor type registration complete');
   
-  // Final inspection after registration
-  debugLog('Registration', 'Registration complete, final state:');
-  inspectActorConfig();
-  
   return {
     partyType: namespacedType // Return the namespaced version
   };
@@ -149,8 +122,6 @@ export const registerPartyActorType = function() {
  * Handles adding the party type to the actor creation dialog
  */
 export const setupActorCreationHook = function(partyType) {
-  debugLog('CreationHook', 'Setting up actor creation hook for type:', partyType);
-  
   // The full namespaced type as Foundry would generate it
   const namespacedType = 'journeys-and-jamborees.party';
   const doubleNamespacedType = 'journeys-and-jamborees.journeys-and-jamborees.party';
@@ -160,30 +131,21 @@ export const setupActorCreationHook = function(partyType) {
     // Check if this is the create actor dialog
     const title = dialog.title;
     if (title === 'Create Actor') {
-      debugLog('CreationHook', 'Create Actor dialog detected');
-      
       // We need to modify the select dropdown options
       const typeSelect = html.find('select[name="type"]');
       if (typeSelect.length) {
         // Get the original options
         const options = Array.from(typeSelect[0].options);
-        debugLog('CreationHook', 'Found select with options:', options.map(o => `${o.value}: ${o.text}`));
         
         // Look for our party option
         for (const option of options) {
           if (option.value === namespacedType || 
               option.value === doubleNamespacedType ||
               option.value.includes('party')) {
-            
-            debugLog('CreationHook', `Modifying option text for ${option.value}`);
             // Just change the display text
             option.text = 'Party';
           }
         }
-        
-        debugLog('CreationHook', 'Modified dropdown display');
-      } else {
-        debugLog('CreationHook', 'Type select not found in the dialog!');
       }
     }
   });

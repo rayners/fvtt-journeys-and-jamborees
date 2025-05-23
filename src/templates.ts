@@ -31,9 +31,8 @@ export const preloadTemplates = async function() {
     // Fetch the template content
     const content = await fetch(partial.path).then(response => response.text());
     
-    // Register with both namespaced and non-namespaced names
+    // Register with simple name only
     Handlebars.registerPartial(partial.name, content);
-    Handlebars.registerPartial(`journeys-and-jamborees.partials.${partial.name}`, content);
   }
   
   return true;

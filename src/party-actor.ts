@@ -35,7 +35,6 @@ export class PartyActorType extends Actor {
     const autoAddCharacters = game.settings.get('journeys-and-jamborees', 'autoAddCharactersOnCreation');
     
     if (autoAddCharacters && party) {
-      console.log('Auto-adding characters to new party...');
       
       // Get player characters belonging to the current user (if not GM)
       // If GM, get all player characters
@@ -79,8 +78,6 @@ export class PartyActorType extends Actor {
   constructor(data, options) {
     super(data, options);
     
-    // Log for debugging
-    console.log('PartyActorType constructor called', this);
     
     // Ensure our methods are bound to this instance
     this.setCharacterStatus = this.setCharacterStatus.bind(this);
@@ -271,8 +268,6 @@ export class PartyActorType extends Actor {
    * Set a character's status in the party
    */
   async setCharacterStatus(characterId, status) {
-    // Log debug info
-    console.log(`Setting character ${characterId} status to ${status}`);
     
     // Initialize member status if needed
     const data = this.system;
@@ -280,12 +275,10 @@ export class PartyActorType extends Actor {
     
     // Check if the status is valid
     if (['active', 'traveling', 'stayingBehind'].includes(status)) {
-      console.log('Before change, memberStatus:', {...memberStatus});
       
       // Simply update the character's status
       memberStatus[characterId] = status;
       
-      console.log('After change, memberStatus:', {...memberStatus});
       
       // Update the actor with the new status
       return this.update({
@@ -460,7 +453,6 @@ export class PartyActorType extends Actor {
         };
       }
     } catch (error) {
-      console.error('Error rolling pathfinding check:', error);
       ui.notifications.error('Could not roll pathfinding check.');
       return null;
     }
@@ -573,8 +565,6 @@ export class PartyActorType extends Actor {
     const character = game.actors.get(characterId);
     const characterName = character ? character.name : 'Unknown Character';
     
-    console.log(`removeCharacter: Removing ${characterName} (${characterId})`);
-    console.log('Before removal - memberStatus:', {...data.memberStatus});
     
     // Check permissions - only allow removing own characters or if GM
     if (!game.user.isGM && character && !character.isOwner) {
@@ -582,41 +572,28 @@ export class PartyActorType extends Actor {
       return false;
     }
     
-    // Create a completely new memberStatus object without the character using deep clone
-    const currentMemberStatus = foundry.utils.deepClone(data.memberStatus || {});
-    delete currentMemberStatus[characterId];
-    
-    console.log('After deletion - memberStatus:', {...currentMemberStatus});
-    
-    // Prepare the update data - use unsetFlag to completely remove the old data first
+    // Use Foundry's deletion syntax to remove the character
     const updateData = {
-      'system.memberStatus': currentMemberStatus
+      [`system.memberStatus.-=${characterId}`]: null
     };
     
     // Check and clear travel roles if this character was assigned
     if (data.roles.pathfinder === characterId) {
       updateData['system.roles.pathfinder'] = '';
-      console.log('Clearing pathfinder role');
     }
     if (data.roles.lookout === characterId) {
       updateData['system.roles.lookout'] = '';
-      console.log('Clearing lookout role');
     }
     if (data.roles.quartermaster === characterId) {
       updateData['system.roles.quartermaster'] = '';
-      console.log('Clearing quartermaster role');
     }
     
-    console.log('Update data to be applied:', updateData);
     
     try {
       // Update the actor data - Foundry will handle ObjectField updates properly
       await this.update(updateData);
-      console.log('Actor update completed successfully');
-      console.log('Final memberStatus after update:', this.system.memberStatus);
       
     } catch (error) {
-      console.error('Error updating actor data:', error);
       ui.notifications.error(`Failed to update party data when removing ${characterName}.`);
       return false;
     }
@@ -627,12 +604,9 @@ export class PartyActorType extends Actor {
       if (typeof this._updateOwnershipAfterRemoval === 'function') {
         try {
           await this._updateOwnershipAfterRemoval();
-          console.log('Ownership update completed');
         } catch (error) {
-          console.warn('Error updating ownership:', error);
         }
       } else {
-        console.warn('_updateOwnershipAfterRemoval method not available, skipping ownership update');
       }
     }
     
@@ -660,13 +634,17 @@ export class PartyActorType extends Actor {
       return false;
     }
     
-    // Clear all characters and travel roles
+    // Use deletion syntax to remove all characters
     const updateData = {
-      'system.memberStatus': {},
       'system.roles.pathfinder': '',
       'system.roles.lookout': '',
       'system.roles.quartermaster': ''
     };
+    
+    // Add deletion for each character in memberStatus
+    Object.keys(memberStatus).forEach(charId => {
+      updateData[`system.memberStatus.-=${charId}`] = null;
+    });
     
     await this.update(updateData);
     
@@ -674,7 +652,6 @@ export class PartyActorType extends Actor {
     if (typeof this._resetOwnershipToGMOnly === 'function') {
       await this._resetOwnershipToGMOnly();
     } else {
-      console.warn('_resetOwnershipToGMOnly method not available, skipping ownership reset');
     }
     
     ui.notifications.info(`Removed all ${characterCount} characters from the party.`);
@@ -699,42 +676,41 @@ export class PartyActorType extends Actor {
       return false;
     }
     
-    // Create update data
-    const updatedMemberStatus = { ...memberStatus };
-    const rolesToClear = {};
+    // Create update data using Foundry's deletion syntax
+    const updateData = {};
     
-    // Remove owned characters from memberStatus
+    // Use Foundry's "-=" prefix to delete specific keys from memberStatus
     ownedCharacterIds.forEach(charId => {
-      delete updatedMemberStatus[charId];
+      updateData[`system.memberStatus.-=${charId}`] = null;
     });
     
-    // Check if any removed characters had travel roles
+    // Check if any removed characters had travel roles and clear them
     const roles = data.roles || {};
     if (ownedCharacterIds.includes(roles.pathfinder)) {
-      rolesToClear['system.roles.pathfinder'] = '';
+      updateData['system.roles.pathfinder'] = '';
     }
     if (ownedCharacterIds.includes(roles.lookout)) {
-      rolesToClear['system.roles.lookout'] = '';
+      updateData['system.roles.lookout'] = '';
     }
     if (ownedCharacterIds.includes(roles.quartermaster)) {
-      rolesToClear['system.roles.quartermaster'] = '';
+      updateData['system.roles.quartermaster'] = '';
     }
     
-    // Prepare update data
-    const updateData = {
-      'system.memberStatus': updatedMemberStatus,
-      ...rolesToClear
-    };
-    
-    await this.update(updateData);
-    
-    // Update ownership after removal
-    if (typeof this._updateOwnershipAfterRemoval === 'function') {
-      await this._updateOwnershipAfterRemoval();
+    try {
+      await this.update(updateData);
+      
+      // Update ownership after removal
+      if (typeof this._updateOwnershipAfterRemoval === 'function') {
+        await this._updateOwnershipAfterRemoval();
+      }
+      
+      ui.notifications.info(`Removed ${ownedCharacterIds.length} of your characters from the party.`);
+      return true;
+    } catch (error) {
+      console.error('Failed to update party actor:', error);
+      ui.notifications.error('Failed to remove characters from the party. You may not have permission to update the party.');
+      return false;
     }
-    
-    ui.notifications.info(`Removed ${ownedCharacterIds.length} of your characters from the party.`);
-    return true;
   }
   
   /**
@@ -745,7 +721,6 @@ export class PartyActorType extends Actor {
     const memberStatus = data.memberStatus || {};
     
     if (Object.keys(memberStatus).length === 0) {
-      console.log('No characters in the party to grant ownership for.');
       return false;
     }
     
@@ -769,7 +744,6 @@ export class PartyActorType extends Actor {
       const character = game.actors.get(characterId);
       if (!character) continue;
       
-      console.log(`Checking ownership for character: ${character.name}`);
       
       // Get character owners
       const characterOwnership = character.ownership || {};
@@ -782,7 +756,6 @@ export class PartyActorType extends Actor {
           currentOwnership[userId] = 3; // OWNER level
           playersGranted.add(user.name);
           ownersAdded++;
-          console.log(`Granted party ownership to: ${user.name}`);
         }
       }
     }
@@ -793,7 +766,6 @@ export class PartyActorType extends Actor {
       ui.notifications.info(`Granted party ownership to: ${playerNames}`);
       return true;
     } else {
-      console.log('No new ownership permissions to grant.');
       return false;
     }
   }
@@ -845,7 +817,6 @@ export class PartyActorType extends Actor {
     
     if (ownersRemoved > 0) {
       await this.update({ 'ownership': currentOwnership });
-      console.log(`Removed party ownership from: ${removedPlayers.join(', ')}`);
     }
   }
   

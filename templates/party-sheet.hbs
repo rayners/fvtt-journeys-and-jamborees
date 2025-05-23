@@ -61,10 +61,10 @@
             <div class="tab members" data-group="primary" data-tab="members">
                 <div class="party-management">
                     <div class="party-actions">
-                        <button type="button" class="add-all-characters">
+                        <button type="button" class="add-all-characters" {{#unless hasCharactersToAdd}}disabled{{/unless}}>
                             <i class="fas fa-user-plus"></i> {{#if isGM}}{{localize "J&J.members.addAllCharacters"}}{{else}}{{localize "J&J.members.addAllYourCharacters"}}{{/if}}
                         </button>
-                        <button type="button" class="remove-all-characters">
+                        <button type="button" class="remove-all-characters" {{#unless hasCharactersToRemove}}disabled{{/unless}}>
                             <i class="fas fa-user-minus"></i> {{#if isGM}}{{localize "J&J.members.removeAllCharacters"}}{{else}}{{localize "J&J.members.removeYourCharacters"}}{{/if}}
                         </button>
                     </div>
@@ -187,7 +187,7 @@
                     </div>
                     
                     <div class="travel-roles">
-                        {{> "journeys-and-jamborees.partials.pathfinder-selector"}}
+                        {{> "pathfinder-selector"}}
                         
                         <div class="travel-role-section">
                             <label class="travel-role-label">{{localize "J&J.travelRoles.lookout"}}</label>

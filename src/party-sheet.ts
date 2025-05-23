@@ -83,6 +83,27 @@ export class PartyActorSheet extends ActorSheet {
     data.isGM = game.user.isGM;
     data.currentUserCharacterId = this._getCurrentUserCharacterId();
     
+    // Check if user has any characters to remove
+    if (data.isGM) {
+      // GM can remove all characters
+      data.hasCharactersToRemove = characters.length > 0;
+    } else {
+      // Players can only remove their own characters
+      data.hasCharactersToRemove = characters.some(char => char.owner);
+    }
+    
+    // Check if there are characters available to add
+    const memberStatus = data.system.memberStatus || {};
+    const allCharacterActors = game.actors.filter(a => a.type === 'character');
+    
+    if (data.isGM) {
+      // GM can add any character not already in party
+      data.hasCharactersToAdd = allCharacterActors.some(a => !memberStatus[a.id]);
+    } else {
+      // Players can only add their own characters not already in party
+      data.hasCharactersToAdd = allCharacterActors.some(a => a.isOwner && !memberStatus[a.id]);
+    }
+    
     // Return the data for rendering
     return data;
   }
@@ -142,7 +163,7 @@ export class PartyActorSheet extends ActorSheet {
         awareness: awarenessValue,
         bartering: barteringValue,
         playerName: ownerUser ? ownerUser.name : 'No Player',
-        userColor: ownerUser ? this._ensureReadableColor(ownerUser.color) : '#7a7971'
+        userColor: ownerUser ? ownerUser.color : '#7a7971'
       };
     });
     
@@ -299,132 +320,6 @@ export class PartyActorSheet extends ActorSheet {
     return ownerUsers[0];
   }
   
-  /**
-   * Ensure a color is readable against the sheet background
-   */
-  _ensureReadableColor(color) {
-    // Make sure we have a valid color string
-    if (!color || typeof color !== 'string') {
-      return '#7a7971'; // Default gray color
-    }
-
-    // Get background brightness - assumes a light background
-    const backgroundBrightness = 200; // Approximate value
-    
-    // Get color brightness
-    const colorBrightness = this._getColorBrightness(color);
-    
-    // If both the background and color are too similar in brightness, adjust the color
-    if (Math.abs(backgroundBrightness - colorBrightness) < 50) {
-      // Darken the color if it's light, lighten if it's dark
-      return (colorBrightness > 128) 
-        ? this._darkenColor(color, 30)
-        : this._lightenColor(color, 30);
-    }
-    
-    return color;
-  }
-  
-  /**
-   * Calculate the brightness of a color (0-255)
-   */
-  _getColorBrightness(color) {
-    // Make sure we have a valid hex color string
-    if (!color || typeof color !== 'string') {
-      return 128; // Default mid-brightness
-    }
-
-    // Clean the hex string and ensure it's valid
-    const hex = color.startsWith('#') ? color.substring(1) : color;
-    
-    // Check if we have a valid hex color
-    if (!/^[0-9A-Fa-f]{3,6}$/.test(hex)) {
-      return 128; // Default mid-brightness for invalid colors
-    }
-    
-    // Expand 3-digit hex to 6-digit if needed
-    const fullHex = hex.length === 3 
-      ? hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2]
-      : hex;
-    
-    // Convert hex to RGB
-    const r = parseInt(fullHex.substr(0, 2), 16);
-    const g = parseInt(fullHex.substr(2, 2), 16);
-    const b = parseInt(fullHex.substr(4, 2), 16);
-    
-    // Use perceived brightness formula
-    return (r * 299 + g * 587 + b * 114) / 1000;
-  }
-  
-  /**
-   * Lighten a color by a percentage
-   */
-  _lightenColor(color, percent) {
-    // Make sure we have a valid color string
-    if (!color || typeof color !== 'string') {
-      return '#7a7971'; // Default gray color
-    }
-
-    // Clean the hex string and ensure it's valid
-    const hex = color.startsWith('#') ? color.substring(1) : color;
-    
-    // Check if we have a valid hex color
-    if (!/^[0-9A-Fa-f]{3,6}$/.test(hex)) {
-      return '#7a7971'; // Default gray for invalid colors
-    }
-    
-    // Expand 3-digit hex to 6-digit if needed
-    const fullHex = hex.length === 3 
-      ? hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2]
-      : hex;
-    
-    const r = parseInt(fullHex.substr(0, 2), 16);
-    const g = parseInt(fullHex.substr(2, 2), 16);
-    const b = parseInt(fullHex.substr(4, 2), 16);
-    
-    // Lighten
-    const amount = Math.round(2.55 * percent);
-    const newR = Math.min(255, r + amount);
-    const newG = Math.min(255, g + amount);
-    const newB = Math.min(255, b + amount);
-    
-    return `#${((1 << 24) + (newR << 16) + (newG << 8) + newB).toString(16).slice(1)}`;
-  }
-  
-  /**
-   * Darken a color by a percentage
-   */
-  _darkenColor(color, percent) {
-    // Make sure we have a valid color string
-    if (!color || typeof color !== 'string') {
-      return '#7a7971'; // Default gray color
-    }
-
-    // Clean the hex string and ensure it's valid
-    const hex = color.startsWith('#') ? color.substring(1) : color;
-    
-    // Check if we have a valid hex color
-    if (!/^[0-9A-Fa-f]{3,6}$/.test(hex)) {
-      return '#7a7971'; // Default gray for invalid colors
-    }
-    
-    // Expand 3-digit hex to 6-digit if needed
-    const fullHex = hex.length === 3 
-      ? hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2]
-      : hex;
-    
-    const r = parseInt(fullHex.substr(0, 2), 16);
-    const g = parseInt(fullHex.substr(2, 2), 16);
-    const b = parseInt(fullHex.substr(4, 2), 16);
-    
-    // Darken
-    const amount = Math.round(2.55 * percent);
-    const newR = Math.max(0, r - amount);
-    const newG = Math.max(0, g - amount);
-    const newB = Math.max(0, b - amount);
-    
-    return `#${((1 << 24) + (newR << 16) + (newG << 8) + newB).toString(16).slice(1)}`;
-  }
   
   /** @override */
   activateListeners(html) {
