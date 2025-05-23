@@ -16,6 +16,7 @@
 - Refactored party member status system to use a single property instead of three arrays
 - Redesigned UI layout to be more compact and efficient
 - Consolidated template structure for better performance
+- Updated settings labels to clarify that rations and water consumption are per character per day
 
 ### Fixed
 - Bug where characters could appear in multiple status lists simultaneously
@@ -23,6 +24,7 @@
 - Template loading problems
 - Method availability on party actor instances
 - Multiple localization issues
+- Missing translation for Party Journal heading
 
 ## [0.1.0] - 2023-XX-XX
 

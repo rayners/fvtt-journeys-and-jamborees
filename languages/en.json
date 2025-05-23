@@ -117,8 +117,8 @@
     },
     "settings": {
       "baseMovement": "Base Movement",
-      "rationsPerDay": "Rations Per Day",
-      "waterPerDay": "Water Per Day",
+      "rationsPerDay": "Rations Per Character Per Day",
+      "waterPerDay": "Water Per Character Per Day",
       "encounterChance": "Encounter Chance",
       "tokenScale": "Token Scale",
       "showPartyHud": "Show Party HUD",
