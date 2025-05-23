@@ -39,3 +39,7 @@ Thumbs.db
 
 # source links
 ref
+
+# Private documentation
+CLAUDE.*
+docs/
