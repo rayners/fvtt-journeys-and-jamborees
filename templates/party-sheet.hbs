@@ -60,17 +60,34 @@
             {{!-- Members Tab --}}
             <div class="tab members" data-group="primary" data-tab="members">
                 <div class="party-management">
-                    <div class="section-header">
-                        <h2>{{localize "J&J.ui.party-sheet.yourCharacter"}}</h2>
+                    <div class="party-actions">
+                        <button type="button" class="add-all-characters">
+                            <i class="fas fa-user-plus"></i> {{#if isGM}}{{localize "J&J.members.addAllCharacters"}}{{else}}{{localize "J&J.members.addAllYourCharacters"}}{{/if}}
+                        </button>
+                        <button type="button" class="remove-all-characters">
+                            <i class="fas fa-user-minus"></i> {{#if isGM}}{{localize "J&J.members.removeAllCharacters"}}{{else}}{{localize "J&J.members.removeYourCharacters"}}{{/if}}
+                        </button>
                     </div>
                     
-                    {{#each characters as |character|}}
-                        {{#if character.owner}}
+                    <div class="drop-zone-hint">
+                        <i class="fas fa-hand-paper"></i> {{localize "J&J.members.dragDropHint"}}
+                    </div>
+                    
+                    <div class="section-header">
+                        <h2>{{#if isGM}}{{localize "J&J.ui.party-sheet.partyCharacters"}}{{else}}{{localize "J&J.ui.party-sheet.yourCharacters"}}{{/if}}</h2>
+                    </div>
+                    
+                    {{#if isGM}}
+                        {{!-- GM sees all characters in one section --}}
+                        {{#each characters as |character|}}
                             <div class="character-entry">
                                 <div class="portrait-container">
                                     <img class="character-portrait thumbnail" src="{{character.img}}" title="{{character.name}}" />
                                 </div>
-                                <div class="character-name">{{character.name}}</div>
+                                <div class="character-info">
+                                    <div class="character-name">{{character.name}}</div>
+                                    <div class="player-name" style="color: {{character.userColor}};">{{character.playerName}}</div>
+                                </div>
                                 <div class="character-status">
                                     <select class="character-status-select" data-character-id="{{character.id}}">
                                         <option value="active" {{#if character.isActive}}selected{{/if}}>{{localize "J&J.characterStatus.active"}}</option>
@@ -91,34 +108,79 @@
                                         </div>
                                     {{/if}}
                                 </div>
+                                <div class="character-controls">
+                                    <button type="button" class="remove-character" data-character-id="{{character.id}}" title="{{localize 'J&J.members.removeCharacter'}}">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
                             </div>
-                        {{/if}}
-                    {{/each}}
-                    
-                    <div class="section-header">
-                        <h2>{{localize "J&J.ui.party-sheet.restOfParty"}}</h2>
-                    </div>
-                    
-                    <div class="party-characters">
+                        {{/each}}
+                    {{else}}
+                        {{!-- Players see their characters first --}}
                         {{#each characters as |character|}}
-                            {{#unless character.owner}}
+                            {{#if character.owner}}
                                 <div class="character-entry">
                                     <div class="portrait-container">
                                         <img class="character-portrait thumbnail" src="{{character.img}}" title="{{character.name}}" />
                                     </div>
-                                    <div class="character-info">
-                                        <div class="character-name">{{character.name}}</div>
-                                        <div class="player-name" style="color: {{character.userColor}};">{{character.playerName}}</div>
+                                    <div class="character-name">{{character.name}}</div>
+                                    <div class="character-status">
+                                        <select class="character-status-select" data-character-id="{{character.id}}">
+                                            <option value="active" {{#if character.isActive}}selected{{/if}}>{{localize "J&J.characterStatus.active"}}</option>
+                                            <option value="traveling" {{#if character.isTraveling}}selected{{/if}}>{{localize "J&J.characterStatus.traveling"}}</option>
+                                            <option value="stayingBehind" {{#if character.isStayingBehind}}selected{{/if}}>{{localize "J&J.characterStatus.stayingBehind"}}</option>
+                                        </select>
+                                        
+                                        {{#if character.isTraveling}}
+                                            <div class="downtime-activity">
+                                                <select class="downtime-select" data-character-id="{{character.id}}">
+                                                    <option value="none">{{localize "J&J.downtimeActivity.none"}}</option>
+                                                    <option value="hunting">{{localize "J&J.downtimeActivity.hunting"}}</option>
+                                                    <option value="fishing">{{localize "J&J.downtimeActivity.fishing"}}</option>
+                                                    <option value="foraging">{{localize "J&J.downtimeActivity.foraging"}}</option>
+                                                    <option value="crafting">{{localize "J&J.downtimeActivity.crafting"}}</option>
+                                                    <option value="healing">{{localize "J&J.downtimeActivity.healing"}}</option>
+                                                </select>
+                                            </div>
+                                        {{/if}}
                                     </div>
-                                    <div class="character-status-display">
-                                        {{#if character.isActive}}{{localize "J&J.characterStatus.active"}}{{/if}}
-                                        {{#if character.isTraveling}}{{localize "J&J.characterStatus.traveling"}}{{/if}}
-                                        {{#if character.isStayingBehind}}{{localize "J&J.characterStatus.stayingBehind"}}{{/if}}
+                                    <div class="character-controls">
+                                        <button type="button" class="remove-character" data-character-id="{{character.id}}" title="{{localize 'J&J.members.removeCharacter'}}">
+                                            <i class="fas fa-times"></i>
+                                        </button>
                                     </div>
                                 </div>
-                            {{/unless}}
+                            {{/if}}
                         {{/each}}
-                    </div>
+                        
+                        <div class="section-header">
+                            <h2>{{localize "J&J.ui.party-sheet.restOfParty"}}</h2>
+                        </div>
+                        
+                        <div class="party-characters">
+                            {{#each characters as |character|}}
+                                {{#unless character.owner}}
+                                    <div class="character-entry rest-of-party">
+                                        <div class="portrait-container">
+                                            <img class="character-portrait thumbnail" src="{{character.img}}" title="{{character.name}}" />
+                                        </div>
+                                        <div class="character-info">
+                                            <div class="character-name">{{character.name}}</div>
+                                            <div class="player-name" style="color: {{character.userColor}};">{{character.playerName}}</div>
+                                        </div>
+                                        <div class="character-status-display">
+                                            {{#if character.isActive}}{{localize "J&J.characterStatus.active"}}{{/if}}
+                                            {{#if character.isTraveling}}{{localize "J&J.characterStatus.traveling"}}{{/if}}
+                                            {{#if character.isStayingBehind}}{{localize "J&J.characterStatus.stayingBehind"}}{{/if}}
+                                        </div>
+                                        <div class="character-controls">
+                                            <!-- Empty space for non-GM users -->
+                                        </div>
+                                    </div>
+                                {{/unless}}
+                            {{/each}}
+                        </div>
+                    {{/if}}
                     
                     <div class="section-header">
                         <h2>{{localize "J&J.ui.party-sheet.travelRoles"}}</h2>

@@ -47,6 +47,17 @@ Hooks.once('init', async function() {
 Hooks.once('ready', async function() {
   console.log('Journeys & Jamborees | Module ready');
   
+  // Patch any existing party actors to ensure they have the latest methods
+  const partyActors = game.actors.filter(a => a.type === 'party' || a.type === 'journeys-and-jamborees.party');
+  if (partyActors.length > 0) {
+    console.log('Journeys & Jamborees | Found party actors, ensuring they have latest methods:', partyActors.length);
+    
+    for (const partyActor of partyActors) {
+      // Ensure the actor has the current methods
+      patchPartyActor(partyActor);
+    }
+  }
+  
   // Add comprehensive debug logging
   debugLog('Ready', 'Module ready hook called');
   debugLog('Ready', 'Final Actor configuration:');

@@ -4,6 +4,7 @@ declare global {
 }
 
 import { patchPartyActor } from './utils';
+import { getSkillValue, getRoleSkillValues } from './helpers';
 
 /**
  * Extends the basic ActorSheet with specific logic for the party actor sheet.
@@ -26,18 +27,23 @@ export class PartyActorSheet extends ActorSheet {
       template: 'modules/journeys-and-jamborees/templates/party-sheet.hbs',
       width: 680,
       height: 650,
-      tabs: [{ navSelector: '.sheet-tabs', contentSelector: '.sheet-body', initial: 'management' }]
+      tabs: [{ navSelector: '.sheet-tabs', contentSelector: '.sheet-body', initial: 'management' }],
+      dragDrop: [{ dragSelector: null, dropSelector: null }] // Enable drag-drop
     });
   }
   
   /** @override */
   getData() {
+    console.log('PartySheet.getData() called');
     const data = super.getData();
     const actorData = this.actor.toObject(false);
     
     // Add actor and system data
     data.actor = actorData;
     data.system = actorData.system;
+    
+    // Log memberStatus for debugging
+    console.log('getData() - Current memberStatus:', JSON.stringify(data.system.memberStatus, null, 2));
     
     // Add isItem flag to items and check if we have any items
     let hasItems = false;
@@ -53,16 +59,25 @@ export class PartyActorSheet extends ActorSheet {
     }
     data.hasItems = hasItems;
     
-    // Add character data
-    const characters = this._getPartyCharacters();
+    // Get the configured pathfinder skill name
+    const pathfinderSkillName = game.settings.get("journeys-and-jamborees", "pathfinderSkillName") || "Bushcraft";
+    data.pathfinderSkillName = pathfinderSkillName;
+    
+    // Add character data with the correct skill values
+    const characters = this._getPartyCharacters(pathfinderSkillName);
     data.characters = characters;
     
     // Add filtered character lists for travel roles
     data.activeCharacters = characters.filter(char => char.isActive);
     data.travelingCharacters = characters.filter(char => char.isTraveling);
     
+    // Log the character lists for debugging
+    console.log('getData() - Total characters found:', characters.length);
+    console.log('getData() - Active characters:', data.activeCharacters.length);
+    console.log('getData() - Traveling characters:', data.travelingCharacters.length);
+    
     // Add travel roles with skill values
-    data.travelRoles = this._getTravelRolesWithSkills();
+    data.travelRoles = this._getTravelRolesWithSkills(pathfinderSkillName);
     
     // Add user-specific data
     data.isGM = game.user.isGM;
@@ -73,39 +88,74 @@ export class PartyActorSheet extends ActorSheet {
   }
   
   /**
-   * Get character actors from the game that can be in the party
+   * Get character actors that are actually in the party
    */
-  _getPartyCharacters() {
-    // Get all 'character' type actors
-    const characters = game.actors.filter(a => a.type === 'character');
+  _getPartyCharacters(pathfinderSkillName) {
+    const data = this.actor.system;
+    const memberStatus = data.memberStatus || {};
+    
+    // Get all character IDs that are in the party
+    const partyCharacterIds = Object.keys(memberStatus);
+    
+    // Get all 'character' type actors that are in the party
+    const characters = game.actors.filter(a => 
+      a.type === 'character' && partyCharacterIds.includes(a.id)
+    );
+    
+    // Log raw character data for debugging
+    console.log('Character actors found:', characters.length);
     
     // Map them to a usable format
-    return characters.map(c => {
+    const mappedCharacters = characters.map(c => {
       // Get player information
       const ownerUser = this._getCharacterOwner(c);
+      
+      // Get status information
+      const isActive = this._isCharacterActive(c.id);
+      const isTraveling = this._isCharacterTraveling(c.id);
+      const isStayingBehind = this._isCharacterStayingBehind(c.id);
+      
+      // Get skill values using the helper function
+      const pathfinderSkillValue = getSkillValue(c, pathfinderSkillName);
+      const awarenessValue = getSkillValue(c, "Awareness");
+      const barteringValue = getSkillValue(c, "Bartering");
+      
+      // Log character status for debugging
+      console.log(`Character ${c.name} (${c.id}) status:`, { isActive, isTraveling, isStayingBehind });
+      console.log(`Character ${c.name} skills:`, { 
+        pathfinder: pathfinderSkillValue, 
+        awareness: awarenessValue, 
+        bartering: barteringValue 
+      });
       
       return {
         id: c.id,
         name: c.name,
         img: c.img,
         owner: this._isCharacterOwnedByCurrentUser(c),
-        isActive: this._isCharacterActive(c.id),
-        isTraveling: this._isCharacterTraveling(c.id),
-        isStayingBehind: this._isCharacterStayingBehind(c.id),
+        isActive: isActive,
+        isTraveling: isTraveling,
+        isStayingBehind: isStayingBehind,
         travelRole: this._getCharacterTravelRole(c.id),
+        pathfinderSkillValue: pathfinderSkillValue,
         bushcraft: this._getCharacterSkillValue(c, 'bushcraft'),
-        awareness: this._getCharacterSkillValue(c, 'awareness'),
-        bartering: this._getCharacterSkillValue(c, 'bartering'),
+        awareness: awarenessValue,
+        bartering: barteringValue,
         playerName: ownerUser ? ownerUser.name : 'No Player',
         userColor: ownerUser ? this._ensureReadableColor(ownerUser.color) : '#7a7971'
       };
     });
+    
+    // Log final mapped characters
+    console.log('Mapped characters:', mappedCharacters);
+    
+    return mappedCharacters;
   }
   
   /**
    * Get travel roles with the assigned character's skill value
    */
-  _getTravelRolesWithSkills() {
+  _getTravelRolesWithSkills(pathfinderSkillName) {
     const data = this.actor.system;
     const roles = {};
     
@@ -114,8 +164,8 @@ export class PartyActorSheet extends ActorSheet {
       name: 'Pathfinder',
       characterId: data.roles.pathfinder,
       characterName: this._getCharacterNameById(data.roles.pathfinder),
-      skill: 'bushcraft',
-      skillValue: this._getAssignedCharacterSkillValue(data.roles.pathfinder, 'bushcraft')
+      skill: pathfinderSkillName.toLowerCase(),
+      skillValue: this._getAssignedCharacterSkillValue(data.roles.pathfinder, pathfinderSkillName)
     };
     
     // Lookout role
@@ -160,7 +210,7 @@ export class PartyActorSheet extends ActorSheet {
    */
   _isCharacterActive(characterId) {
     const data = this.actor.system;
-    return data.members.active.some(m => m.id === characterId);
+    return data.memberStatus && data.memberStatus[characterId] === 'active';
   }
   
   /**
@@ -168,7 +218,7 @@ export class PartyActorSheet extends ActorSheet {
    */
   _isCharacterTraveling(characterId) {
     const data = this.actor.system;
-    return data.members.traveling.some(m => m.id === characterId);
+    return data.memberStatus && data.memberStatus[characterId] === 'traveling';
   }
   
   /**
@@ -176,7 +226,7 @@ export class PartyActorSheet extends ActorSheet {
    */
   _isCharacterStayingBehind(characterId) {
     const data = this.actor.system;
-    return data.members.stayingBehind.some(m => m.id === characterId);
+    return data.memberStatus && data.memberStatus[characterId] === 'stayingBehind';
   }
   
   /**
@@ -196,12 +246,7 @@ export class PartyActorSheet extends ActorSheet {
    * Get a character's skill value
    */
   _getCharacterSkillValue(character, skillName) {
-    // This will need to be adapted for the specific system
-    try {
-      return character.system.skills[skillName]?.value || 0;
-    } catch (e) {
-      return 0;
-    }
+    return getSkillValue(character, skillName);
   }
   
   /**
@@ -408,6 +453,12 @@ export class PartyActorSheet extends ActorSheet {
     html.find('.random-encounter').click(this._onRandomEncounterClick.bind(this));
     html.find('.roll-weather').click(this._onRollWeatherClick.bind(this));
     html.find('.toggle-mounted').click(this._onToggleMountedClick.bind(this));
+    html.find('.add-all-characters').click(this._onAddAllCharactersClick.bind(this));
+    html.find('.remove-character').click(this._onRemoveCharacterClick.bind(this));
+    html.find('.remove-all-characters').click(this._onRemoveAllCharactersClick.bind(this));
+    
+    // Enable drag-and-drop for adding characters
+    this._activateDragDrop(html);
     
     // If the sheet is editable
     if (this.isEditable) {
@@ -691,6 +742,108 @@ export class PartyActorSheet extends ActorSheet {
   }
   
   /**
+   * Handle adding all characters to the party
+   */
+  async _onAddAllCharactersClick(event) {
+    event.preventDefault();
+    
+    const partyActor = this.actor;
+    if (typeof partyActor.addAllCharactersAsActive === 'function') {
+      await partyActor.addAllCharactersAsActive();
+    } else {
+      console.error("Party actor doesn't have addAllCharactersAsActive method", partyActor);
+      ui.notifications.error("Could not add all characters. See console for details.");
+    }
+  }
+  
+  /**
+   * Handle removing a character from the party
+   */
+  async _onRemoveCharacterClick(event) {
+    event.preventDefault();
+    
+    const element = event.currentTarget;
+    const characterId = element.dataset.characterId;
+    
+    if (!characterId) {
+      ui.notifications.error('No character ID specified.');
+      return;
+    }
+    
+    // Get character name for debugging
+    const character = game.actors.get(characterId);
+    const characterName = character ? character.name : 'Unknown Character';
+    
+    console.log(`Attempting to remove character: ${characterName} (${characterId})`);
+    
+    // Use the party actor's removeCharacter method instead of handling it in the sheet
+    const partyActor = this.actor;
+    
+    // Ensure the actor is properly patched before attempting to call methods
+    if (typeof partyActor.removeCharacter !== 'function') {
+      console.error("Party actor doesn't have removeCharacter method", partyActor);
+      ui.notifications.error("Could not remove character. See console for details.");
+      return;
+    }
+    
+    try {
+      const result = await partyActor.removeCharacter(characterId, true);
+      
+      if (result) {
+        // Successfully removed, the actor method handles notifications
+        // Force a re-render to ensure UI is updated with fresh data
+        // Use setTimeout to ensure the actor update has fully propagated
+        setTimeout(() => {
+          console.log('Re-rendering sheet after character removal');
+          this.render(true); // Force full re-render
+        }, 200);
+      }
+    } catch (error) {
+      console.error('Error removing character:', error);
+      ui.notifications.error(`Failed to remove ${characterName}. See console for details.`);
+    }
+  }
+  
+  
+  /**
+   * Handle removing all characters from the party
+   */
+  async _onRemoveAllCharactersClick(event) {
+    event.preventDefault();
+    
+    // Determine which method to call based on user type
+    const isGM = game.user.isGM;
+    const methodName = isGM ? 'removeAllCharacters' : 'removeOwnCharacters';
+    const dialogTitle = isGM ? 'Remove All Characters' : 'Remove Your Characters';
+    const dialogContent = isGM 
+      ? '<p>Are you sure you want to remove all characters from the party?</p>'
+      : '<p>Are you sure you want to remove all your characters from the party?</p>';
+    
+    // Ask for confirmation
+    const confirmed = await Dialog.confirm({
+      title: dialogTitle,
+      content: dialogContent,
+      yes: () => true,
+      no: () => false,
+      defaultYes: false
+    });
+    
+    if (!confirmed) return;
+    
+    const partyActor = this.actor;
+    
+    // Ensure the actor is properly patched before attempting to call methods
+    patchPartyActor(partyActor);
+    
+    if (typeof partyActor[methodName] === 'function') {
+      await partyActor[methodName]();
+    } else {
+      console.error(`Party actor doesn't have ${methodName} method`, partyActor);
+      ui.notifications.error("Could not remove characters. See console for details.");
+    }
+  }
+  
+  /**
    * Handle creating a new item
    */
   _onItemCreate(event) {
@@ -744,5 +897,75 @@ export class PartyActorSheet extends ActorSheet {
       },
       default: 'cancel'
     }).render(true);
+  }
+  
+  /**
+   * Activate drag-and-drop functionality for the party sheet
+   */
+  _activateDragDrop(html) {
+    // Create a new DragDrop instance
+    const dragDrop = new DragDrop({
+      dragSelector: '.character', // Allow dragging characters (not implemented for this sheet)
+      dropSelector: '.party-sheet', // Allow dropping on the entire sheet
+      permissions: {
+        dragstart: () => false, // Don't allow dragging from this sheet
+        drop: () => this.isEditable // Only allow dropping if editable
+      },
+      callbacks: {
+        drop: this._onDrop.bind(this)
+      }
+    });
+    
+    // Bind the DragDrop to the HTML element
+    dragDrop.bind(html[0]);
+  }
+  
+  /**
+   * Handle drop events
+   */
+  async _onDrop(event) {
+    event.preventDefault();
+    
+    let data;
+    try {
+      data = JSON.parse(event.dataTransfer.getData('text/plain'));
+    } catch (err) {
+      console.error('Invalid drop data:', err);
+      return false;
+    }
+    
+    // Only handle Actor drops
+    if (data.type !== 'Actor') {
+      return false;
+    }
+    
+    // Get the dropped actor
+    const actor = await Actor.implementation.fromDropData(data);
+    if (!actor) {
+      ui.notifications.error('Invalid actor data.');
+      return false;
+    }
+    
+    // Only allow character actors
+    if (actor.type !== 'character') {
+      ui.notifications.warn('Only character actors can be added to the party.');
+      return false;
+    }
+    
+    // Check permissions - only allow adding own characters or if GM
+    if (!game.user.isGM && !actor.isOwner) {
+      ui.notifications.error('You can only add characters you own to the party.');
+      return false;
+    }
+    
+    // Add the character to the party (grantOwnership is handled automatically in addCharacter)
+    const partyActor = this.actor;
+    if (typeof partyActor.addCharacter === 'function') {
+      return await partyActor.addCharacter(actor.id, 'active', true);
+    } else {
+      console.error("Party actor doesn't have addCharacter method", partyActor);
+      ui.notifications.error("Could not add character. See console for details.");
+      return false;
+    }
   }
 }

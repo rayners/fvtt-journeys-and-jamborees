@@ -1,5 +1,7 @@
 # Journeys & Jamborees
 
+> ⚠️ **DEVELOPMENT STATUS**: This module is in active development. Features may change without notice, and backward compatibility between versions is not guaranteed until v1.0 release.
+
 A party management system for Dragonbane in Foundry VTT.
 
 ## Description

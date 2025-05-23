@@ -8,4 +8,24 @@ export const registerSettings = function() {
     type: Boolean,
     default: true
   });
+  
+  // Add new setting for pathfinder skill name
+  game.settings.register("journeys-and-jamborees", "pathfinderSkillName", {
+    name: "SETTINGS.PathfinderSkillName",
+    hint: "SETTINGS.PathfinderSkillNameHint",
+    scope: "world", 
+    config: true,
+    type: String,
+    default: "Bushcraft"
+  });
+  
+  // Add setting for auto-adding characters on party creation
+  game.settings.register("journeys-and-jamborees", "autoAddCharactersOnCreation", {
+    name: "SETTINGS.AutoAddCharactersOnCreation",
+    hint: "SETTINGS.AutoAddCharactersOnCreationHint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
 };

@@ -13,18 +13,7 @@ export class PartyModel extends foundry.abstract.TypeDataModel {
       notes: new fields.StringField({required: false, blank: true}),
       
       // Party member management
-      members: new fields.SchemaField({
-        active: new fields.ArrayField(new fields.SchemaField({
-          id: new fields.DocumentIdField({required: true}),
-          isLeader: new fields.BooleanField({initial: false})
-        })),
-        traveling: new fields.ArrayField(new fields.SchemaField({
-          id: new fields.DocumentIdField({required: true})
-        })),
-        stayingBehind: new fields.ArrayField(new fields.SchemaField({
-          id: new fields.DocumentIdField({required: true})
-        }))
-      }),
+      memberStatus: new fields.ObjectField(),
       
       // Travel roles
       roles: new fields.SchemaField({
@@ -87,14 +76,36 @@ export class PartyModel extends foundry.abstract.TypeDataModel {
    * Calculate derived data for the party
    */
   prepareDerivedData() {
-    // Count active members
-    this.activeCount = this.members.active.length;
+    // Initialize memberStatus if not present - but don't reassign the property
+    if (!this.memberStatus) {
+      this.memberStatus = {};
+    }
     
-    // Count traveling members
-    this.travelingCount = this.members.traveling.length;
+    // Initialize counts for each status
+    const activeMembers = [];
+    const travelingMembers = [];
+    const stayingBehindMembers = [];
+    
+    // Count members by status from current memberStatus only
+    // NOTE: We removed legacy member processing as it was causing removed characters to reappear
+    Object.entries(this.memberStatus || {}).forEach(([id, status]) => {
+      if (status === 'active') activeMembers.push(id);
+      else if (status === 'traveling') travelingMembers.push(id);
+      else if (status === 'stayingBehind') stayingBehindMembers.push(id);
+    });
+    
+    // Set counts
+    this.activeCount = activeMembers.length;
+    this.travelingCount = travelingMembers.length;
+    this.stayingBehindCount = stayingBehindMembers.length;
+    
+    // Store the filtered lists for easy access
+    this.activeMembers = activeMembers;
+    this.travelingMembers = travelingMembers;
+    this.stayingBehindMembers = stayingBehindMembers;
     
     // Compute total members
-    this.totalMembers = this.activeCount + this.travelingCount + this.members.stayingBehind.length;
+    this.totalMembers = this.activeCount + this.travelingCount + this.stayingBehindCount;
     
     // Check if we have enough resources
     this.hasEnoughRations = this.resources.rations >= this.totalMembers;

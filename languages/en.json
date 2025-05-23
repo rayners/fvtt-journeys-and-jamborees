@@ -12,6 +12,8 @@
         "settings": "Settings",
         "travel": "Travel",
         "yourCharacter": "Your Character",
+        "yourCharacters": "Your Characters",
+        "partyCharacters": "Party Characters",
         "restOfParty": "Rest of Party",
         "travelRoles": "Travel Roles",
         "partyInventory": "Party Inventory",
@@ -27,6 +29,14 @@
         "dangerZone": "Danger Zone",
         "resources": "Resources"
       }
+    },
+    "members": {
+      "addAllCharacters": "Add All Characters",
+      "addAllYourCharacters": "Add All Your Characters",
+      "removeAllCharacters": "Remove All Characters",
+      "removeYourCharacters": "Remove Your Characters",
+      "removeCharacter": "Remove Character",
+      "dragDropHint": "Drag characters from the Actor Directory to add them to the party"
     },
     "travelStatus": {
       "traveling": "Traveling",
@@ -119,7 +129,14 @@
       "bushcraft": "Bushcraft",
       "awareness": "Awareness",
       "bartering": "Bartering"
-    }
+    },
+    "usingSkill": "Using skill"
+  },
+  "SETTINGS": {
+    "PathfinderSkillName": "Pathfinder Skill Name",
+    "PathfinderSkillNameHint": "The name of the skill used for pathfinding (typically Bushcraft)",
+    "AutoAddCharactersOnCreation": "Auto-add Characters on Party Creation",
+    "AutoAddCharactersOnCreationHint": "Automatically add all player characters to new parties and grant ownership to their players"
   },
   "TYPES.Actor.journeys-and-jamborees.party": "Party"
 }

@@ -12,7 +12,7 @@ export function patchPartyActor(actor) {
   if (!actor) return;
   
   // Only patch party actors
-  if (actor.type !== 'journeys-and-jamborees.party') return;
+  if (actor.type !== 'party' && actor.type !== 'journeys-and-jamborees.party') return;
   
   // Check if our key methods are missing
   if (typeof actor.setCharacterStatus !== 'function') {
@@ -21,13 +21,21 @@ export function patchPartyActor(actor) {
     // Add the methods from our prototype
     const methods = [
       'setCharacterStatus',
-      'assignTravelRole',
+        'assignTravelRole',
       'addResource',
       'removeResource',
       'distributeResources',
       'makeCamp',
       'rollPathfinding',
-      'toggleMounted'
+      'toggleMounted',
+      'addAllCharactersAsActive',
+      'addCharacter',
+      'removeCharacter',
+      'removeAllCharacters',
+      'removeOwnCharacters',
+      'grantOwnershipToPlayers',
+      '_updateOwnershipAfterRemoval',
+      '_resetOwnershipToGMOnly'
     ];
     
     methods.forEach(methodName => {
