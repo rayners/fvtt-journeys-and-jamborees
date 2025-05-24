@@ -75,9 +75,9 @@ const SYSTEM_CONFIGS: Record<string, SystemConfig> = {
       mounted: { value: 30, unit: 'miles' }  // 30 miles per day (normal pace)
     },
     skills: {
-      pathfinding: 'survival',
-      lookout: 'perception',
-      quartermaster: 'persuasion'
+      pathfinding: 'sur',  // Survival
+      lookout: 'prc',      // Perception
+      quartermaster: 'per' // Persuasion
     },
     dice: {
       randomEncounter: '1d20',

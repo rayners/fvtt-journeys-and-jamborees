@@ -1,4 +1,5 @@
 import { SystemConfigManager } from './system-config';
+import { SkillManager } from './skill-manager';
 
 export const registerSettings = function() {
   // Register any module settings here
@@ -42,16 +43,7 @@ export const registerSettings = function() {
     onChange: value => updateSystemConfig()
   });
   
-  // Keep pathfinder skill name for backward compatibility, but update to use new system
-  game.settings.register("journeys-and-jamborees", "pathfinderSkillName", {
-    name: "SETTINGS.PathfinderSkillName",
-    hint: "SETTINGS.PathfinderSkillNameHint",
-    scope: "world", 
-    config: true,
-    type: String,
-    default: SystemConfigManager.getInstance().getConfig().skills.pathfinding,
-    onChange: value => updateSystemConfig()
-  });
+  // Skill settings will be registered after the game is ready
 
   // Dice configuration
   game.settings.register("journeys-and-jamborees", "randomEncounterDice", {
@@ -111,7 +103,16 @@ function updateSystemConfig() {
       }
     },
     skills: {
-      pathfinding: game.settings.get("journeys-and-jamborees", "pathfinderSkillName")
+      // Try to get skill settings if they exist, otherwise use defaults
+      pathfinding: game.settings.settings.has("journeys-and-jamborees.pathfinderSkillName") 
+        ? game.settings.get("journeys-and-jamborees", "pathfinderSkillName")
+        : SystemConfigManager.getInstance().getConfig().skills.pathfinding,
+      lookout: game.settings.settings.has("journeys-and-jamborees.lookoutSkillName")
+        ? game.settings.get("journeys-and-jamborees", "lookoutSkillName")
+        : SystemConfigManager.getInstance().getConfig().skills.lookout,
+      quartermaster: game.settings.settings.has("journeys-and-jamborees.quartermasterSkillName")
+        ? game.settings.get("journeys-and-jamborees", "quartermasterSkillName")
+        : SystemConfigManager.getInstance().getConfig().skills.quartermaster
     },
     dice: {
       randomEncounter: game.settings.get("journeys-and-jamborees", "randomEncounterDice"),
@@ -122,3 +123,4 @@ function updateSystemConfig() {
   
   SystemConfigManager.getInstance().updateFromSettings(config);
 }
+

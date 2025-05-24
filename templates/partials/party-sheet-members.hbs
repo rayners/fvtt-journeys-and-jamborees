@@ -79,7 +79,7 @@
                     {{#each characters as |character|}}
                         {{#if character.isActive}}
                             <a class="assign-role" data-character-id="{{character.id}}" data-role="pathfinder">
-                                {{localize "J&J.travelRoles.assign"}} {{character.name}} ({{character.bushcraft}})
+                                {{localize "J&J.travelRoles.assign"}} {{character.name}} ({{character.pathfinderSkillName}}: {{character.pathfinderSkillValue}})
                             </a>
                         {{/if}}
                     {{/each}}
@@ -99,7 +99,7 @@
                     {{#each characters as |character|}}
                         {{#if character.isActive}}
                             <a class="assign-role" data-character-id="{{character.id}}" data-role="lookout">
-                                {{localize "J&J.travelRoles.assign"}} {{character.name}} ({{character.awareness}})
+                                {{localize "J&J.travelRoles.assign"}} {{character.name}} ({{character.lookoutSkillName}}: {{character.lookoutSkillValue}})
                             </a>
                         {{/if}}
                     {{/each}}
@@ -119,7 +119,7 @@
                     {{#each characters as |character|}}
                         {{#if character.isActive}}
                             <a class="assign-role" data-character-id="{{character.id}}" data-role="quartermaster">
-                                {{localize "J&J.travelRoles.assign"}} {{character.name}} ({{character.bartering}})
+                                {{localize "J&J.travelRoles.assign"}} {{character.name}} ({{character.quartermasterSkillName}}: {{character.quartermasterSkillValue}})
                             </a>
                         {{/if}}
                     {{/each}}

@@ -7,7 +7,7 @@
         <optgroup label="{{localize 'J&J.characterStatus.active'}}">
             {{#each activeCharacters}}
             <option value="{{this.id}}" {{#if (eq this.id ../system.roles.pathfinder)}}selected{{/if}}>
-                {{this.name}} ({{this.pathfinderSkillValue}})
+                {{this.name}} ({{this.pathfinderSkillName}}: {{this.pathfinderSkillValue}})
             </option>
             {{/each}}
         </optgroup>
@@ -17,7 +17,7 @@
         <optgroup label="{{localize 'J&J.characterStatus.traveling'}} ({{localize 'J&J.travelRoles.unavailable'}})">
             {{#each travelingCharacters}}
             <option value="{{this.id}}" disabled>
-                {{this.name}} ({{this.pathfinderSkillValue}})
+                {{this.name}} ({{this.pathfinderSkillName}}: {{this.pathfinderSkillValue}})
             </option>
             {{/each}}
         </optgroup>

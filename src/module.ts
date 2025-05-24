@@ -3,6 +3,7 @@ import '../styles/journeys-and-jamborees.scss'
 
 // Import required modules
 import { registerSettings } from './settings';
+import { SkillManager } from './skill-manager';
 import { preloadTemplates } from './templates';
 import { registerHooks } from './hooks';
 import { registerPartyActorType, setupActorCreationHook } from './registration';
@@ -55,5 +56,10 @@ Hooks.once('ready', async function() {
     }
   }
   
-  
+});
+
+// Register skill settings in a separate ready hook to ensure system data is loaded
+Hooks.once("ready", () => {
+  console.log('Journeys & Jamborees | Registering skill settings');
+  SkillManager.getInstance().registerSkillSettings();
 });

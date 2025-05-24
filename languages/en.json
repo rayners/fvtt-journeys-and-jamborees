@@ -129,13 +129,19 @@
     "skills": {
       "bushcraft": "Bushcraft",
       "awareness": "Awareness",
-      "bartering": "Bartering"
+      "bartering": "Bartering",
+      "none": "None",
+      "configureMe": "Please Configure Skills"
     },
     "usingSkill": "Using skill"
   },
   "SETTINGS": {
-    "PathfinderSkillName": "Pathfinder Skill Name",
-    "PathfinderSkillNameHint": "The name of the skill used for pathfinding (typically Bushcraft)",
+    "PathfinderSkillName": "Pathfinder Skill",
+    "PathfinderSkillNameHint": "The skill used for pathfinding rolls (e.g., 'sur' for Survival in D&D 5e, 'bushcraft' for Dragonbane)",
+    "LookoutSkillName": "Lookout Skill",
+    "LookoutSkillNameHint": "The skill used for spotting danger (e.g., 'prc' for Perception in D&D 5e, 'awareness' for Dragonbane)",
+    "QuartermasterSkillName": "Quartermaster Skill", 
+    "QuartermasterSkillNameHint": "The skill used for managing supplies (e.g., 'per' for Persuasion in D&D 5e, 'bartering' for Dragonbane)",
     "AutoAddCharactersOnCreation": "Auto-add Characters on Party Creation",
     "AutoAddCharactersOnCreationHint": "Automatically add all player characters to new parties and grant ownership to their players",
     "MovementOnFoot": "Movement Rate (On Foot)",

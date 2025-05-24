@@ -198,7 +198,7 @@
                                 <optgroup label="{{localize 'J&J.characterStatus.active'}}">
                                     {{#each activeCharacters}}
                                     <option value="{{this.id}}" {{#if (eq this.id ../system.roles.lookout)}}selected{{/if}}>
-                                        {{this.name}} ({{localize "J&J.skills.awareness"}}: {{this.awareness}})
+                                        {{this.name}} ({{this.lookoutSkillName}}: {{this.lookoutSkillValue}})
                                     </option>
                                     {{/each}}
                                 </optgroup>
@@ -208,7 +208,7 @@
                                 <optgroup label="{{localize 'J&J.characterStatus.traveling'}} ({{localize 'J&J.travelRoles.unavailable'}})">
                                     {{#each travelingCharacters}}
                                     <option value="{{this.id}}" disabled>
-                                        {{this.name}} ({{localize "J&J.skills.awareness"}}: {{this.awareness}})
+                                        {{this.name}} ({{this.lookoutSkillName}}: {{this.lookoutSkillValue}})
                                     </option>
                                     {{/each}}
                                 </optgroup>
@@ -225,7 +225,7 @@
                                 <optgroup label="{{localize 'J&J.characterStatus.active'}}">
                                     {{#each activeCharacters}}
                                     <option value="{{this.id}}" {{#if (eq this.id ../system.roles.quartermaster)}}selected{{/if}}>
-                                        {{this.name}} ({{localize "J&J.skills.bartering"}}: {{this.bartering}})
+                                        {{this.name}} ({{this.quartermasterSkillName}}: {{this.quartermasterSkillValue}})
                                     </option>
                                     {{/each}}
                                 </optgroup>
@@ -235,7 +235,7 @@
                                 <optgroup label="{{localize 'J&J.characterStatus.traveling'}} ({{localize 'J&J.travelRoles.unavailable'}})">
                                     {{#each travelingCharacters}}
                                     <option value="{{this.id}}" disabled>
-                                        {{this.name}} ({{localize "J&J.skills.bartering"}}: {{this.bartering}})
+                                        {{this.name}} ({{this.quartermasterSkillName}}: {{this.quartermasterSkillValue}})
                                     </option>
                                     {{/each}}
                                 </optgroup>

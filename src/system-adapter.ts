@@ -21,7 +21,12 @@ export abstract class SystemAdapter {
    * @param skillName The name of the skill
    * @returns The skill value or null if not found
    */
-  abstract getSkillValue(actor: Actor, skillName: string): number | null;
+  getSkillValue(actor: Actor, skillName: string): number | null {
+    if (skillName === 'none' || !skillName) return null;
+    return this.getActorSkillValue(actor, skillName);
+  }
+  
+  protected abstract getActorSkillValue(actor: Actor, skillName: string): number | null;
 
   /**
    * Roll a skill check for a character
@@ -29,7 +34,20 @@ export abstract class SystemAdapter {
    * @param skillName The name of the skill
    * @returns The roll result
    */
-  abstract rollSkill(actor: Actor, skillName: string): Promise<SkillRollResult>;
+  async rollSkill(actor: Actor, skillName: string): Promise<SkillRollResult> {
+    if (skillName === 'none' || !skillName) {
+      // Return a failed roll for "none" skill
+      return {
+        total: 0,
+        success: false,
+        criticalSuccess: false,
+        criticalFailure: false
+      };
+    }
+    return this.performSkillRoll(actor, skillName);
+  }
+  
+  protected abstract performSkillRoll(actor: Actor, skillName: string): Promise<SkillRollResult>;
 
   /**
    * Check if an actor has a specific skill
@@ -52,12 +70,12 @@ export abstract class SystemAdapter {
  * Dragonbane system adapter
  */
 class DragonbaneAdapter extends SystemAdapter {
-  getSkillValue(actor: Actor, skillName: string): number | null {
-    const skill = actor.system.skills?.[skillName.toLowerCase()];
-    return skill?.value ?? null;
+  protected getActorSkillValue(actor: Actor, skillName: string): number | null {
+    const skill = actor.getSkill(skillName);
+    return skill?.system?.value ?? null;
   }
 
-  async rollSkill(actor: Actor, skillName: string): Promise<SkillRollResult> {
+  protected async performSkillRoll(actor: Actor, skillName: string): Promise<SkillRollResult> {
     const roll = await actor.rollSkill(skillName);
     return {
       total: roll.total,
@@ -81,12 +99,12 @@ class DragonbaneAdapter extends SystemAdapter {
  * D&D 5e system adapter
  */
 class Dnd5eAdapter extends SystemAdapter {
-  getSkillValue(actor: Actor, skillName: string): number | null {
+  protected getActorSkillValue(actor: Actor, skillName: string): number | null {
     const skill = actor.system.skills?.[skillName.toLowerCase()];
     return skill?.total ?? skill?.mod ?? null;
   }
 
-  async rollSkill(actor: Actor, skillName: string): Promise<SkillRollResult> {
+  protected async performSkillRoll(actor: Actor, skillName: string): Promise<SkillRollResult> {
     const roll = await actor.rollSkill(skillName);
     const dc = 15; // Default DC for moderate difficulty
     return {
@@ -112,12 +130,12 @@ class Dnd5eAdapter extends SystemAdapter {
  * Pathfinder 2e system adapter
  */
 class Pf2eAdapter extends SystemAdapter {
-  getSkillValue(actor: Actor, skillName: string): number | null {
+  protected getActorSkillValue(actor: Actor, skillName: string): number | null {
     const skill = actor.system.skills?.[skillName.toLowerCase()];
     return skill?.totalModifier ?? skill?.value ?? null;
   }
 
-  async rollSkill(actor: Actor, skillName: string): Promise<SkillRollResult> {
+  protected async performSkillRoll(actor: Actor, skillName: string): Promise<SkillRollResult> {
     const skill = actor.system.skills?.[skillName.toLowerCase()];
     if (!skill) return { total: 0, success: false };
     
@@ -145,12 +163,12 @@ class Pf2eAdapter extends SystemAdapter {
  * Forbidden Lands system adapter
  */
 class ForbiddenLandsAdapter extends SystemAdapter {
-  getSkillValue(actor: Actor, skillName: string): number | null {
+  protected getActorSkillValue(actor: Actor, skillName: string): number | null {
     const skill = actor.system.skill?.[skillName.toLowerCase()];
     return skill?.value ?? null;
   }
 
-  async rollSkill(actor: Actor, skillName: string): Promise<SkillRollResult> {
+  protected async performSkillRoll(actor: Actor, skillName: string): Promise<SkillRollResult> {
     // Forbidden Lands uses a different dice system
     const skill = this.getSkillValue(actor, skillName) || 0;
     const attribute = 3; // Default attribute value
@@ -180,7 +198,7 @@ class ForbiddenLandsAdapter extends SystemAdapter {
  * Generic adapter for unknown systems
  */
 class GenericAdapter extends SystemAdapter {
-  getSkillValue(actor: Actor, skillName: string): number | null {
+  protected getActorSkillValue(actor: Actor, skillName: string): number | null {
     // Try common patterns
     const skill = actor.system.skills?.[skillName] || 
                  actor.system.abilities?.[skillName] ||
@@ -188,7 +206,7 @@ class GenericAdapter extends SystemAdapter {
     return skill?.value ?? skill?.total ?? skill?.mod ?? null;
   }
 
-  async rollSkill(actor: Actor, skillName: string): Promise<SkillRollResult> {
+  protected async performSkillRoll(actor: Actor, skillName: string): Promise<SkillRollResult> {
     // Use a simple d20 roll
     const roll = new Roll('1d20');
     await roll.evaluate();

@@ -1,11 +1,19 @@
 /* Main Sheet Styling for Journeys & Jamborees */
-.dragonbane.sheet.actor.party {
+.sheet.actor.party {
   min-width: 670px;
   min-height: 580px;
   
   .window-content {
-    /* Use the Dragonbane system dialog background */
-    background-image: url('/systems/dragonbane/art/ui/dialog-bg.webp');
+    /* Use a neutral parchment-style background */
+    background-color: #f4f1e8;
+    background-image: 
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(141, 110, 83, 0.03) 2px,
+        rgba(141, 110, 83, 0.03) 4px
+      );
     background-size: cover;
     padding: 8px;
     font-family: var(--font-primary);

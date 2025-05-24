@@ -2,6 +2,8 @@
  * Helper functions for skills and character data in Journeys & Jamborees
  */
 
+import { SystemAdapterFactory } from './system-adapter';
+
 /**
  * Get the value of a specific skill from an actor
  * @param actor The actor to get the skill from
@@ -11,8 +13,14 @@
 export function getSkillValue(actor, skillName) {
   if (!actor) return 0;
   
-  const skillItem = actor.getSkill(skillName);
-  return skillItem ? skillItem.system.value : 0;
+  try {
+    const adapter = SystemAdapterFactory.getAdapter();
+    const value = adapter.getSkillValue(actor, skillName);
+    return value ?? 0;
+  } catch (error) {
+    console.warn(`Failed to get skill value for ${skillName}:`, error);
+    return 0;
+  }
 }
 
 /**
@@ -25,11 +33,17 @@ export function getRoleSkillValues(actor, skillConfig) {
   if (!actor) return {};
   
   const result = {};
+  const adapter = SystemAdapterFactory.getAdapter();
   
-  // Get skill values for each role using the actor.getSkill method
+  // Get skill values for each role using the system adapter
   Object.entries(skillConfig).forEach(([role, skillName]) => {
-    const skill = actor.getSkill(skillName);
-    result[role] = skill ? skill.system.value : 0;
+    try {
+      const value = adapter.getSkillValue(actor, skillName);
+      result[role] = value ?? 0;
+    } catch (error) {
+      console.warn(`Failed to get ${role} skill value:`, error);
+      result[role] = 0;
+    }
   });
   
   return result;

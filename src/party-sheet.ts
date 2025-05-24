@@ -6,6 +6,7 @@ declare global {
 import { patchPartyActor } from './utils';
 import { getSkillValue, getRoleSkillValues } from './helpers';
 import { SystemConfigManager } from './system-config';
+import { SkillManager } from './skill-manager';
 
 /**
  * Extends the basic ActorSheet with specific logic for the party actor sheet.
@@ -60,9 +61,14 @@ export class PartyActorSheet extends ActorSheet {
     }
     data.hasItems = hasItems;
     
-    // Get the configured pathfinder skill name from system config
-    const pathfinderSkillName = SystemConfigManager.getInstance().getSkillName('pathfinding');
+    // Get the configured skill names from settings
+    const pathfinderSkillName = game.settings.get('journeys-and-jamborees', 'pathfinderSkillName');
+    const lookoutSkillName = game.settings.get('journeys-and-jamborees', 'lookoutSkillName');
+    const quartermasterSkillName = game.settings.get('journeys-and-jamborees', 'quartermasterSkillName');
+    
     data.pathfinderSkillName = pathfinderSkillName;
+    data.lookoutSkillName = lookoutSkillName;
+    data.quartermasterSkillName = quartermasterSkillName;
     
     // Add character data with the correct skill values
     const characters = this._getPartyCharacters(pathfinderSkillName);
@@ -78,7 +84,7 @@ export class PartyActorSheet extends ActorSheet {
     console.log('getData() - Traveling characters:', data.travelingCharacters.length);
     
     // Add travel roles with skill values
-    data.travelRoles = this._getTravelRolesWithSkills(pathfinderSkillName);
+    data.travelRoles = this._getTravelRolesWithSkills(pathfinderSkillName, lookoutSkillName, quartermasterSkillName);
     
     // Add user-specific data
     data.isGM = game.user.isGM;
@@ -137,21 +143,28 @@ export class PartyActorSheet extends ActorSheet {
       const isTraveling = this._isCharacterTraveling(c.id);
       const isStayingBehind = this._isCharacterStayingBehind(c.id);
       
-      // Get skill values using the helper function
+      // Get skill values using the helper function with configured skill names
       const pathfinderSkillValue = getSkillValue(c, pathfinderSkillName);
-      const lookoutSkillName = SystemConfigManager.getInstance().getSkillName('lookout');
-      const quartermasterSkillName = SystemConfigManager.getInstance().getSkillName('quartermaster');
-      const awarenessValue = getSkillValue(c, lookoutSkillName);
-      const barteringValue = getSkillValue(c, quartermasterSkillName);
+      const lookoutSkillName = game.settings.get('journeys-and-jamborees', 'lookoutSkillName');
+      const quartermasterSkillName = game.settings.get('journeys-and-jamborees', 'quartermasterSkillName');
+      const lookoutValue = getSkillValue(c, lookoutSkillName);
+      const quartermasterValue = getSkillValue(c, quartermasterSkillName);
       
       // Log character status for debugging
       console.log(`Character ${c.name} (${c.id}) status:`, { isActive, isTraveling, isStayingBehind });
       console.log(`Character ${c.name} skills:`, { 
         pathfinder: pathfinderSkillValue, 
-        awareness: awarenessValue, 
-        bartering: barteringValue 
+        lookout: lookoutValue, 
+        quartermaster: quartermasterValue 
       });
       
+      // Get skill display names from skill manager
+      const skillManager = SkillManager.getInstance();
+      const availableSkills = skillManager.getAvailableSkills();
+      const pathfinderSkillDisplayName = availableSkills[pathfinderSkillName] || pathfinderSkillName;
+      const lookoutSkillDisplayName = availableSkills[lookoutSkillName] || lookoutSkillName;
+      const quartermasterSkillDisplayName = availableSkills[quartermasterSkillName] || quartermasterSkillName;
+
       return {
         id: c.id,
         name: c.name,
@@ -162,9 +175,15 @@ export class PartyActorSheet extends ActorSheet {
         isStayingBehind: isStayingBehind,
         travelRole: this._getCharacterTravelRole(c.id),
         pathfinderSkillValue: pathfinderSkillValue,
-        bushcraft: this._getCharacterSkillValue(c, pathfinderSkillName),
-        awareness: awarenessValue,
-        bartering: barteringValue,
+        pathfinderSkillName: pathfinderSkillDisplayName,
+        lookoutSkillValue: lookoutValue,
+        lookoutSkillName: lookoutSkillDisplayName,
+        quartermasterSkillValue: quartermasterValue,
+        quartermasterSkillName: quartermasterSkillDisplayName,
+        // Backward compatibility properties
+        bushcraft: pathfinderSkillValue,
+        awareness: lookoutValue,
+        bartering: quartermasterValue,
         playerName: ownerUser ? ownerUser.name : 'No Player',
         userColor: ownerUser ? ownerUser.color : '#7a7971'
       };
@@ -179,7 +198,7 @@ export class PartyActorSheet extends ActorSheet {
   /**
    * Get travel roles with the assigned character's skill value
    */
-  _getTravelRolesWithSkills(pathfinderSkillName) {
+  _getTravelRolesWithSkills(pathfinderSkillName, lookoutSkillName, quartermasterSkillName) {
     const data = this.actor.system;
     const roles = {};
     
@@ -188,7 +207,7 @@ export class PartyActorSheet extends ActorSheet {
       name: 'Pathfinder',
       characterId: data.roles.pathfinder,
       characterName: this._getCharacterNameById(data.roles.pathfinder),
-      skill: pathfinderSkillName.toLowerCase(),
+      skill: pathfinderSkillName,
       skillValue: this._getAssignedCharacterSkillValue(data.roles.pathfinder, pathfinderSkillName)
     };
     
@@ -197,8 +216,8 @@ export class PartyActorSheet extends ActorSheet {
       name: 'Lookout',
       characterId: data.roles.lookout,
       characterName: this._getCharacterNameById(data.roles.lookout),
-      skill: SystemConfigManager.getInstance().getSkillName('lookout'),
-      skillValue: this._getAssignedCharacterSkillValue(data.roles.lookout, SystemConfigManager.getInstance().getSkillName('lookout'))
+      skill: lookoutSkillName,
+      skillValue: this._getAssignedCharacterSkillValue(data.roles.lookout, lookoutSkillName)
     };
     
     // Quartermaster role
@@ -206,8 +225,8 @@ export class PartyActorSheet extends ActorSheet {
       name: 'Quartermaster',
       characterId: data.roles.quartermaster,
       characterName: this._getCharacterNameById(data.roles.quartermaster),
-      skill: SystemConfigManager.getInstance().getSkillName('quartermaster'),
-      skillValue: this._getAssignedCharacterSkillValue(data.roles.quartermaster, SystemConfigManager.getInstance().getSkillName('quartermaster'))
+      skill: quartermasterSkillName,
+      skillValue: this._getAssignedCharacterSkillValue(data.roles.quartermaster, quartermasterSkillName)
     };
     
     return roles;
