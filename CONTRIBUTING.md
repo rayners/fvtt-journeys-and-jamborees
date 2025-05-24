@@ -23,8 +23,38 @@ If you encounter bugs while testing:
    - Steps to reproduce
    - Expected vs actual behavior
    - Your Foundry VTT version
-   - Your Dragonbane system version
+   - Your game system and version (e.g., Dragonbane 1.0.0, D&D 5e 3.0.0)
    - Any console errors (F12 in browser)
+   
+#### Including Test Results
+
+If you have the [Quench](https://foundryvtt.com/packages/quench) testing module installed:
+
+1. Run the Journeys & Jamborees tests in Quench
+2. Screenshot or copy any failing test results
+3. Include these in your bug report
+
+#### Demonstrating Bugs with Tests
+
+For complex bugs, you can even write a Quench test to demonstrate the issue:
+
+```javascript
+// Example: Demonstrating a character removal bug
+quench.registerBatch('bug-demo.character-removal', (context) => {
+  const { describe, it, assert } = context;
+  
+  describe('Character Removal Bug', function() {
+    it('fails to remove character in specific scenario', async function() {
+      // Your test code that reproduces the bug
+      const party = await Actor.create({name: 'Bug Test Party', type: 'party'});
+      // ... steps that trigger the bug
+      assert.fail('Character still exists after removal');
+    });
+  });
+});
+```
+
+Include such test code in your bug report to help us reproduce and fix issues faster!
 
 ### 2. Test the Module
 

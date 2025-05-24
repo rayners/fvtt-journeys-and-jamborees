@@ -13,6 +13,11 @@
 - Comprehensive README documentation
 - CONTRIBUTING.md with contribution guidelines
 - Improved development documentation in CLAUDE.md
+- Comprehensive testing infrastructure with Vitest for unit tests
+- Quench integration for end-to-end testing within Foundry VTT
+- System-specific test suites for Dragonbane, D&D 5e, PF2e, Forbidden Lands
+- Test documentation and guidelines for contributors
+- Bug reporting guidelines that encourage including Quench test results
 
 ### Changed
 - Movement rates now configurable per system
@@ -25,6 +30,8 @@
 ### Fixed
 - Character removal now properly uses Foundry's deletion syntax
 - Settings labels clarified for per-character consumption
+- Party sheet member count display (was showing "/" without numbers)
+- Travel role assignment parameter order in party actor
 
 ## [0.2.0] - 2024-XX-XX (In Development)
 

@@ -8,6 +8,8 @@ import { preloadTemplates } from './templates';
 import { registerHooks } from './hooks';
 import { registerPartyActorType, setupActorCreationHook } from './registration';
 import { patchPartyActor } from './utils';
+// Import quench tests - they self-register via the quenchReady hook
+import './quench-tests';
 
 // Initialize the module
 Hooks.once('init', async function() {
@@ -59,6 +61,9 @@ Hooks.once('ready', async function() {
 });
 
 // Register skill settings in a separate ready hook to ensure system data is loaded
+// IMPORTANT: Skill settings MUST be registered after the game is fully ready to 
+// ensure CONFIG objects (like CONFIG.DND5E.skills) are populated. If registered 
+// in 'init', D&D 5e skills show as "sur" instead of "Survival".
 Hooks.once("ready", () => {
   console.log('Journeys & Jamborees | Registering skill settings');
   SkillManager.getInstance().registerSkillSettings();

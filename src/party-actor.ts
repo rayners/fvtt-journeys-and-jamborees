@@ -312,7 +312,7 @@ export class PartyActorType extends Actor {
   /**
    * Assign a travel role to a character
    */
-  async assignTravelRole(characterId, role) {
+  async assignTravelRole(role, characterId) {
     const data = this.system;
     
     // Update the role

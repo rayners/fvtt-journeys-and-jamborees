@@ -49,6 +49,17 @@ export const registerPartyActorType = function() {
     console.warn('Journeys & Jamborees | CONFIG.Actor.types not available yet');
   }
   
+  // 2b. Add to system template if it exists
+  if (game.system?.template?.Actor?.types) {
+    if (!game.system.template.Actor.types.includes(cleanType)) {
+      game.system.template.Actor.types.push(cleanType);
+    }
+    if (!game.system.template.Actor.types.includes(namespacedType)) {
+      game.system.template.Actor.types.push(namespacedType);
+    }
+    console.log('Journeys & Jamborees | Added party types to system template');
+  }
+  
   // 3. Register document class
   if (CONFIG.Actor?.documentClasses) {
     // Clean up any existing registrations

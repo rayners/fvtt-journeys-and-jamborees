@@ -86,6 +86,10 @@ export class PartyActorSheet extends ActorSheet {
     // Add travel roles with skill values
     data.travelRoles = this._getTravelRolesWithSkills(pathfinderSkillName, lookoutSkillName, quartermasterSkillName);
     
+    // Add member counts from the party model
+    data.activeMembers = this.actor.system.activeCount || 0;
+    data.totalMembers = this.actor.system.totalMembers || 0;
+    
     // Add user-specific data
     data.isGM = game.user.isGM;
     data.currentUserCharacterId = this._getCurrentUserCharacterId();

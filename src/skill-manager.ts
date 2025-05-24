@@ -1,6 +1,14 @@
 /**
  * Skill Manager for handling dynamic skill detection and selection
  * Provides system-agnostic skill discovery and configuration
+ * 
+ * KEY IMPLEMENTATION NOTES:
+ * - Uses deferred registration pattern - skill settings are registered 
+ *   in a separate ready hook to ensure system data is fully loaded
+ * - D&D 5e gets priority detection from CONFIG.DND5E.skills (shows proper names)
+ * - Dragonbane and others fall back to compendium/world/actor skill detection
+ * - Settings registration happens in module.ts ready hook, not init hook
+ * - Skill display names come from this manager, used in both settings and templates
  */
 
 import { SystemConfigManager } from './system-config';

@@ -48,6 +48,7 @@ Development is tracked privately but bug reports are welcome via [GitHub Issues]
 - **Resource Tracking**: Shared rations, water, and gold
 - **Party Inventory**: Separate from character inventories
 - **Permission System**: Automatic ownership for party members
+- **Testing Framework**: Comprehensive test suite with Vitest and Quench integration
 
 ### 🚧 In Development
 - Journey tracking and logging
@@ -99,9 +100,20 @@ For detailed instructions, see the [Quick Start Guide](https://docs.rayners.dev/
 ## Contributing
 
 Thank you for your interest! While the module is in alpha, we're accepting:
-- Bug reports
+- Bug reports (include Quench test results when possible!)
 - Testing feedback  
 - Translations
+
+### Testing & Debugging
+
+This module includes comprehensive test coverage:
+- **Unit tests** via `npm test` for development
+- **In-app tests** via [Quench](https://foundryvtt.com/packages/quench) for end-to-end testing
+
+When reporting bugs, you can:
+1. Run the Quench test suite and include results
+2. Write a Quench test to demonstrate the issue
+3. Include test output in your bug report
 
 See our [Contributing Guide](https://docs.rayners.dev/journeys-and-jamborees/contributing) for details.
 

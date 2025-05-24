@@ -1,6 +1,16 @@
 /**
  * System adapter for handling system-specific operations
  * This provides an abstraction layer for different game systems
+ * 
+ * KEY IMPLEMENTATION NOTES:
+ * - Each system has different skill value access patterns:
+ *   * Dragonbane: actor.getSkill(name) returns skill item with .system.value
+ *   * D&D 5e: actor.system.skills[key] object with .total or .mod properties  
+ *   * PF2e: actor.system.skills[key] with .totalModifier or .value
+ *   * Others: various patterns, GenericAdapter tries common locations
+ * - Factory pattern ensures one adapter instance per system ID
+ * - Base class handles "none" skill gracefully (returns null/failed rolls)
+ * - Skill names are passed as-is from settings, adapters handle casing/lookup
  */
 
 import { SystemConfigManager } from './system-config';
