@@ -5,6 +5,7 @@ declare global {
 
 import { patchPartyActor } from './utils';
 import { getSkillValue, getRoleSkillValues } from './helpers';
+import { SystemConfigManager } from './system-config';
 
 /**
  * Extends the basic ActorSheet with specific logic for the party actor sheet.
@@ -23,7 +24,7 @@ export class PartyActorSheet extends ActorSheet {
   /** @override */
   static get defaultOptions() {
     return mergeObject(super.defaultOptions, {
-      classes: ['dragonbane', 'sheet', 'actor', 'party'],
+      classes: ['sheet', 'actor', 'party'],
       template: 'modules/journeys-and-jamborees/templates/party-sheet.hbs',
       width: 680,
       height: 650,
@@ -59,8 +60,8 @@ export class PartyActorSheet extends ActorSheet {
     }
     data.hasItems = hasItems;
     
-    // Get the configured pathfinder skill name
-    const pathfinderSkillName = game.settings.get("journeys-and-jamborees", "pathfinderSkillName") || "Bushcraft";
+    // Get the configured pathfinder skill name from system config
+    const pathfinderSkillName = SystemConfigManager.getInstance().getSkillName('pathfinding');
     data.pathfinderSkillName = pathfinderSkillName;
     
     // Add character data with the correct skill values
@@ -138,8 +139,10 @@ export class PartyActorSheet extends ActorSheet {
       
       // Get skill values using the helper function
       const pathfinderSkillValue = getSkillValue(c, pathfinderSkillName);
-      const awarenessValue = getSkillValue(c, "Awareness");
-      const barteringValue = getSkillValue(c, "Bartering");
+      const lookoutSkillName = SystemConfigManager.getInstance().getSkillName('lookout');
+      const quartermasterSkillName = SystemConfigManager.getInstance().getSkillName('quartermaster');
+      const awarenessValue = getSkillValue(c, lookoutSkillName);
+      const barteringValue = getSkillValue(c, quartermasterSkillName);
       
       // Log character status for debugging
       console.log(`Character ${c.name} (${c.id}) status:`, { isActive, isTraveling, isStayingBehind });
@@ -159,7 +162,7 @@ export class PartyActorSheet extends ActorSheet {
         isStayingBehind: isStayingBehind,
         travelRole: this._getCharacterTravelRole(c.id),
         pathfinderSkillValue: pathfinderSkillValue,
-        bushcraft: this._getCharacterSkillValue(c, 'bushcraft'),
+        bushcraft: this._getCharacterSkillValue(c, pathfinderSkillName),
         awareness: awarenessValue,
         bartering: barteringValue,
         playerName: ownerUser ? ownerUser.name : 'No Player',
@@ -194,8 +197,8 @@ export class PartyActorSheet extends ActorSheet {
       name: 'Lookout',
       characterId: data.roles.lookout,
       characterName: this._getCharacterNameById(data.roles.lookout),
-      skill: 'awareness',
-      skillValue: this._getAssignedCharacterSkillValue(data.roles.lookout, 'awareness')
+      skill: SystemConfigManager.getInstance().getSkillName('lookout'),
+      skillValue: this._getAssignedCharacterSkillValue(data.roles.lookout, SystemConfigManager.getInstance().getSkillName('lookout'))
     };
     
     // Quartermaster role
@@ -203,8 +206,8 @@ export class PartyActorSheet extends ActorSheet {
       name: 'Quartermaster',
       characterId: data.roles.quartermaster,
       characterName: this._getCharacterNameById(data.roles.quartermaster),
-      skill: 'bartering',
-      skillValue: this._getAssignedCharacterSkillValue(data.roles.quartermaster, 'bartering')
+      skill: SystemConfigManager.getInstance().getSkillName('quartermaster'),
+      skillValue: this._getAssignedCharacterSkillValue(data.roles.quartermaster, SystemConfigManager.getInstance().getSkillName('quartermaster'))
     };
     
     return roles;
@@ -584,14 +587,15 @@ export class PartyActorSheet extends ActorSheet {
   async _onRandomEncounterClick(event) {
     event.preventDefault();
     
-    // This would ideally be implemented to use Dragonbane-specific encounter tables
-    // For now, we'll just roll a d20 and announce the result
-    const roll = new Roll('1d20');
+    // Use system-specific dice formulas
+    const encounterFormula = SystemConfigManager.getInstance().getDiceFormula('randomEncounter');
+    const encounterThreshold = SystemConfigManager.getInstance().getDiceFormula('encounterThreshold');
+    const roll = new Roll(String(encounterFormula));
     await roll.evaluate();
     
     ChatMessage.create({
       speaker: { actor: this.actor.id, alias: this.actor.name },
-      content: `<h3>Random Encounter Check</h3><p>Roll: ${roll.total}</p><p>${roll.total >= 18 ? 'An encounter occurs!' : 'No encounter.'}</p>`
+      content: `<h3>Random Encounter Check</h3><p>Roll: ${roll.total}</p><p>${roll.total >= encounterThreshold ? 'An encounter occurs!' : 'No encounter.'}</p>`
     });
   }
   
@@ -601,9 +605,9 @@ export class PartyActorSheet extends ActorSheet {
   async _onRollWeatherClick(event) {
     event.preventDefault();
     
-    // This would ideally be implemented with Dragonbane-specific weather tables
-    // For now, just roll a d6 and announce the result
-    const roll = new Roll('1d6');
+    // Use system-specific weather dice formula
+    const weatherFormula = SystemConfigManager.getInstance().getDiceFormula('weather');
+    const roll = new Roll(String(weatherFormula));
     await roll.evaluate();
     
     const weather = {
@@ -613,7 +617,7 @@ export class PartyActorSheet extends ActorSheet {
       4: 'Light rain',
       5: 'Heavy rain',
       6: 'Storm'
-    }[roll.total];
+    }[roll.total] || `Weather condition ${roll.total}`;
     
     ChatMessage.create({
       speaker: { actor: this.actor.id, alias: this.actor.name },

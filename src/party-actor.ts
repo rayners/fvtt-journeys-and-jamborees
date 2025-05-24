@@ -1,3 +1,5 @@
+import { SystemConfigManager } from './system-config.js';
+
 /**
  * Extends the base Actor class to implement additional party-specific logic.
  */
@@ -146,16 +148,20 @@ export class PartyActorType extends Actor {
     
     // Initialize movement data if not present
     if (!data.movement) {
+      const configManager = SystemConfigManager.getInstance();
+      const onFootMovement = configManager.getMovementRate(false);
       data.movement = {
-        value: 15, // Default movement of 15km per shift on foot
+        value: onFootMovement.value, // Default movement based on system config
         isMounted: false
       };
     }
     
     // Initialize settings if not present
     if (!data.settings) {
+      const configManager = SystemConfigManager.getInstance();
+      const onFootMovement = configManager.getMovementRate(false);
       data.settings = {
-        baseMovement: 15, // Default 15km per Dragonbane rules
+        baseMovement: onFootMovement.value, // Default movement based on system config
         rationsPerDay: 1,
         waterPerDay: 1,
         encounterChance: 10,
@@ -203,7 +209,7 @@ export class PartyActorType extends Actor {
     data.hasEnoughRations = data.resources.rations >= data.totalMembers;
     data.hasEnoughWater = data.resources.water >= data.totalMembers;
     
-    // Compute movement rate based on Dragonbane rules
+    // Compute movement rate based on system configuration
     this._computeMovementRate();
     
     // Compute journey remaining distance
@@ -214,19 +220,24 @@ export class PartyActorType extends Actor {
   }
   
   /**
-   * Compute movement rate based on Dragonbane rules
-   * Base movement is 15km per shift on foot, 30km if mounted
+   * Compute movement rate based on system configuration
+   * Base movement varies by system, typically doubled when mounted
    * @private
    */
   _computeMovementRate() {
     const data = this.system;
+    const configManager = SystemConfigManager.getInstance();
     
-    // Get the base movement from settings (default 15km per Dragonbane rules)
-    let baseMovement = data.settings?.baseMovement || 15;
+    // Get the base movement from settings or use system default
+    const systemMovement = configManager.getMovementRate(data.movement.isMounted);
+    let baseMovement = data.settings?.baseMovement || systemMovement.value;
     
-    // Double movement if the party is mounted
-    if (data.movement.isMounted) {
-      baseMovement *= 2; // 30km if mounted per Dragonbane rules
+    // If mounted and using system defaults, use the mounted rate
+    if (data.movement.isMounted && !data.settings?.baseMovement) {
+      baseMovement = systemMovement.value;
+    } else if (data.movement.isMounted && data.settings?.baseMovement) {
+      // If using custom base movement, double it when mounted
+      baseMovement *= 2;
     }
     
     // Could add terrain modifiers here if needed
@@ -247,9 +258,11 @@ export class PartyActorType extends Actor {
     data.name = this.name;
     
     // Use a specific token image that represents a group
-    // If no image is set, use a default
+    // If no image is set, use a system-appropriate default
     if (!this.img || this.img === 'icons/svg/mystery-man.svg') {
-      data.img = 'modules/dragonbane-coreset/assets/artwork/chapter-2.webp';
+      const configManager = SystemConfigManager.getInstance();
+      const config = configManager.getConfig();
+      data.img = config.assets.defaultPartyImage;
     } else {
       data.img = this.img;
     }
@@ -369,7 +382,7 @@ export class PartyActorType extends Actor {
     
     // In the future, we could:
     // 1. Consume resources
-    // 2. Make BUSHCRAFT checks
+    // 2. Make navigation/survival checks
     // 3. Roll for random encounters
     // 4. Apply resting benefits to characters
     
@@ -390,18 +403,23 @@ export class PartyActorType extends Actor {
       'system.movement.isMounted': isMounted
     });
     
+    // Get config manager for announcing the change
+    const configManager = SystemConfigManager.getInstance();
+    const movementConfig = configManager.getMovementRate(isMounted);
+    const timeUnit = configManager.getConfig().timeUnit;
+    
     // Announce the change in chat
     ChatMessage.create({
       speaker: { actor: this.id, alias: this.name },
       content: `<h3>${isMounted ? 'Mounted' : 'Dismounted'}</h3>
-                <p>The party is now ${isMounted ? 'mounted and moves at 30km per shift' : 'on foot and moves at 15km per shift'}.</p>`
+                <p>The party is now ${isMounted ? 'mounted' : 'on foot'} and moves at ${movementConfig.value}${movementConfig.unit} per ${timeUnit}.</p>`
     });
     
     return isMounted;
   }
   
   /**
-   * Roll a pathfinding check using the assigned pathfinder's BUSHCRAFT skill
+   * Roll a pathfinding check using the assigned pathfinder's navigation skill
    */
   async rollPathfinding() {
     const pathfinderId = this.system.roles.pathfinder;
@@ -416,23 +434,27 @@ export class PartyActorType extends Actor {
       return null;
     }
     
-    // This implementation may need to be adjusted based on the Dragonbane system
+    // Get the appropriate skill name from system configuration
+    const configManager = SystemConfigManager.getInstance();
+    const pathfindingSkill = configManager.getSkillName('pathfinding');
+    
     try {
-      // Try to roll the bushcraft skill
-      const skillValue = this._getCharacterSkillValue(pathfinder, 'bushcraft');
+      // Try to roll the pathfinding skill
+      const skillValue = this._getCharacterSkillValue(pathfinder, pathfindingSkill);
       
       // Create a chat message indicating the roll
       ChatMessage.create({
         speaker: { actor: this.id, alias: this.name },
-        content: `<h3>Pathfinding Check</h3><p>${pathfinder.name} is leading the way with BUSHCRAFT (${skillValue}).</p>`
+        content: `<h3>Pathfinding Check</h3><p>${pathfinder.name} is leading the way with ${pathfindingSkill.toUpperCase()} (${skillValue}).</p>`
       });
       
-      // Use the Dragonbane system's roll method if available
+      // Use the system's roll method if available
       if (pathfinder.rollSkill) {
-        return pathfinder.rollSkill('bushcraft');
+        return pathfinder.rollSkill(pathfindingSkill);
       } else {
-        // Fallback to a basic d20 roll against the skill value
-        const roll = new Roll('1d20');
+        // Fallback to a basic roll using system-appropriate dice
+        const diceFormula = configManager.getDiceFormula('pathfinding');
+        const roll = new Roll(diceFormula.toString());
         await roll.evaluate();
         
         const success = roll.total <= skillValue;
@@ -441,14 +463,14 @@ export class PartyActorType extends Actor {
         ChatMessage.create({
           speaker: { actor: this.id, alias: this.name },
           content: `<h3>Pathfinding Result</h3>
-                    <p>Roll: ${roll.total} vs BUSHCRAFT ${skillValue}</p>
+                    <p>Roll: ${roll.total} vs ${pathfindingSkill.toUpperCase()} ${skillValue}</p>
                     <p>${success ? 'Success! The party finds the right path.' : 'Failure! The party gets lost.'}</p>`
         });
         
         return {
           success,
           total: roll.total,
-          skill: 'bushcraft',
+          skill: pathfindingSkill,
           skillValue
         };
       }

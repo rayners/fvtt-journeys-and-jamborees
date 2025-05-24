@@ -7,7 +7,7 @@
 > 
 > **Do not use this in your active games yet!**
 
-A comprehensive party management system for Foundry VTT, initially designed for the Dragonbane RPG.
+A comprehensive party management system for Foundry VTT that works with multiple game systems including Dragonbane, D&D 5e, Pathfinder 2e, and more.
 
 ## 📚 Documentation
 
@@ -21,6 +21,22 @@ Full documentation is available at: **[docs.rayners.dev/journeys-and-jamborees](
 ## About
 
 Journeys & Jamborees transforms how groups handle travel, resources, and party dynamics by treating the party as a cohesive unit with its own character sheet. Instead of juggling individual character inventories and tracking party resources across multiple sheets, J&J provides a unified Party actor that serves as the central hub for group activities.
+
+## Development Status
+
+This module is being actively developed. Major features are still being implemented.
+
+- [x] Core party management
+- [x] Character status tracking
+- [x] Resource tracking  
+- [ ] Journey logging system
+- [ ] Weather and encounter integration
+- [ ] Mount management
+- [ ] Multi-language support
+- [ ] UI/UX polish
+- [ ] Testing and bug fixes
+
+Development is tracked privately but bug reports are welcome via [GitHub Issues](https://github.com/rayners/fvtt-journeys-and-jamborees/issues).
 
 ## Features
 
@@ -59,6 +75,16 @@ Once published to the Foundry package repository:
 ```
 https://github.com/rayners/fvtt-journeys-and-jamborees/releases/latest/download/module.json
 ```
+
+## System Support
+
+Journeys & Jamborees is designed to work with any game system in Foundry VTT:
+
+- **Pre-configured**: Dragonbane, D&D 5e, Pathfinder 2e, Forbidden Lands
+- **Configurable**: Customize movement rates, skills, and dice formulas for any system
+- **Automatic**: Falls back to sensible defaults for unknown systems
+
+See the [System Configuration Guide](https://docs.rayners.dev/journeys-and-jamborees/system-configuration) for details.
 
 ## Quick Start
 

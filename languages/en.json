@@ -137,7 +137,19 @@
     "PathfinderSkillName": "Pathfinder Skill Name",
     "PathfinderSkillNameHint": "The name of the skill used for pathfinding (typically Bushcraft)",
     "AutoAddCharactersOnCreation": "Auto-add Characters on Party Creation",
-    "AutoAddCharactersOnCreationHint": "Automatically add all player characters to new parties and grant ownership to their players"
+    "AutoAddCharactersOnCreationHint": "Automatically add all player characters to new parties and grant ownership to their players",
+    "MovementOnFoot": "Movement Rate (On Foot)",
+    "MovementOnFootHint": "Distance traveled per time period when walking",
+    "MovementMounted": "Movement Rate (Mounted)",
+    "MovementMountedHint": "Distance traveled per time period when mounted",
+    "MovementUnit": "Movement Unit",
+    "MovementUnitHint": "Unit of measurement for movement (e.g., km, miles)",
+    "RandomEncounterDice": "Random Encounter Dice",
+    "RandomEncounterDiceHint": "Dice formula for random encounter checks",
+    "EncounterThreshold": "Encounter Threshold",
+    "EncounterThresholdHint": "Minimum roll result to trigger a random encounter",
+    "WeatherDice": "Weather Dice",
+    "WeatherDiceHint": "Dice formula for weather determination"
   },
   "TYPES.Actor.journeys-and-jamborees.party": "Party"
 }

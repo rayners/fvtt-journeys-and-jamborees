@@ -2,7 +2,31 @@
 
 > **Development Status**: Journeys & Jamborees is in active development. Breaking changes may occur between versions until v1.0 release.
 
-## [0.2.0] - 2023-XX-XX
+## [Unreleased]
+
+### Added
+- System-agnostic support for multiple game systems
+- Pre-configured support for D&D 5e, Pathfinder 2e, and Forbidden Lands
+- System configuration settings for movement, skills, and dice formulas
+- System adapter pattern for handling different skill systems
+- System Configuration Guide documentation
+- Comprehensive README documentation
+- CONTRIBUTING.md with contribution guidelines
+- Improved development documentation in CLAUDE.md
+
+### Changed
+- Movement rates now configurable per system
+- Skill names dynamically loaded from system configuration
+- Dice formulas (encounters, weather) now system-specific
+- Default party image changes based on active system
+- Enhanced README with alpha warnings and clearer feature status
+- Updated all documentation for public repository release
+
+### Fixed
+- Character removal now properly uses Foundry's deletion syntax
+- Settings labels clarified for per-character consumption
+
+## [0.2.0] - 2024-XX-XX (In Development)
 
 ### Added
 - Dragonbane-styled UI matching the system's appearance

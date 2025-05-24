@@ -42,4 +42,9 @@ ref
 
 # Private documentation
 CLAUDE.*
-docs/
+docs/development-environment.md
+docs/implementation-steps.md
+docs/project-overview.md
+docs/recent-changes.md
+docs/common-issues.md
+docs/code-references.md

@@ -1,3 +1,5 @@
+import { SystemConfigManager } from './system-config';
+
 /**
  * Data model for party actor type
  */
@@ -30,7 +32,11 @@ export class PartyModel extends foundry.abstract.TypeDataModel {
       
       // Travel settings
       settings: new fields.SchemaField({
-        baseMovement: new fields.NumberField({initial: 15, min: 0, integer: true}), // Default 15km per Dragonbane rules
+        baseMovement: new fields.NumberField({
+          initial: () => SystemConfigManager.getInstance().getConfig().movement.onFoot.value, 
+          min: 0, 
+          integer: true
+        }),
         rationsPerDay: new fields.NumberField({initial: 1, min: 0, integer: true}),
         waterPerDay: new fields.NumberField({initial: 1, min: 0, integer: true}),
         encounterChance: new fields.NumberField({initial: 10, min: 0, max: 100, integer: true}),
@@ -42,7 +48,11 @@ export class PartyModel extends foundry.abstract.TypeDataModel {
       
       // Party movement
       movement: new fields.SchemaField({
-        value: new fields.NumberField({initial: 15, min: 0, integer: true}),
+        value: new fields.NumberField({
+          initial: () => SystemConfigManager.getInstance().getConfig().movement.onFoot.value, 
+          min: 0, 
+          integer: true
+        }),
         isMounted: new fields.BooleanField({initial: false})
       }),
       
@@ -116,18 +126,15 @@ export class PartyModel extends foundry.abstract.TypeDataModel {
   }
   
   /**
-   * Calculate party movement rate based on Dragonbane rules
-   * Base movement is 15km per shift on foot, 30km if mounted
+   * Calculate party movement rate based on system rules
    * @private
    */
   _calculateMovement() {
-    // Get the base movement from settings (default 15km per Dragonbane rules)
-    let baseMovement = this.settings.baseMovement;
+    const config = SystemConfigManager.getInstance().getConfig();
     
-    // Double movement if the party is mounted
-    if (this.movement.isMounted) {
-      baseMovement *= 2; // 30km if mounted
-    }
+    // Use the appropriate movement rate from system config
+    const movementConfig = this.movement.isMounted ? config.movement.mounted : config.movement.onFoot;
+    let baseMovement = movementConfig.value;
     
     // Apply terrain modifiers if needed
     // For now, use the base value
