@@ -1,103 +1,96 @@
 # Journeys & Jamborees
 
-> ⚠️ **DEVELOPMENT STATUS**: This module is in active development. Features may change without notice, and backward compatibility between versions is not guaranteed until v1.0 release.
+> ⚠️ **ALPHA SOFTWARE - NOT READY FOR USE** ⚠️
+> 
+> This module is in early development and is not ready for production use.
+> Features are incomplete, APIs will change, and bugs are expected.
+> 
+> **Do not use this in your active games yet!**
 
-A party management system for Dragonbane in Foundry VTT.
+A comprehensive party management system for Foundry VTT, initially designed for the Dragonbane RPG.
 
-## Description
+## 📚 Documentation
 
-This module adds a party management system to Dragonbane in Foundry VTT. It allows players to manage their party as a whole, tracking travel roles, shared resources, and party-wide actions.
+Full documentation is available at: **[docs.rayners.dev/journeys-and-jamborees](https://docs.rayners.dev/journeys-and-jamborees)**
+
+- [Installation Guide](https://docs.rayners.dev/journeys-and-jamborees/installation)
+- [Quick Start Guide](https://docs.rayners.dev/journeys-and-jamborees/quick-start)
+- [User Guide](https://docs.rayners.dev/journeys-and-jamborees/party-management)
+- [Contributing](https://docs.rayners.dev/journeys-and-jamborees/contributing)
+
+## About
+
+Journeys & Jamborees transforms how groups handle travel, resources, and party dynamics by treating the party as a cohesive unit with its own character sheet. Instead of juggling individual character inventories and tracking party resources across multiple sheets, J&J provides a unified Party actor that serves as the central hub for group activities.
 
 ## Features
 
-- Party Actor: Represent your party as a Foundry actor
-- Travel Roles: Assign party members to different travel roles
-- Character Status: Track which characters are active, traveling, or staying behind
-- Resource Management: Track shared resources like food and water
-- HUD Integration: Access party management directly from the token HUD
-- ARGON Integration: Additional quick actions when ARGON HUD is installed
-- Localization Support: Fully localized UI with support for multiple languages
+### ✅ Currently Implemented
+- **Party Actor**: Custom actor type representing the entire party
+- **Character Management**: Add/remove party members with proper permission handling
+- **Character Status**: Active, traveling, or staying behind
+- **Travel Roles**: Pathfinder, lookout, and quartermaster assignments
+- **Resource Tracking**: Shared rations, water, and gold
+- **Party Inventory**: Separate from character inventories
+- **Permission System**: Automatic ownership for party members
+
+### 🚧 In Development
+- Journey tracking and logging
+- Weather and encounter systems
+- Mount management
+- Multi-language support
+
+## Requirements
+
+- Foundry VTT v13.0.0 or later
+- Dragonbane (Drakar och Demoner) game system v1.0.0 or later
 
 ## Installation
 
-You can install this module by searching for "Journeys & Jamborees" in the Foundry VTT module browser, or by using the following manifest URL:
+### Manual Installation (Current Method)
 
+1. Download the latest release from [GitHub Releases](https://github.com/rayners/fvtt-journeys-and-jamborees/releases)
+2. Extract to your Foundry VTT modules directory
+3. Restart Foundry VTT
+4. Enable the module in your world
+
+### Future Installation
+
+Once published to the Foundry package repository:
 ```
-https://github.com/yourusername/journeys-and-jamborees/releases/latest/download/module.json
-```
-
-After installation, you need to properly set up the template files:
-
-### Fix Template Files
-
-1. Locate your Foundry VTT modules directory:
-   - Windows: `%APPDATA%\Local\FoundryVTT\Data\modules\journeys-and-jamborees\`
-   - macOS: `~/Library/Application Support/FoundryVTT/Data/modules/journeys-and-jamborees/`
-   - Linux: `~/.local/share/FoundryVTT/Data/modules/journeys-and-jamborees/`
-
-2. Create a templates directory:
-   ```bash
-   mkdir -p "[YOUR_FOUNDRY_DATA_PATH]/modules/journeys-and-jamborees/templates"
-   ```
-
-3. Copy the template files from the root directory to the templates directory:
-   ```bash
-   cp "[YOUR_FOUNDRY_DATA_PATH]/modules/journeys-and-jamborees/party-sheet.hbs" "[YOUR_FOUNDRY_DATA_PATH]/modules/journeys-and-jamborees/templates/"
-   cp "[YOUR_FOUNDRY_DATA_PATH]/modules/journeys-and-jamborees/party-hud.hbs" "[YOUR_FOUNDRY_DATA_PATH]/modules/journeys-and-jamborees/templates/"
-   ```
-
-### Temporary Fix
-
-If you can't manually fix the files, you can paste the following code into your browser console when Foundry is loaded:
-
-```javascript
-// Run this in browser console
-// Check the template-fix.js file in the module for the full code
-loadTemplates = (function(original) {
-  return function(paths) {
-    const fixedPaths = paths.map(path => {
-      if (path.includes('templates') && path.includes('journeys-and-jamborees')) {
-        return path.replace('templates/', '');
-      }
-      return path;
-    });
-    return original(fixedPaths);
-  };
-})(loadTemplates);
+https://github.com/rayners/fvtt-journeys-and-jamborees/releases/latest/download/module.json
 ```
 
-## Usage
+## Quick Start
 
-After installing and enabling the module, create a new Party actor from the Actors directory. This actor will represent your party and can be placed on the scene as a token.
+1. Create a new "Party" actor
+2. Add player characters to the party
+3. Assign travel roles
+4. Track resources and manage inventory
+5. Begin your journey!
 
-## Localization
+For detailed instructions, see the [Quick Start Guide](https://docs.rayners.dev/journeys-and-jamborees/quick-start).
 
-The module comes with English translations by default. If you want to add support for another language, you can create a new translation file in the `languages` directory. See the [Localization Guide](./docs/localization.md) for more details.
+## Contributing
 
-## Troubleshooting
+Thank you for your interest! While the module is in alpha, we're accepting:
+- Bug reports
+- Testing feedback  
+- Translations
 
-### Party Actor Type Not Available
+See our [Contributing Guide](https://docs.rayners.dev/journeys-and-jamborees/contributing) for details.
 
-If "Party" doesn't appear as an actor type option when creating a new actor, try these solutions:
+## Support
 
-1. **Restart Foundry VTT completely** - Sometimes a full restart resolves initialization issues.
-
-2. **Check the console for errors** - Press F12 to open your browser's developer console and look for error messages.
-
-3. **Try the helper script** - This module includes a helper script that can fix actor type registration issues:
-   - Install the "Module Management+" or "Console Wizard" modules
-   - Copy the contents of `party-actor-type-helper.js` into a new script
-   - Run the script before creating a party actor
-
-4. **Check system compatibility** - Ensure you're using Dragonbane system version 0.5.0 or later.
-
-5. **Load order issue** - If you have many modules, try moving this module to load later than others by adjusting priorities in Module Management+.
+- **Documentation**: [docs.rayners.dev/journeys-and-jamborees](https://docs.rayners.dev/journeys-and-jamborees)
+- **Bug Reports**: [GitHub Issues](https://github.com/rayners/fvtt-journeys-and-jamborees/issues)
+- **Discussion**: Foundry VTT Discord #module-discussion
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 
 - The Dragonbane RPG by Free League Publishing
 - The Foundry VTT development community
+- All alpha testers and contributors
