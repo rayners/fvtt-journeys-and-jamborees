@@ -119,6 +119,105 @@ Set the party's current activity:
 - **Roll Weather**: Determine weather conditions
 - **Make Camp**: Set up camp for rest
 
+## Food Gathering (Dragonbane)
+
+*Note: Food gathering is available only for Dragonbane system with the Core Set module*
+
+### Using Food Gathering
+
+When making camp in Dragonbane, party members can gather food through:
+
+1. **Hunting**: Track and kill animals for meat
+2. **Fishing**: Catch fish with rod or net  
+3. **Foraging**: Find edible plants and fungi
+
+Food gathering uses configurable skills (default: Hunting & Fishing for hunting/fishing, Bushcraft for foraging).
+
+### Customizing Food Tables
+
+The module uses Foundry's RollTable system for flexible food gathering results.
+
+#### Official Content vs Generic Tables
+
+- **With Dragonbane Core Set**: Uses official hunting and foraging tables from the rulebook
+- **Without Core Set**: Uses generic tables to avoid copyright issues
+- **Custom Worlds**: You can create your own tables for any setup
+
+#### Creating Custom Food Tables
+
+**Step 1: Create the RollTable**
+1. Go to **Compendium Packs** or **Items** tab
+2. Click **Create RollTable** 
+3. Name it appropriately:
+   - `"J&J Hunting Table"` for hunting
+   - `"J&J Foraging Table"` for foraging
+
+**Step 2: Add Table Results**
+Add results with the following structure:
+
+| Range | Text | Weight |
+|-------|------|--------|
+| 1-1 | Squirrel | 1 |
+| 2-2 | Crow | 1 |
+| 3-3 | Rabbit | 1 |
+| 4-4 | Fox | 1 |
+| 5-5 | Boar | 1 |
+| 6-6 | Deer | 1 |
+
+**Step 3: Configure Result Flags**
+For each result, add flags under `journeys-and-jamborees`:
+
+```json
+{
+  "rations": "1d3",
+  "requiresWeapon": true,
+  "canUseTrap": true,
+  "dangerous": false
+}
+```
+
+#### Flag Options
+
+**For Hunting Results:**
+- `rations`: Amount of food (number or dice formula like "1d3", "2d6")
+- `requiresWeapon`: Does this animal require a ranged weapon? (true/false)
+- `canUseTrap`: Can this animal be caught with traps? (true/false) 
+- `dangerous`: Is this animal dangerous if hunting fails? (true/false)
+
+**For Foraging Results:**
+- `rations`: Amount of food found (number or dice formula)
+
+#### Example Custom Hunting Table
+
+**Arctic Hunting Table:**
+- Ice Fox (1d2 rations, requires weapon, can trap)
+- Seal (1d6 rations, requires weapon, cannot trap)
+- Caribou (2d8 rations, requires weapon, cannot trap)
+- Arctic Hare (1d3 rations, requires weapon, can trap)
+- Polar Bear (3d6 rations, requires weapon, cannot trap, dangerous)
+
+**Desert Foraging Table:**
+- Cactus Fruit (1 ration)
+- Desert Sage (1d2 rations)
+- Prickly Pear (1d3 rations)
+- Nothing Edible (0 rations)
+
+#### Table Detection
+
+The module automatically finds your custom tables by name:
+- Tables containing "hunting" are used for hunting
+- Tables containing "foraging" are used for foraging
+- If multiple tables exist, it uses the first one found
+- Official tables take precedence when Core Set is active
+
+#### Tips for Custom Tables
+
+1. **Balance Results**: Include both good and poor outcomes
+2. **Use Dice Formulas**: Makes results more variable and interesting
+3. **Consider Your Setting**: Match animals/plants to your world's environment
+4. **Test Your Tables**: Roll them manually to check balance
+5. **Seasonal Variants**: Create different tables for different seasons/regions
+
 ## Party Inventory
 
 ### Shared Items

@@ -12,6 +12,8 @@ import { patchPartyActor } from './utils';
 import './api';
 // Import quench tests - they self-register via the quenchReady hook
 import './quench-tests';
+// Import Dragonbane Roll API if using Dragonbane
+import './dragonbane-roll-api';
 
 // Initialize the module
 Hooks.once('init', async function() {

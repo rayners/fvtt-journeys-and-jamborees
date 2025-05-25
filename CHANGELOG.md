@@ -18,6 +18,10 @@
 - System-specific test suites for Dragonbane, D&D 5e, PF2e, Forbidden Lands
 - Test documentation and guidelines for contributors
 - Bug reporting guidelines that encourage including Quench test results
+- Food gathering system (hunting, fishing, foraging) for Dragonbane
+- RollTable-based food results system with customizable tables
+- Dragonbane Roll API for easier programmatic skill rolling
+- Hunting and foraging skill configuration settings
 
 ### Changed
 - Movement rates now configurable per system
@@ -32,6 +36,7 @@
 - Settings labels clarified for per-character consumption
 - Party sheet member count display (was showing "/" without numbers)
 - Travel role assignment parameter order in party actor
+- D&D 5e skill names now display correctly in all interfaces (dropdowns and party sheet)
 
 ## [0.2.0] - 2024-XX-XX (In Development)
 

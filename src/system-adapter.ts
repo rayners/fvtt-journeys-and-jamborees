@@ -86,17 +86,48 @@ class DragonbaneAdapter extends SystemAdapter {
   }
 
   protected async performSkillRoll(actor: Actor, skillName: string): Promise<SkillRollResult> {
-    const roll = await actor.rollSkill(skillName);
-    return {
-      total: roll.total,
-      success: roll.total <= this.getSkillValue(actor, skillName),
-      criticalSuccess: roll.total === 1,
-      criticalFailure: roll.total === 20
-    };
+    // Use our new Dragonbane Roll API
+    const { DragonbaneRollAPI } = await import('./dragonbane-roll-api');
+    
+    try {
+      // For food gathering, we don't want push mechanics
+      const result = await DragonbaneRollAPI.rollSkill(actor, skillName, {
+        skipDialog: true,
+        createMessage: true, // Show rolls in chat
+        allowPush: false // No pushing for food gathering activities
+      });
+      
+      // Log if advancement mark was earned
+      if (result.advancementMarkApplied) {
+        ui.notifications.info(
+          `${actor.name} earned an advancement mark in ${skillName}!`
+        );
+      }
+      
+      return {
+        total: result.total,
+        success: result.success,
+        criticalSuccess: result.criticalSuccess,
+        criticalFailure: result.criticalFailure
+      };
+    } catch (error) {
+      console.error('Dragonbane skill roll failed:', error);
+      // Return a failed roll
+      return {
+        total: 20,
+        success: false,
+        criticalSuccess: false,
+        criticalFailure: true
+      };
+    }
   }
 
   hasSkill(actor: Actor, skillName: string): boolean {
-    return skillName.toLowerCase() in (actor.system.skills || {});
+    // In Dragonbane, skills are items, not properties in system.skills
+    return actor.items.some((item: Item) => 
+      item.type === 'skill' && 
+      item.name.toLowerCase() === skillName.toLowerCase()
+    );
   }
 
   getActorSpeed(actor: Actor, mounted: boolean): number {

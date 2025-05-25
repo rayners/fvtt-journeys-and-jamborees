@@ -376,17 +376,173 @@ export class PartyActorType extends Actor {
    * Make camp for the party
    */
   async makeCamp() {
-    // Implementation will depend on Dragonbane system specifics
-    // For now, just display a notification
-    ui.notifications.info('The party makes camp for the night.');
+    // Check if we're in Dragonbane with core set
+    const isDragonbane = game.system.id === 'dragonbane';
+    const hasCoreSet = game.modules.get('dragonbane-coreset')?.active;
     
-    // In the future, we could:
-    // 1. Consume resources
-    // 2. Make navigation/survival checks
-    // 3. Roll for random encounters
-    // 4. Apply resting benefits to characters
+    // Store reference to this actor before creating dialog
+    const partyActor = this;
+    
+    if (isDragonbane && hasCoreSet) {
+      // Show food gathering dialog
+      const foodGatheringAvailable = true;
+      
+      // Create dialog for camp activities
+      new Dialog({
+        title: game.i18n.localize('J&J.camp.makeCamp'),
+        content: `
+          <form>
+            <p>${game.i18n.localize('J&J.camp.description')}</p>
+            <div class="form-group">
+              <label>${game.i18n.localize('J&J.camp.activities')}</label>
+              <button type="button" class="gather-food" data-action="gather">
+                <i class="fas fa-drumstick-bite"></i>
+                ${game.i18n.localize('J&J.FoodGathering.GatherFood')}
+              </button>
+            </div>
+          </form>
+        `,
+        buttons: {
+          rest: {
+            icon: '<i class="fas fa-campground"></i>',
+            label: game.i18n.localize('J&J.camp.rest'),
+            callback: () => {
+              ui.notifications.info('The party makes camp for the night.');
+              // Consume daily resources if auto-consume is on
+              if (partyActor.system.settings.autoConsume) {
+                const rationsPerDay = partyActor.system.settings.rationsPerDay * partyActor.system.activeCount;
+                const waterPerDay = partyActor.system.settings.waterPerDay * partyActor.system.activeCount;
+                partyActor.removeResource('rations', rationsPerDay);
+                partyActor.removeResource('water', waterPerDay);
+              }
+            }
+          },
+          cancel: {
+            icon: '<i class="fas fa-times"></i>',
+            label: game.i18n.localize('Cancel')
+          }
+        },
+        render: (html) => {
+          html.find('.gather-food').click(async () => {
+            // Close this dialog and open food gathering dialog
+            html.closest('.dialog').find('.close').click();
+            await partyActor.openFoodGatheringDialog();
+          });
+        }
+      }).render(true);
+    } else {
+      // Non-Dragonbane camp making
+      ui.notifications.info('The party makes camp for the night.');
+      
+      // Consume daily resources if auto-consume is on
+      if (this.system.settings.autoConsume) {
+        const rationsPerDay = this.system.settings.rationsPerDay * this.system.activeCount;
+        const waterPerDay = this.system.settings.waterPerDay * this.system.activeCount;
+        this.removeResource('rations', rationsPerDay);
+        this.removeResource('water', waterPerDay);
+      }
+    }
     
     return true;
+  }
+  
+  /**
+   * Get all characters in the party
+   */
+  getCharacters() {
+    const memberStatus = this.system.memberStatus || {};
+    const characterIds = Object.keys(memberStatus);
+    return characterIds.map(id => game.actors.get(id)).filter(actor => actor);
+  }
+  
+  /**
+   * Open food gathering dialog
+   */
+  async openFoodGatheringDialog() {
+    const { FoodGatheringSystem } = await import('./food-gathering');
+    const foodSystem = FoodGatheringSystem.getInstance();
+    
+    // Get party members who can gather
+    const members = this.getCharacters();
+    if (members.length === 0) {
+      ui.notifications.warn('No party members available for food gathering');
+      return;
+    }
+    
+    // Create character selection and gathering type dialog
+    const content = `
+      <form>
+        <div class="form-group">
+          <label>${game.i18n.localize('J&J.FoodGathering.SelectCharacter')}</label>
+          <select name="character">
+            ${members.map(m => `<option value="${m.id}">${m.name}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>${game.i18n.localize('J&J.FoodGathering.SelectActivity')}</label>
+          <select name="activity">
+            <option value="hunt">${game.i18n.localize('J&J.FoodGathering.Hunt')}</option>
+            <option value="fish">${game.i18n.localize('J&J.FoodGathering.Fish')}</option>
+            <option value="forage">${game.i18n.localize('J&J.FoodGathering.Forage')}</option>
+          </select>
+        </div>
+      </form>
+    `;
+    
+    new Dialog({
+      title: game.i18n.localize('J&J.FoodGathering.GatherFood'),
+      content,
+      buttons: {
+        gather: {
+          icon: '<i class="fas fa-dice-d20"></i>',
+          label: game.i18n.localize('J&J.FoodGathering.Gather'),
+          callback: async (html) => {
+            const formData = new FormDataExtended(html[0].querySelector('form')).object;
+            const character = game.actors.get(formData.character);
+            const activity = formData.activity;
+            
+            if (!character) return;
+            
+            let result;
+            switch (activity) {
+              case 'hunt':
+                result = await foodSystem.hunt(character);
+                break;
+              case 'fish':
+                // TODO: Check character inventory for fishing gear
+                result = await foodSystem.fish(character, true, false);
+                break;
+              case 'forage':
+                // TODO: Determine current season
+                result = await foodSystem.forage(character, 'summer');
+                break;
+            }
+            
+            // Display result
+            if (result) {
+              ChatMessage.create({
+                speaker: ChatMessage.getSpeaker({ actor: character }),
+                content: `<div class="food-gathering-result">
+                  <h3>${game.i18n.localize(`J&J.FoodGathering.${activity.charAt(0).toUpperCase() + activity.slice(1)}`)}</h3>
+                  <p>${result.description}</p>
+                  ${result.complications ? `<p class="complications">${result.complications}</p>` : ''}
+                </div>`
+              });
+              
+              // Add rations to party if successful
+              if (result.success && result.rations > 0) {
+                await this.addResource('rations', result.rations);
+                ui.notifications.info(`Added ${result.rations} rations to party supplies`);
+              }
+            }
+          }
+        },
+        cancel: {
+          icon: '<i class="fas fa-times"></i>',
+          label: game.i18n.localize('Cancel')
+        }
+      }
+    }).render(true);
   }
   
   /**

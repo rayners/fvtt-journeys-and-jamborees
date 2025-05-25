@@ -26,6 +26,8 @@ export function patchPartyActor(actor) {
       'removeResource',
       'distributeResources',
       'makeCamp',
+      'getCharacters',
+      'openFoodGatheringDialog',
       'rollPathfinding',
       'toggleMounted',
       'addAllCharactersAsActive',

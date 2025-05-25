@@ -80,13 +80,13 @@ export class SkillManager {
     
     // Method 3: Try to get skills from world items
     const worldSkillItems = game.items
-      .filter((i: Item) => i.type === 'skill')
-      .map((i: Item) => ({ id: i.name.toLowerCase().replace(/\s+/g, '-'), name: i.name }));
+      .filter((i: Item) => i.type === 'skill');
     
     if (worldSkillItems.length > 0) {
       console.log("Found world skill items:", worldSkillItems);
       worldSkillItems.forEach(skill => {
-        skills[skill.id] = skill.name;
+        // Use the actual skill name as the key, not a transformed ID
+        skills[skill.name] = skill.name;
       });
     }
     
@@ -194,8 +194,8 @@ export class SkillManager {
         if (skillEntries.size > 0) {
           // Process skill entries
           skillEntries.forEach((entry: any) => {
-            const id = entry.name.toLowerCase().replace(/\s+/g, '-');
-            skills[id] = entry.name;
+            // Use the actual skill name as the key, not a transformed ID
+            skills[entry.name] = entry.name;
           });
         }
       } catch (error) {
@@ -298,6 +298,30 @@ export class SkillManager {
       choices: skillChoices,
       onChange: value => this.onSkillChange()
     });
+    
+    // Register hunting skill
+    game.settings.register("journeys-and-jamborees", "huntingSkillName", {
+      name: "SETTINGS.HuntingSkillName",
+      hint: "SETTINGS.HuntingSkillNameHint",
+      scope: "world",
+      config: true,
+      type: String,
+      default: this.findBestMatch(config.skills.hunting, availableSkills),
+      choices: skillChoices,
+      onChange: value => this.onSkillChange()
+    });
+    
+    // Register foraging skill
+    game.settings.register("journeys-and-jamborees", "foragingSkillName", {
+      name: "SETTINGS.ForagingSkillName",
+      hint: "SETTINGS.ForagingSkillNameHint",
+      scope: "world",
+      config: true,
+      type: String,
+      default: this.findBestMatch(config.skills.foraging, availableSkills),
+      choices: skillChoices,
+      onChange: value => this.onSkillChange()
+    });
   }
 
   /**
@@ -307,29 +331,29 @@ export class SkillManager {
   findBestMatch(desiredSkill: string, availableSkills: Record<string, string>): string {
     const desired = desiredSkill.toLowerCase();
     
-    // Direct key match
-    if (availableSkills[desired]) return desired;
-    
-    // Case-insensitive key match
-    const keyMatch = Object.keys(availableSkills).find(
+    // Direct key match (case-insensitive)
+    const exactMatch = Object.keys(availableSkills).find(
       key => key.toLowerCase() === desired
     );
-    if (keyMatch) return keyMatch;
+    if (exactMatch) return exactMatch;
     
-    // Match by label (case-insensitive)
-    const labelMatch = Object.entries(availableSkills).find(
-      ([key, label]) => label.toLowerCase() === desired
+    // Handle special characters in skill names (e.g., "hunting & fishing")
+    const normalizedDesired = desired.replace(/[&]/g, 'and');
+    const specialCharMatch = Object.keys(availableSkills).find(
+      key => {
+        const normalizedKey = key.toLowerCase().replace(/[&]/g, 'and');
+        return normalizedKey === normalizedDesired;
+      }
     );
-    if (labelMatch) return labelMatch[0];
+    if (specialCharMatch) return specialCharMatch;
     
-    // Partial match in key or label
-    const partialMatch = Object.entries(availableSkills).find(
-      ([key, label]) => 
+    // Partial match in key
+    const partialMatch = Object.keys(availableSkills).find(
+      key => 
         key.toLowerCase().includes(desired) ||
-        label.toLowerCase().includes(desired) ||
         desired.includes(key.toLowerCase())
     );
-    if (partialMatch) return partialMatch[0];
+    if (partialMatch) return partialMatch;
     
     // Common synonyms mapping (only using generic terms)
     const synonyms: Record<string, string[]> = {
@@ -342,16 +366,12 @@ export class SkillManager {
     // Check synonyms
     for (const [synonym, alternatives] of Object.entries(synonyms)) {
       if (desired === synonym || alternatives.includes(desired)) {
-        const synMatch = Object.entries(availableSkills).find(
-          ([key, label]) => 
+        const synMatch = Object.keys(availableSkills).find(
+          key => 
             key.toLowerCase() === synonym ||
-            label.toLowerCase() === synonym ||
-            alternatives.some(alt => 
-              key.toLowerCase().includes(alt) || 
-              label.toLowerCase().includes(alt)
-            )
+            alternatives.some(alt => key.toLowerCase().includes(alt))
         );
-        if (synMatch) return synMatch[0];
+        if (synMatch) return synMatch;
       }
     }
     
@@ -368,7 +388,9 @@ export class SkillManager {
       skills: {
         pathfinding: game.settings.get("journeys-and-jamborees", "pathfinderSkillName"),
         lookout: game.settings.get("journeys-and-jamborees", "lookoutSkillName"),
-        quartermaster: game.settings.get("journeys-and-jamborees", "quartermasterSkillName")
+        quartermaster: game.settings.get("journeys-and-jamborees", "quartermasterSkillName"),
+        hunting: game.settings.get("journeys-and-jamborees", "huntingSkillName"),
+        foraging: game.settings.get("journeys-and-jamborees", "foragingSkillName")
       }
     };
     

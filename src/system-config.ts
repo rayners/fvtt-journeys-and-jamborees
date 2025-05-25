@@ -18,6 +18,8 @@ export interface SystemSkillConfig {
   pathfinding: string;
   lookout: string;
   quartermaster: string;
+  hunting: string;
+  foraging: string;
 }
 
 export interface SystemDiceConfig {
@@ -54,7 +56,9 @@ const SYSTEM_CONFIGS: Record<string, SystemConfig> = {
     skills: {
       pathfinding: 'bushcraft',
       lookout: 'awareness',
-      quartermaster: 'bartering'
+      quartermaster: 'bartering',
+      hunting: 'hunting & fishing',
+      foraging: 'bushcraft'
     },
     dice: {
       randomEncounter: '1d20',
@@ -77,7 +81,9 @@ const SYSTEM_CONFIGS: Record<string, SystemConfig> = {
     skills: {
       pathfinding: 'sur',  // Survival
       lookout: 'prc',      // Perception
-      quartermaster: 'per' // Persuasion
+      quartermaster: 'per', // Persuasion
+      hunting: 'sur',      // Survival (also used for hunting)
+      foraging: 'sur'      // Survival (also used for foraging)
     },
     dice: {
       randomEncounter: '1d20',
@@ -100,7 +106,9 @@ const SYSTEM_CONFIGS: Record<string, SystemConfig> = {
     skills: {
       pathfinding: 'survival',
       lookout: 'perception',
-      quartermaster: 'diplomacy'
+      quartermaster: 'diplomacy',
+      hunting: 'survival',
+      foraging: 'survival'
     },
     dice: {
       randomEncounter: '1d20',
@@ -123,7 +131,9 @@ const SYSTEM_CONFIGS: Record<string, SystemConfig> = {
     skills: {
       pathfinding: 'survival',
       lookout: 'scouting',
-      quartermaster: 'manipulation'
+      quartermaster: 'manipulation',
+      hunting: 'survival',
+      foraging: 'survival'
     },
     dice: {
       randomEncounter: '1d6',
@@ -146,7 +156,9 @@ const SYSTEM_CONFIGS: Record<string, SystemConfig> = {
     skills: {
       pathfinding: 'skill',  // Generic skill name
       lookout: 'skill',
-      quartermaster: 'skill'
+      quartermaster: 'skill',
+      hunting: 'skill',
+      foraging: 'skill'
     },
     dice: {
       randomEncounter: '1d20',
@@ -172,7 +184,9 @@ const DEFAULT_CONFIG: SystemConfig = {
   skills: {
     pathfinding: 'skill',
     lookout: 'skill',
-    quartermaster: 'skill'
+    quartermaster: 'skill',
+    hunting: 'skill',
+    foraging: 'skill'
   },
   dice: {
     randomEncounter: '1d20',
