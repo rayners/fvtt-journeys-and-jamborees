@@ -50,7 +50,8 @@ export const registerPartyActorType = function() {
   }
   
   // 2b. Add to system template if it exists
-  if (game.system?.template?.Actor?.types) {
+  // Skip for Simple Worldbuilding as it has strict template requirements
+  if (game.system?.template?.Actor?.types && game.system.id !== 'worldbuilding') {
     if (!game.system.template.Actor.types.includes(cleanType)) {
       game.system.template.Actor.types.push(cleanType);
     }
@@ -58,6 +59,8 @@ export const registerPartyActorType = function() {
       game.system.template.Actor.types.push(namespacedType);
     }
     console.log('Journeys & Jamborees | Added party types to system template');
+  } else if (game.system.id === 'worldbuilding') {
+    console.log('Journeys & Jamborees | Skipping system template modification for Simple Worldbuilding');
   }
   
   // 3. Register document class
