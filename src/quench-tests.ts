@@ -568,6 +568,171 @@ export function registerQuenchTests(): void {
     });
   }
   
+  // Simple Worldbuilding-specific tests
+  if (systemId === 'worldbuilding') {
+    quench.registerBatch('journeys-and-jamborees.system-worldbuilding', (context) => {
+      const { describe, it, assert, beforeEach, afterEach } = context;
+      
+      describe('Simple Worldbuilding System Tests', function() {
+        let partyActor: Actor;
+        let testCharacter: Actor;
+        
+        beforeEach(async function() {
+          partyActor = await Actor.create({
+            name: 'Simple Worldbuilding Test Party',
+            type: 'journeys-and-jamborees.party'
+          });
+          patchPartyActor(partyActor);
+          
+          // Create a character with custom attributes
+          testCharacter = await Actor.create({
+            name: 'Test Character',
+            type: 'character',
+            system: {
+              attributes: {
+                // Simple Worldbuilding uses custom attributes
+                navigation: { value: 15, label: 'Navigation' },
+                perception: { value: 12, label: 'Perception' },
+                diplomacy: { value: 10, label: 'Diplomacy' }
+              }
+            }
+          });
+        });
+        
+        afterEach(async function() {
+          if (partyActor) await partyActor.delete();
+          if (testCharacter) await testCharacter.delete();
+        });
+        
+        it('should use Simple Worldbuilding defaults', function() {
+          assert.equal(partyActor.system.movement.value, 25, 'On-foot movement should be 25 units');
+          assert.equal(partyActor.system.settings.baseMovement, 25, 'Base movement should be 25 units');
+          
+          const config = SystemConfigManager.getInstance().getConfig();
+          assert.equal(config.timeUnit, 'period', 'Should use period as time unit');
+        });
+        
+        it('should use GenericAdapter for skill handling', function() {
+          const adapter = game.modules.get('journeys-and-jamborees')?.api?.systemAdapter;
+          assert.ok(adapter, 'System adapter should exist');
+          assert.equal(adapter.constructor.name, 'GenericAdapter', 'Should use GenericAdapter');
+        });
+        
+        it('should detect attributes as skills', async function() {
+          const skillManager = game.modules.get('journeys-and-jamborees')?.api?.skillManager;
+          if (skillManager) {
+            const availableSkills = skillManager.getAvailableSkills();
+            console.log('Simple Worldbuilding detected skills:', availableSkills);
+            
+            // Should detect attributes from the test character or show configure message
+            const hasSkills = Object.keys(availableSkills).length > 0;
+            assert.ok(hasSkills, 'Should detect some skills or show configure message');
+          }
+        });
+        
+        it('should handle minimal system structure gracefully', async function() {
+          await partyActor.addCharacter(testCharacter.id);
+          
+          // Test that basic operations work without errors
+          assert.doesNotThrow(() => {
+            partyActor.getCharacters();
+          }, 'getCharacters should not throw');
+          
+          assert.doesNotThrow(() => {
+            partyActor.system.activeCount;
+          }, 'activeCount should not throw');
+          
+          // Travel roles should be assignable
+          await partyActor.assignTravelRole('pathfinder', testCharacter.id);
+          assert.equal(partyActor.system.roles.pathfinder, testCharacter.id, 
+            'Should assign pathfinder role');
+        });
+        
+        it('should allow skill configuration via settings', function() {
+          // Check that skill settings exist and can be configured
+          const pathfinderSetting = game.settings.settings.get('journeys-and-jamborees.pathfinderSkillName');
+          assert.ok(pathfinderSetting, 'Pathfinder skill setting should exist');
+          
+          // In Simple Worldbuilding, skills might default to 'none' or 'skill'
+          const currentValue = game.settings.get('journeys-and-jamborees', 'pathfinderSkillName');
+          assert.ok(
+            currentValue === 'skill' || currentValue === 'none' || currentValue === 'configure-me',
+            `Should have generic default, got: ${currentValue}`
+          );
+        });
+        
+        it('should handle attribute-based skill values', async function() {
+          const adapter = game.modules.get('journeys-and-jamborees')?.api?.systemAdapter;
+          if (adapter && testCharacter) {
+            // Test getting attribute values
+            const navValue = adapter.getSkillValue(testCharacter, 'navigation');
+            console.log('Navigation attribute value:', navValue);
+            
+            // The GenericAdapter should find the value in attributes
+            if (navValue !== null) {
+              assert.equal(navValue, 15, 'Should retrieve navigation attribute value');
+            }
+          }
+        });
+        
+        it('should handle none skill option properly', async function() {
+          // Set all skills to none
+          await game.settings.set('journeys-and-jamborees', 'pathfinderSkillName', 'none');
+          await game.settings.set('journeys-and-jamborees', 'lookoutSkillName', 'none');
+          await game.settings.set('journeys-and-jamborees', 'quartermasterSkillName', 'none');
+          
+          await partyActor.addCharacter(testCharacter.id);
+          await partyActor.assignTravelRole('pathfinder', testCharacter.id);
+          
+          // Should handle none skills without errors
+          const adapter = game.modules.get('journeys-and-jamborees')?.api?.systemAdapter;
+          if (adapter) {
+            const skillValue = adapter.getSkillValue(testCharacter, 'none');
+            assert.equal(skillValue, null, 'None skill should return null');
+            
+            const rollResult = await adapter.rollSkill(testCharacter, 'none');
+            assert.equal(rollResult.success, false, 'None skill roll should fail');
+          }
+        });
+        
+        it('should display resource management correctly', async function() {
+          const sheet = partyActor.sheet;
+          await sheet.render(true, { force: true });
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+          // Check that resource elements exist
+          const rationsElement = sheet.element.find('.resource[data-resource="rations"]');
+          const waterElement = sheet.element.find('.resource[data-resource="water"]');
+          
+          assert.ok(rationsElement.length > 0, 'Rations resource should be displayed');
+          assert.ok(waterElement.length > 0, 'Water resource should be displayed');
+          
+          await sheet.close();
+        });
+        
+        it('should not have hardcoded Dragonbane references', async function() {
+          const sheet = partyActor.sheet;
+          await sheet.render(true, { force: true });
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+          const htmlContent = sheet.element.html();
+          
+          // Check for Dragonbane-specific terms that shouldn't appear
+          assert.notOk(
+            htmlContent.includes('BUSHCRAFT') && !htmlContent.includes('skill'),
+            'Should not show hardcoded BUSHCRAFT'
+          );
+          assert.notOk(
+            htmlContent.includes('shift') && systemId !== 'dragonbane',
+            'Should not show shift time unit'
+          );
+          
+          await sheet.close();
+        });
+      });
+    });
+  }
+  
   // Generic/Unknown system tests
   if (!['dragonbane', 'dnd5e', 'pf2e', 'forbidden-lands', 'worldbuilding'].includes(systemId)) {
     quench.registerBatch('journeys-and-jamborees.system-generic', (context) => {

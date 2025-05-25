@@ -8,6 +8,8 @@ import { preloadTemplates } from './templates';
 import { registerHooks } from './hooks';
 import { registerPartyActorType, setupActorCreationHook } from './registration';
 import { patchPartyActor } from './utils';
+// Import API for external access
+import './api';
 // Import quench tests - they self-register via the quenchReady hook
 import './quench-tests';
 
