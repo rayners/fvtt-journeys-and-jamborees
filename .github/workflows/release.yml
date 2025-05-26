@@ -1,4 +1,4 @@
-name: Release Creation
+name: Release Module
 
 on:
   release:
@@ -7,27 +7,16 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v3
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Release Journeys & Jamborees
+        uses: rayners/foundry-module-actions@4954dad
         with:
           node-version: '18'
-          
-      - name: Install dependencies
-        run: npm ci
-        
-      - name: Build project
-        run: npm run build
-        
-      - name: Create zip file
-        working-directory: ./dist
-        run: zip -r ../module.zip .
-        
-      - name: Upload artifact to release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            module.zip
-            dist/module.json
+          build-command: 'npm run build'
+          working-directory: 'dist'
+          module-files: 'module.js module.json styles/ templates/ languages/'
