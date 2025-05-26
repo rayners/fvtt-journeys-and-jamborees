@@ -5,18 +5,17 @@ This document contains the release process for publishing new versions of the Jo
 ## Pre-Release Checklist
 
 ### 1. Update Module Manifest (module.json)
-- [ ] Update version number following semantic versioning
-  - Alpha releases: `0.1.0-alpha`, `0.2.0-alpha`, etc.
-  - Beta releases: `0.1.0-beta`, `0.2.0-beta`, etc.
+- [ ] Update version number using clean semantic versioning (no suffixes)
+  - Early releases: `0.1.0`, `0.2.0`, etc.
   - Stable releases: `1.0.0`, `1.1.0`, etc.
-- [ ] Update `manifest` URL to point to raw GitHub URL:
+  - **Note**: Avoid `-alpha`, `-beta` suffixes as Foundry may not handle version comparison correctly
+- [ ] **CRITICAL**: Update `manifest` and `download` URLs to point to the EXACT version being released:
   ```json
-  "manifest": "https://raw.githubusercontent.com/rayners/fvtt-journeys-and-jamborees/main/module.json"
-  ```
-- [ ] Update `download` URL to point to the release:
-  ```json
+  "manifest": "https://github.com/rayners/fvtt-journeys-and-jamborees/releases/download/v{VERSION}/module.json",
   "download": "https://github.com/rayners/fvtt-journeys-and-jamborees/releases/download/v{VERSION}/journeys-and-jamborees-v{VERSION}.zip"
   ```
+  - ❌ **NEVER use `/latest/`** - this breaks Foundry's update mechanism
+  - ✅ **Always use exact version** (e.g., `v0.1.0`)
 - [ ] Verify `url` points to the repository
 - [ ] Verify `readme` and `changelog` URLs are correct
 
@@ -38,14 +37,14 @@ This document contains the release process for publishing new versions of the Jo
 
 ### 5. Create GitHub Release
 - [ ] Go to GitHub repository → Releases → Draft a new release
-- [ ] Create tag matching version (e.g., `v0.1.0-alpha`)
-- [ ] Set release title (e.g., "v0.1.0-alpha - Initial Alpha Release")
+- [ ] Create tag matching version (e.g., `v0.1.0`)
+- [ ] Set release title (e.g., "v0.1.0 - Initial Release")
 - [ ] Add release notes highlighting:
   - New features
   - Bug fixes
   - Known issues
   - Breaking changes (if any)
-- [ ] Mark as pre-release if alpha/beta
+- [ ] Mark as pre-release if early/unstable version
 - [ ] Upload the module zip file as release asset
 - [ ] Publish release
 
@@ -75,9 +74,12 @@ For README.md:
 3. Click "Install Module"
 4. Paste this URL in the Manifest URL field:
    ```
-   https://raw.githubusercontent.com/rayners/fvtt-journeys-and-jamborees/main/module.json
+   https://github.com/rayners/fvtt-journeys-and-jamborees/releases/download/v{VERSION}/module.json
    ```
+   Replace `{VERSION}` with the actual release version (e.g., `v0.1.0`)
 5. Click Install
+
+**Note**: Always use the specific version URL, never `/latest/`
 ```
 
 ## Release Notes Template
