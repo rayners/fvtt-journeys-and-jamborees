@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { patchPartyActor } from '@/utils';
-import { PartyActorType } from '@/party-actor';
 
-// Mock the PartyActorType
-vi.mock('@/party-actor', () => ({
+// Mock the PartyActorType from registration module
+vi.mock('@/registration', () => ({
   PartyActorType: {
     prototype: {
       setCharacterStatus: vi.fn(),
