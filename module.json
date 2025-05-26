@@ -26,10 +26,6 @@
   ],
   "relationships": {
     "recommends": [
-      {
-        "id": "argon",
-        "type": "module"
-      }
     ]
   },
   "socket": true,
