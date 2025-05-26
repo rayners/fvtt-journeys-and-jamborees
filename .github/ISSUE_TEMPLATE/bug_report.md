@@ -2,7 +2,7 @@
 name: Bug report
 about: Report a bug in Journeys & Jamborees
 title: '[BUG] '
-labels: bug
+labels: bug, needs:triage
 assignees: ''
 
 ---
@@ -26,9 +26,11 @@ If applicable, add screenshots to help explain your problem.
 
 **Environment:**
  - Foundry VTT Version: [e.g. v13.0.0]
- - Dragonbane System Version: [e.g. v1.0.0]
+ - Game System: [e.g. Dragonbane, D&D 5e, Pathfinder 2e, Forbidden Lands, Simple Worldbuilding]
+ - Game System Version: [e.g. v1.0.0]
  - Browser: [e.g. Chrome, Firefox]
- - Module Version: [e.g. 0.1.0]
+ - Module Version: [e.g. 0.3.0]
+ - Other Active Modules: [list any that might be relevant]
 
 **Console Errors**
 Please check the browser console (F12) and paste any relevant errors here:

@@ -99,10 +99,21 @@ For detailed instructions, see the [Quick Start Guide](https://docs.rayners.dev/
 
 ## Contributing
 
-Thank you for your interest! While the module is in alpha, we're accepting:
-- Bug reports (include Quench test results when possible!)
-- Testing feedback  
-- Translations
+Thank you for your interest in contributing to Journeys & Jamborees! We welcome community involvement.
+
+### How to Contribute
+
+- 🐛 **Bug Reports**: Use our [bug report template](.github/ISSUE_TEMPLATE/bug_report.md)
+- 💡 **Feature Requests**: Use our [feature request template](.github/ISSUE_TEMPLATE/feature_request.md)
+- 🧪 **Testing**: Help test with different game systems and workflows
+- 📖 **Documentation**: Improve guides and add examples
+- 🌐 **Translations**: Localize the module for other languages
+
+### Getting Started
+
+1. Read our [Contributing Guide](CONTRIBUTING.md) for detailed guidelines
+2. Check our [Support Guide](SUPPORT.md) for help and community channels
+3. Review the [Security Policy](SECURITY.md) for responsible disclosure
 
 ### Testing & Debugging
 
@@ -110,12 +121,12 @@ This module includes comprehensive test coverage:
 - **Unit tests** via `npm test` for development
 - **In-app tests** via [Quench](https://foundryvtt.com/packages/quench) for end-to-end testing
 
-When reporting bugs, you can:
-1. Run the Quench test suite and include results
-2. Write a Quench test to demonstrate the issue
-3. Include test output in your bug report
+When reporting bugs:
+1. Use the bug report template with all required information
+2. Run Quench test suites and include results
+3. Include console errors and reproduction steps
 
-See our [Contributing Guide](https://docs.rayners.dev/journeys-and-jamborees/contributing) for details.
+For more details, see our [full documentation](https://docs.rayners.dev/journeys-and-jamborees).
 
 ## Support
 

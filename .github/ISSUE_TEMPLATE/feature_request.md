@@ -2,7 +2,7 @@
 name: Feature request
 about: Suggest an idea for Journeys & Jamborees
 title: '[FEATURE] '
-labels: enhancement
+labels: enhancement, needs:triage
 assignees: ''
 
 ---
@@ -17,6 +17,15 @@ A clear and concise description of what you want to happen.
 
 **Describe alternatives you've considered**
 A clear and concise description of any alternative solutions or features you've considered.
+
+**Which game systems would benefit from this feature?**
+- [ ] All systems
+- [ ] Dragonbane
+- [ ] D&D 5e
+- [ ] Pathfinder 2e
+- [ ] Forbidden Lands
+- [ ] Simple Worldbuilding
+- [ ] Other: [please specify]
 
 **How would this integrate with existing features?**
 Explain how this feature would work with the current party management system.

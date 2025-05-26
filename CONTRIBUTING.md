@@ -1,113 +1,340 @@
 # Contributing to Journeys & Jamborees
 
-> **Note**: This project is in early alpha and not currently accepting code contributions. This document outlines how you can help and what the future contribution process will look like.
+Thank you for your interest in contributing to Journeys & Jamborees! This guide will help you understand how to contribute effectively to the project.
+
+## Table of Contents
+
+- [Current Status](#current-status)
+- [How You Can Help](#how-you-can-help)
+- [Development Setup](#development-setup)
+- [Code Style Guidelines](#code-style-guidelines)
+- [Branching Strategy](#branching-strategy)
+- [Commit Message Conventions](#commit-message-conventions)
+- [Pull Request Process](#pull-request-process)
+- [Testing Requirements](#testing-requirements)
+- [Documentation](#documentation)
+- [Community Guidelines](#community-guidelines)
 
 ## Current Status
 
-Journeys & Jamborees is in active early development. The core architecture and feature set are still being established, which means:
+Journeys & Jamborees is in **ALPHA** stage. This means:
 
-- ❌ **Not accepting**: Pull requests for new features or refactoring
 - ✅ **Accepting**: Bug reports
 - ✅ **Accepting**: Testing feedback
-- ⚠️ **Limited acceptance**: Feature suggestions (most features are already planned)
+- ✅ **Accepting**: Documentation improvements
+- ⚠️ **Limited**: Feature suggestions (check roadmap first)
+- ⚠️ **Case-by-case**: Code contributions (please discuss first)
 
-## How You Can Help Now
+## How You Can Help
 
 ### 1. Report Bugs
 
-If you encounter bugs while testing:
+Use our [bug report template](.github/ISSUE_TEMPLATE/bug_report.md) and include:
+- Clear description and reproduction steps
+- Environment details (Foundry version, game system, etc.)
+- Console errors (F12 in browser)
+- Screenshots if applicable
 
-1. Check existing issues to avoid duplicates
-2. Create a new issue with:
-   - Clear description of the problem
-   - Steps to reproduce
-   - Expected vs actual behavior
-   - Your Foundry VTT version
-   - Your game system and version (e.g., Dragonbane 1.0.0, D&D 5e 3.0.0)
-   - Any console errors (F12 in browser)
-   
-#### Including Test Results
+### 2. Test the Module
 
-If you have the [Quench](https://foundryvtt.com/packages/quench) testing module installed:
+- Test with different game systems
+- Try various workflows and edge cases
+- Run the Quench test suites
+- Report your findings
 
-1. Run the Journeys & Jamborees tests in Quench
-2. Screenshot or copy any failing test results
-3. Include these in your bug report
+### 3. Improve Documentation
 
-#### Demonstrating Bugs with Tests
+- Fix typos and clarify existing docs
+- Add examples and use cases
+- Translate to other languages
+- Create video tutorials
 
-For complex bugs, you can even write a Quench test to demonstrate the issue:
+### 4. Share Ideas
 
-```javascript
-// Example: Demonstrating a character removal bug
-quench.registerBatch('bug-demo.character-removal', (context) => {
+Before suggesting features:
+- Check the [README](README.md) for planned features
+- Search existing issues
+- Focus on user experience improvements
+- Consider compatibility with multiple game systems
+
+## Development Setup
+
+### Prerequisites
+
+- Node.js 18+ and npm
+- Foundry VTT v13+ installation
+- Git
+
+### Setup Steps
+
+1. Fork and clone the repository:
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/fvtt-journeys-and-jamborees.git
+   cd fvtt-journeys-and-jamborees
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Link to your Foundry modules directory:
+   ```bash
+   ./link-module.sh /path/to/FoundryVTT/Data/modules
+   ```
+
+4. Build the module:
+   ```bash
+   npm run build
+   ```
+
+5. Run tests:
+   ```bash
+   npm test          # Watch mode
+   npm run test:run  # Single run
+   ```
+
+## Code Style Guidelines
+
+### TypeScript
+
+- Use TypeScript strict mode
+- Prefer `const` over `let`
+- Use meaningful variable names
+- Add JSDoc comments for public APIs
+- Avoid `any` type - use proper typing
+
+### File Organization
+
+```
+src/
+├── api.ts              # Public API exports
+├── applications/       # UI components
+├── documents/         # Document classes
+├── helpers.ts         # Utility functions
+├── hooks.ts          # Foundry hooks
+├── module.ts         # Module entry point
+└── system-adapter.ts # System-specific code
+```
+
+### Naming Conventions
+
+- **Files**: kebab-case (e.g., `party-sheet.ts`)
+- **Classes**: PascalCase (e.g., `PartySheet`)
+- **Functions/Variables**: camelCase (e.g., `getActiveMembers`)
+- **Constants**: UPPER_SNAKE_CASE (e.g., `MODULE_ID`)
+
+### Code Example
+
+```typescript
+/**
+ * Calculate the total weight carried by the party
+ * @param party - The party actor
+ * @returns Total weight in the system's weight units
+ */
+export function calculatePartyWeight(party: Actor): number {
+  const members = party.system.getActiveMembers();
+  return members.reduce((total, member) => {
+    return total + (member.system.encumbrance?.value ?? 0);
+  }, 0);
+}
+```
+
+## Branching Strategy
+
+### Branch Types
+
+- `main` - Stable releases
+- `develop` - Integration branch (if used)
+- `feature/` - New features (e.g., `feature/party-inventory`)
+- `fix/` - Bug fixes (e.g., `fix/member-removal`)
+- `docs/` - Documentation updates
+- `refactor/` - Code refactoring
+
+### Linear Integration
+
+We use Linear for issue tracking. Branch names should include the issue ID:
+- `feature/FOU-123-party-inventory`
+- `fix/FOU-456-member-removal`
+
+## Commit Message Conventions
+
+We follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+### Format
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+### Types
+
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation only
+- `style`: Code style (formatting, semicolons, etc.)
+- `refactor`: Code refactoring
+- `perf`: Performance improvements
+- `test`: Adding/updating tests
+- `chore`: Maintenance tasks
+
+### Examples
+
+```
+feat(party-sheet): add inventory weight calculation
+
+Add total weight display to party inventory tab.
+Calculates based on all active members' encumbrance.
+
+Fixes FOU-123
+```
+
+```
+fix(dragonbane): correct skill detection for hunting
+
+The BUSHCRAFT skill was not properly detected in newer
+Dragonbane versions due to localization changes.
+```
+
+## Pull Request Process
+
+### Before Submitting
+
+1. **Discuss First**: For features, open an issue first
+2. **Update From Main**: Ensure your branch is current
+3. **Run Tests**: All tests must pass
+4. **Check Linting**: No errors or warnings
+5. **Update Docs**: Include relevant documentation updates
+6. **Update CHANGELOG**: Add your changes
+
+### PR Checklist
+
+- [ ] Tests pass (`npm run test:run`)
+- [ ] Code follows style guidelines
+- [ ] Commits follow conventions
+- [ ] Documentation updated
+- [ ] CHANGELOG.md updated
+- [ ] No console errors in Foundry
+
+### Review Process
+
+1. Automated checks must pass
+2. Code review by maintainer
+3. Testing in multiple game systems
+4. Final approval and merge
+
+## Testing Requirements
+
+### Unit Tests (Vitest)
+
+Located in `test/` directory:
+
+```typescript
+describe('PartyModel', () => {
+  it('should add a character to the party', () => {
+    const party = new PartyModel();
+    party.addCharacter('char-123');
+    expect(party.hasCharacter('char-123')).toBe(true);
+  });
+});
+```
+
+### Integration Tests (Quench)
+
+For Foundry-specific testing:
+
+```typescript
+quench.registerBatch('journeys-and-jamborees.party', (context) => {
   const { describe, it, assert } = context;
   
-  describe('Character Removal Bug', function() {
-    it('fails to remove character in specific scenario', async function() {
-      // Your test code that reproduces the bug
-      const party = await Actor.create({name: 'Bug Test Party', type: 'party'});
-      // ... steps that trigger the bug
-      assert.fail('Character still exists after removal');
+  describe('Party Operations', function() {
+    it('should create party actor', async function() {
+      const party = await Actor.create({
+        name: 'Test Party',
+        type: 'journeys-and-jamborees.party'
+      });
+      assert.ok(party.id);
     });
   });
 });
 ```
 
-Include such test code in your bug report to help us reproduce and fix issues faster!
+### Test Coverage
 
-### 2. Test the Module
+Aim for:
+- 80%+ code coverage for utilities
+- Comprehensive Quench tests for Foundry integration
+- Manual testing across supported game systems
 
-Once beta releases are available:
+## Documentation
 
-- Test with your gaming group
-- Try different workflows
-- Report what works and what doesn't
-- Share your experience
+### Code Comments
 
-### 3. Share Ideas (Carefully)
+```typescript
+/**
+ * Brief description of what the function does
+ * 
+ * @param param1 - Description of parameter
+ * @returns Description of return value
+ * @throws {ErrorType} Description of when this error occurs
+ * 
+ * @example
+ * ```typescript
+ * const result = myFunction('test');
+ * ```
+ */
+```
 
-While the feature roadmap is largely planned, you can still share ideas:
+### User Documentation
 
-- Check the README for planned features first
-- Focus on user experience improvements
-- Share creative uses you've found
-- Suggest integration ideas with other modules
+- Update user guide for new features
+- Include screenshots when helpful
+- Add examples of common workflows
+- Keep language clear and concise
 
-## Future Contribution Process
+### API Documentation
 
-Once the module reaches beta status, we'll accept contributions following these guidelines:
+- Document all public methods
+- Include parameter types and descriptions
+- Provide usage examples
+- Note system-specific behavior
 
-### Code Style
+## Community Guidelines
 
-- TypeScript with strict mode enabled
-- Prettier for formatting (configuration coming)
-- ESLint for code quality (configuration coming)
-- Clear variable and function names
-- Comments for complex logic
+### Be Respectful
 
-### Pull Request Process
+- Treat everyone with respect
+- Be patient with new contributors
+- Provide constructive feedback
+- Celebrate diverse perspectives
 
-1. Fork the repository
-2. Create a feature branch from `main`
-3. Make your changes
-4. Run tests (when available)
-5. Update documentation
-6. Submit a pull request
+### Communication
 
-### Commit Messages
+- Use clear, concise language
+- Ask questions when unsure
+- Provide context in discussions
+- Be responsive to feedback
 
-Follow conventional commits format:
-- `feat:` New features
-- `fix:` Bug fixes
-- `docs:` Documentation changes
-- `style:` Code style changes
-- `refactor:` Code refactoring
-- `test:` Test additions/changes
-- `chore:` Build process/auxiliary changes
+### Collaboration
 
-## Questions?
+- Share knowledge freely
+- Help others learn
+- Credit contributors
+- Build on each other's ideas
 
-Feel free to open an issue for clarification or find me on the Foundry VTT Discord.
+## Getting Help
 
-Thank you for your interest in Journeys & Jamborees!
+- **Discord**: Find us on Foundry VTT Discord
+- **Issues**: Open a GitHub issue
+- **Documentation**: Check [docs.rayners.dev](https://docs.rayners.dev/journeys-and-jamborees)
+
+## License
+
+By contributing, you agree that your contributions will be licensed under the same license as the project (MIT).
+
+---
+
+Thank you for contributing to Journeys & Jamborees! Your efforts help make this module better for the entire community.
