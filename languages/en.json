@@ -169,7 +169,9 @@
       "GatherFood": "Gather Food",
       "SelectCharacter": "Select Character",
       "SelectActivity": "Select Activity",
-      "Gather": "Gather"
+      "Gather": "Gather",
+      "WaitingForRoll": "Please roll {skill}. Waiting {timeout} seconds for your roll...",
+      "RollTimeout": "Roll timed out. Assuming failure."
     },
     "camp": {
       "makeCamp": "Make Camp",
@@ -203,7 +205,9 @@
     "EncounterThreshold": "Encounter Threshold",
     "EncounterThresholdHint": "Minimum roll result to trigger a random encounter",
     "WeatherDice": "Weather Dice",
-    "WeatherDiceHint": "Dice formula for weather determination"
+    "WeatherDiceHint": "Dice formula for weather determination",
+    "FoodGatheringRollTimeout": "Food Gathering Roll Timeout",
+    "FoodGatheringRollTimeoutHint": "How many seconds to wait for a player to complete their skill roll during food gathering activities"
   },
   "TYPES.Actor.journeys-and-jamborees.party": "Party"
 }

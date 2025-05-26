@@ -85,6 +85,21 @@ export const registerSettings = function() {
     type: Boolean,
     default: true
   });
+  
+  // Food gathering roll timeout
+  game.settings.register("journeys-and-jamborees", "foodGatheringRollTimeout", {
+    name: "SETTINGS.FoodGatheringRollTimeout",
+    hint: "SETTINGS.FoodGatheringRollTimeoutHint",
+    scope: "world",
+    config: true,
+    type: Number,
+    default: 30,
+    range: {
+      min: 10,
+      max: 120,
+      step: 5
+    }
+  });
 };
 
 /**

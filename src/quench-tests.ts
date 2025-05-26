@@ -766,6 +766,210 @@ export function registerQuenchTests(): void {
       });
     });
   }
+  
+  // Register Food Gathering tests
+  if (game.system.id === 'dragonbane') {
+    quench.registerBatch('journeys-and-jamborees.food-gathering', (context) => {
+      const { describe, it, assert, expect, beforeEach, afterEach } = context;
+      
+      describe('Food Gathering System Tests', function() {
+        let partyActor: Actor;
+        let testCharacter: Actor;
+        let originalTimeout: number;
+        
+        beforeEach(async function() {
+          // Save original timeout setting
+          originalTimeout = game.settings.get('journeys-and-jamborees', 'foodGatheringRollTimeout') as number;
+          // Set a shorter timeout for tests
+          await game.settings.set('journeys-and-jamborees', 'foodGatheringRollTimeout', 5);
+          
+          // Create test party
+          partyActor = await Actor.create({
+            name: 'Food Gathering Test Party',
+            type: 'journeys-and-jamborees.party'
+          });
+          patchPartyActor(partyActor);
+          
+          // Create test character
+          testCharacter = await Actor.create({
+            name: 'Test Hunter',
+            type: 'character',
+            system: {}
+          });
+        });
+        
+        afterEach(async function() {
+          // Restore original timeout
+          await game.settings.set('journeys-and-jamborees', 'foodGatheringRollTimeout', originalTimeout);
+          
+          // Clean up
+          if (testCharacter) await testCharacter.delete();
+          if (partyActor) await partyActor.delete();
+        });
+        
+        it('should register skill roll tracker on ready', function() {
+          const tracker = game.modules.get('journeys-and-jamborees')?.api?.skillRollTracker;
+          assert.ok(tracker, 'Skill roll tracker should be available in API');
+        });
+        
+        it('should track pending rolls in user flags', async function() {
+          const { SkillRollTracker } = await import('./skill-roll-tracker');
+          const tracker = SkillRollTracker.getInstance();
+          
+          // Queue a test roll
+          const rollId = tracker.queueRoll(
+            testCharacter.id,
+            'bushcraft',
+            'hunt-tracking',
+            () => {}
+          );
+          
+          // Check that it was stored in user flags
+          const userFlags = game.user?.getFlag('journeys-and-jamborees', 'pendingRolls') as any;
+          assert.ok(userFlags?.[rollId], 'Pending roll should be stored in user flags');
+          assert.equal(userFlags[rollId].skillName, 'bushcraft', 'Skill name should match');
+        });
+        
+        describe('Chat Message Monitoring', function() {
+          it('should detect successful skill rolls from chat', async function() {
+            const { SkillRollTracker } = await import('./skill-roll-tracker');
+            const tracker = SkillRollTracker.getInstance();
+            
+            let capturedResult: boolean | null = null;
+            
+            // Queue a roll
+            tracker.queueRoll(
+              testCharacter.id,
+              'bushcraft',
+              'hunt-tracking',
+              (success) => { capturedResult = success; }
+            );
+            
+            // Create a mock successful skill roll message
+            await ChatMessage.create({
+              content: `
+                <div class="skill-roll" 
+                     data-actor-id="${testCharacter.id}" 
+                     data-skill-id="bushcraft" 
+                     data-target="15" 
+                     data-result="10">
+                  ${game.i18n.localize('DoD.roll.success')}
+                </div>
+              `,
+              speaker: ChatMessage.getSpeaker({ actor: testCharacter })
+            });
+            
+            // Wait for message processing
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            assert.strictEqual(capturedResult, true, 'Should capture successful roll');
+          });
+          
+          it('should detect failed skill rolls from chat', async function() {
+            const { SkillRollTracker } = await import('./skill-roll-tracker');
+            const tracker = SkillRollTracker.getInstance();
+            
+            let capturedResult: boolean | null = null;
+            
+            // Queue a roll
+            tracker.queueRoll(
+              testCharacter.id,
+              'bushcraft',
+              'hunt-tracking',
+              (success) => { capturedResult = success; }
+            );
+            
+            // Create a mock failed skill roll message
+            await ChatMessage.create({
+              content: `
+                <div class="skill-roll" 
+                     data-actor-id="${testCharacter.id}" 
+                     data-skill-id="bushcraft" 
+                     data-target="15" 
+                     data-result="18">
+                  ${game.i18n.localize('DoD.roll.failure')}
+                </div>
+              `,
+              speaker: ChatMessage.getSpeaker({ actor: testCharacter })
+            });
+            
+            // Wait for message processing
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            assert.strictEqual(capturedResult, false, 'Should capture failed roll');
+          });
+        });
+        
+        describe('Food Gathering Integration', function() {
+          it('should check for Dragonbane system and coreset', async function() {
+            const foodSystem = game.modules.get('journeys-and-jamborees')?.api?.foodGathering;
+            assert.ok(foodSystem, 'Food gathering system should be available');
+            
+            const isDragonbane = foodSystem.isDragonbaneSystem();
+            const hasCoreSet = foodSystem.isDragonbaneCoresetAvailable();
+            
+            assert.strictEqual(isDragonbane, true, 'Should detect Dragonbane system');
+            
+            // This might fail if coreset isn't installed
+            if (!hasCoreSet) {
+              console.warn('Dragonbane coreset not available - some food gathering tests will be skipped');
+            }
+          });
+          
+          it('should detect ranged weapons correctly', async function() {
+            // Add a bow to character
+            const bow = await testCharacter.createEmbeddedDocuments('Item', [{
+              name: 'Longbow',
+              type: 'weapon',
+              system: {
+                range: 20,
+                features: { thrown: false },
+                skill: { name: 'bows' }
+              }
+            }]);
+            
+            assert.ok(bow.length, 'Bow should be created');
+            
+            // Test internal method through reflection
+            const foodSystem = game.modules.get('journeys-and-jamborees')?.api?.foodGathering;
+            const weaponCheck = foodSystem['checkRangedWeapon'](testCharacter);
+            
+            assert.strictEqual(weaponCheck.hasRangedWeapon, true, 'Should detect ranged weapon');
+            assert.equal(weaponCheck.weaponSkill, 'bows', 'Should identify bow skill');
+          });
+          
+          it('should detect traps correctly', async function() {
+            // Add a trap to character
+            await testCharacter.createEmbeddedDocuments('Item', [{
+              name: 'Hunting Trap',
+              type: 'item'
+            }]);
+            
+            const foodSystem = game.modules.get('journeys-and-jamborees')?.api?.foodGathering;
+            const hasTrap = foodSystem['checkHuntingTrap'](testCharacter);
+            
+            assert.strictEqual(hasTrap, true, 'Should detect hunting trap');
+          });
+        });
+        
+        describe('Settings Configuration', function() {
+          it('should have configurable timeout setting', function() {
+            const timeout = game.settings.get('journeys-and-jamborees', 'foodGatheringRollTimeout');
+            assert.ok(typeof timeout === 'number', 'Timeout should be a number');
+            assert.ok(timeout >= 10 && timeout <= 120, 'Timeout should be between 10 and 120 seconds');
+          });
+          
+          it('should have skill name settings', function() {
+            const huntingSkill = game.settings.get('journeys-and-jamborees', 'huntingSkillName');
+            const foragingSkill = game.settings.get('journeys-and-jamborees', 'foragingSkillName');
+            
+            assert.ok(huntingSkill, 'Hunting skill should be configured');
+            assert.ok(foragingSkill, 'Foraging skill should be configured');
+          });
+        });
+      });
+    });
+  }
 }
 
 /**

@@ -8,6 +8,7 @@ import { preloadTemplates } from './templates';
 import { registerHooks } from './hooks';
 import { registerPartyActorType, setupActorCreationHook } from './registration';
 import { patchPartyActor } from './utils';
+import { SkillRollTracker } from './skill-roll-tracker';
 // Import API for external access
 import './api';
 // Import quench tests - they self-register via the quenchReady hook
@@ -50,6 +51,9 @@ Hooks.once('init', async function() {
 // When ready
 Hooks.once('ready', async function() {
   console.log('Journeys & Jamborees | Module ready');
+  
+  // Initialize the skill roll tracker
+  SkillRollTracker.getInstance();
   
   // Patch any existing party actors to ensure they have the latest methods
   const partyActors = game.actors.filter(a => a.type === 'party' || a.type === 'journeys-and-jamborees.party');

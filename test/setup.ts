@@ -65,6 +65,9 @@ globalThis.CONFIG = {
   Actor: {
     documentClass: class MockActor {},
     typeLabels: {}
+  },
+  debug: {
+    hooks: false
   }
 };
 

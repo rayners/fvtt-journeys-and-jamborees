@@ -4,7 +4,17 @@
 
 ## [Unreleased]
 
+## [0.1.0] - 2025-05-25
+
 ### Added
+- Initial public alpha release
+- Core party management system with custom Party actor type
+- Party sheet with tabs for Members, Travel, Inventory, Journal, and Settings
+- Character management (add/remove party members)
+- Travel role assignments (Pathfinder, Lookout, Quartermaster)
+- Journey tracking with distance and progress
+- Resource consumption system (food and water)
+- Rest mechanics with overnight consumption
 - System-agnostic support for multiple game systems
 - Pre-configured support for D&D 5e, Pathfinder 2e, and Forbidden Lands
 - System configuration settings for movement, skills, and dice formulas

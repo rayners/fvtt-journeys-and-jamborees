@@ -58,6 +58,14 @@ export abstract class SystemAdapter {
   }
   
   protected abstract performSkillRoll(actor: Actor, skillName: string): Promise<SkillRollResult>;
+  
+  /**
+   * Trigger a skill roll dialog without waiting for result
+   * Used for chat monitoring approach
+   * @param actor The actor making the roll
+   * @param skillName The name of the skill to roll
+   */
+  abstract triggerSkillRoll(actor: Actor, skillName: string): void | Promise<void>;
 
   /**
    * Check if an actor has a specific skill
@@ -134,6 +142,62 @@ class DragonbaneAdapter extends SystemAdapter {
     // Dragonbane doesn't track individual speed, use system defaults
     return mounted ? this.config.movement.mounted.value : this.config.movement.onFoot.value;
   }
+  
+  async triggerSkillRoll(actor: Actor, skillName: string): Promise<void> {
+    // Find the skill item
+    const skill = actor.items.find((item: Item) => 
+      item.type === 'skill' && 
+      item.name.toLowerCase() === skillName.toLowerCase()
+    );
+    
+    if (!skill) {
+      console.warn('Skill not found:', skillName);
+      return;
+    }
+    
+    // Create a fake DOM element that has the necessary methods
+    const fakeSheetTableData = {
+      dataset: { 
+        itemId: skill.id
+      }
+    };
+    
+    const fakeElement = {
+      dataset: { 
+        itemId: skill.id,
+        skillId: skill.id 
+      },
+      closest: (selector: string) => {
+        // Return the fake sheet-table-data element when requested
+        if (selector === '.sheet-table-data') {
+          return fakeSheetTableData;
+        }
+        return null;
+      },
+      classList: {
+        contains: () => false
+      }
+    };
+    
+    // Create a fake event
+    const fakeEvent = {
+      preventDefault: () => {},
+      stopPropagation: () => {},
+      currentTarget: fakeElement,
+      target: fakeElement,
+      type: 'click',  // Important! Must be 'click' to trigger roll, not item sheet
+      shiftKey: false,  // Don't skip dialog
+      ctrlKey: false,
+      button: 0  // Left click
+    };
+    
+    // Use the actor sheet's skill roll method directly
+    if (actor.sheet && typeof (actor.sheet as any)._onSkillRoll === 'function') {
+      await (actor.sheet as any)._onSkillRoll(fakeEvent);
+    } else {
+      console.warn('Could not find _onSkillRoll method on actor sheet');
+    }
+  }
 }
 
 /**
@@ -164,6 +228,11 @@ class Dnd5eAdapter extends SystemAdapter {
     const movement = actor.system.attributes?.movement;
     if (mounted && movement?.burrow) return movement.burrow;
     return movement?.walk || 30;
+  }
+  
+  triggerSkillRoll(actor: Actor, skillName: string): void {
+    // In D&D 5e, use the actor's rollSkill method
+    actor.rollSkill(skillName.toLowerCase());
   }
 }
 
@@ -197,6 +266,14 @@ class Pf2eAdapter extends SystemAdapter {
   getActorSpeed(actor: Actor, mounted: boolean): number {
     const speed = actor.system.attributes?.speed;
     return speed?.total || speed?.value || 25;
+  }
+  
+  triggerSkillRoll(actor: Actor, skillName: string): void {
+    // In PF2e, trigger through the skill object
+    const skill = actor.system.skills?.[skillName.toLowerCase()];
+    if (skill && skill.roll) {
+      skill.roll();
+    }
   }
 }
 
@@ -232,6 +309,16 @@ class ForbiddenLandsAdapter extends SystemAdapter {
   getActorSpeed(actor: Actor, mounted: boolean): number {
     // Forbidden Lands doesn't track speed on actors
     return mounted ? this.config.movement.mounted.value : this.config.movement.onFoot.value;
+  }
+  
+  triggerSkillRoll(actor: Actor, skillName: string): void {
+    // In Forbidden Lands, use the actor's rollSkill method if available
+    if (typeof actor.rollSkill === 'function') {
+      actor.rollSkill(skillName.toLowerCase());
+    } else {
+      // Fallback to manual roll
+      this.performSkillRoll(actor, skillName);
+    }
   }
 }
 
@@ -280,6 +367,18 @@ class GenericAdapter extends SystemAdapter {
     
     // Fall back to config defaults
     return mounted ? this.config.movement.mounted.value : this.config.movement.onFoot.value;
+  }
+  
+  triggerSkillRoll(actor: Actor, skillName: string): void {
+    // For generic systems, try common methods
+    if (typeof actor.rollSkill === 'function') {
+      actor.rollSkill(skillName);
+    } else if (typeof actor.rollAbility === 'function') {
+      actor.rollAbility(skillName);
+    } else {
+      // Fallback to manual roll
+      this.performSkillRoll(actor, skillName);
+    }
   }
 }
 

@@ -6,6 +6,8 @@
 import { SystemAdapterFactory } from './system-adapter';
 import { SkillManager } from './skill-manager';
 import { SystemConfigManager } from './system-config';
+import { SkillRollTracker } from './skill-roll-tracker';
+import { FoodGatheringSystem } from './food-gathering';
 
 export const JourneysAndJamboreesAPI = {
   // System adapter for skill/movement handling
@@ -21,6 +23,16 @@ export const JourneysAndJamboreesAPI = {
   // System configuration manager
   get systemConfig() {
     return SystemConfigManager.getInstance();
+  },
+  
+  // Skill roll tracker for monitoring chat messages
+  get skillRollTracker() {
+    return SkillRollTracker.getInstance();
+  },
+  
+  // Food gathering system
+  get foodGathering() {
+    return FoodGatheringSystem.getInstance();
   },
   
   // Version info

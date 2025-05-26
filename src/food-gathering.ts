@@ -5,6 +5,7 @@
 
 import { SystemAdapterFactory } from './system-adapter';
 import { FoodTablesManager } from './food-tables';
+import { SkillRollTracker } from './skill-roll-tracker';
 
 export interface FoodGatheringResult {
   success: boolean;
@@ -29,6 +30,57 @@ export class FoodGatheringSystem {
       FoodGatheringSystem.instance = new FoodGatheringSystem();
     }
     return FoodGatheringSystem.instance;
+  }
+  
+  /**
+   * Roll a skill and wait for the result from chat
+   * @param actor The actor making the roll
+   * @param skillName The skill to roll
+   * @param purpose The purpose of the roll for tracking
+   * @param allowPush Whether to allow push rolls (default true)
+   * @returns Promise resolving to success/failure
+   */
+  private async rollSkillWithTracking(
+    actor: Actor, 
+    skillName: string, 
+    purpose: 'hunt-tracking' | 'hunt-kill' | 'fish' | 'forage' | 'cook',
+    allowPush: boolean = true
+  ): Promise<{ success: boolean }> {
+    // Get timeout from settings (default 30 seconds)
+    const timeoutSeconds = game.settings.get('journeys-and-jamborees', 'foodGatheringRollTimeout') || 30;
+    const timeoutMs = timeoutSeconds * 1000;
+    
+    // Notify the user that we're waiting for their roll
+    ui.notifications.info(game.i18n.format('J&J.FoodGathering.WaitingForRoll', { 
+      skill: skillName,
+      timeout: timeoutSeconds 
+    }));
+    
+    return new Promise((resolve) => {
+      const tracker = SkillRollTracker.getInstance();
+      let resolved = false;
+      
+      // Queue the roll for tracking
+      tracker.queueRoll(actor.id || actor.uuid, skillName, purpose, (success) => {
+        if (!resolved) {
+          resolved = true;
+          resolve({ success });
+        }
+      }, allowPush);
+      
+      // Trigger the actual skill roll
+      const adapter = SystemAdapterFactory.getAdapter();
+      adapter.triggerSkillRoll(actor, skillName);
+      
+      // Set timeout with user notification
+      setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          ui.notifications.warn(game.i18n.localize('J&J.FoodGathering.RollTimeout'));
+          resolve({ success: false });
+        }
+      }, timeoutMs);
+    });
   }
   
   /**
@@ -161,8 +213,7 @@ export class FoodGatheringSystem {
     const hasTrap = this.checkHuntingTrap(actor);
     
     // First roll: Track down an animal (using configured hunting skill)
-    const adapter = SystemAdapterFactory.getAdapter();
-    const trackingResult = await adapter.rollSkill(actor, huntingSkill);
+    const trackingResult = await this.rollSkillWithTracking(actor, huntingSkill, 'hunt-tracking');
     
     if (!trackingResult.success) {
       return {
@@ -193,10 +244,10 @@ export class FoodGatheringSystem {
     let killResult;
     if (weaponCheck.hasRangedWeapon && weaponCheck.weaponSkill) {
       // Use the specific weapon skill (BOWS, CROSSBOWS, etc.)
-      killResult = await adapter.rollSkill(actor, weaponCheck.weaponSkill);
+      killResult = await this.rollSkillWithTracking(actor, weaponCheck.weaponSkill, 'hunt-kill');
     } else if (hasTrap && animalResult.canUseTrap) {
       // Use hunting skill for trap
-      killResult = await adapter.rollSkill(actor, huntingSkill);
+      killResult = await this.rollSkillWithTracking(actor, huntingSkill, 'hunt-kill');
     } else {
       // This shouldn't happen if we checked equipment correctly
       killResult = { success: false };
@@ -251,8 +302,7 @@ export class FoodGatheringSystem {
     }
     
     const huntingSkill = game.settings.get('journeys-and-jamborees', 'huntingSkillName') as string;
-    const adapter = SystemAdapterFactory.getAdapter();
-    const fishingResult = await adapter.rollSkill(actor, huntingSkill);
+    const fishingResult = await this.rollSkillWithTracking(actor, huntingSkill, 'fish');
     
     if (!fishingResult.success) {
       return {
@@ -293,14 +343,13 @@ export class FoodGatheringSystem {
     
     // For foraging, use the configured foraging skill
     const foragingSkill = game.settings.get('journeys-and-jamborees', 'foragingSkillName') as string;
-    const adapter = SystemAdapterFactory.getAdapter();
     
     // Modify the roll based on season
     // In Dragonbane, bane/boon would be handled differently
     // For now, we'll just note it in the description
     const seasonModifier = season === 'winter' ? 'bane' : (season === 'fall' ? 'boon' : 'normal');
     
-    const foragingResult = await adapter.rollSkill(actor, foragingSkill);
+    const foragingResult = await this.rollSkillWithTracking(actor, foragingSkill, 'forage');
     
     if (!foragingResult.success) {
       return {
@@ -373,11 +422,9 @@ export class FoodGatheringSystem {
       };
     }
     
-    const adapter = SystemAdapterFactory.getAdapter();
-    
     // Note: In Dragonbane, field kitchen or proper kitchen would give a boon
     // For now, we'll just note it in the result
-    const cookingResult = await adapter.rollSkill(actor, 'bushcraft');
+    const cookingResult = await this.rollSkillWithTracking(actor, 'bushcraft', 'cook');
     
     if (!cookingResult.success) {
       return {
