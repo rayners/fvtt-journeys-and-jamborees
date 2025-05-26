@@ -16,7 +16,7 @@ jobs:
       - name: Release Journeys & Jamborees
         uses: rayners/foundry-module-actions@main
         with:
-          node-version: '18'
+          node-version: '20'
           build-command: 'npm run build'
           working-directory: 'dist'
           module-files: 'module.js module.json styles/ templates/ languages/'
