@@ -1,11 +1,11 @@
 /**
  * System adapter for handling system-specific operations
  * This provides an abstraction layer for different game systems
- * 
+ *
  * KEY IMPLEMENTATION NOTES:
  * - Each system has different skill value access patterns:
  *   * Dragonbane: actor.getSkill(name) returns skill item with .system.value
- *   * D&D 5e: actor.system.skills[key] object with .total or .mod properties  
+ *   * D&D 5e: actor.system.skills[key] object with .total or .mod properties
  *   * PF2e: actor.system.skills[key] with .totalModifier or .value
  *   * Others: various patterns, GenericAdapter tries common locations
  * - Factory pattern ensures one adapter instance per system ID
@@ -35,7 +35,7 @@ export abstract class SystemAdapter {
     if (skillName === 'none' || !skillName) return null;
     return this.getActorSkillValue(actor, skillName);
   }
-  
+
   protected abstract getActorSkillValue(actor: Actor, skillName: string): number | null;
 
   /**
@@ -56,9 +56,9 @@ export abstract class SystemAdapter {
     }
     return this.performSkillRoll(actor, skillName);
   }
-  
+
   protected abstract performSkillRoll(actor: Actor, skillName: string): Promise<SkillRollResult>;
-  
+
   /**
    * Trigger a skill roll dialog without waiting for result
    * Used for chat monitoring approach
@@ -96,7 +96,7 @@ class DragonbaneAdapter extends SystemAdapter {
   protected async performSkillRoll(actor: Actor, skillName: string): Promise<SkillRollResult> {
     // Use our new Dragonbane Roll API
     const { DragonbaneRollAPI } = await import('./dragonbane-roll-api');
-    
+
     try {
       // For food gathering, we don't want push mechanics
       const result = await DragonbaneRollAPI.rollSkill(actor, skillName, {
@@ -104,14 +104,12 @@ class DragonbaneAdapter extends SystemAdapter {
         createMessage: true, // Show rolls in chat
         allowPush: false // No pushing for food gathering activities
       });
-      
+
       // Log if advancement mark was earned
       if (result.advancementMarkApplied) {
-        ui.notifications.info(
-          `${actor.name} earned an advancement mark in ${skillName}!`
-        );
+        ui.notifications.info(`${actor.name} earned an advancement mark in ${skillName}!`);
       }
-      
+
       return {
         total: result.total,
         success: result.success,
@@ -132,9 +130,8 @@ class DragonbaneAdapter extends SystemAdapter {
 
   hasSkill(actor: Actor, skillName: string): boolean {
     // In Dragonbane, skills are items, not properties in system.skills
-    return actor.items.some((item: Item) => 
-      item.type === 'skill' && 
-      item.name.toLowerCase() === skillName.toLowerCase()
+    return actor.items.some(
+      (item: Item) => item.type === 'skill' && item.name.toLowerCase() === skillName.toLowerCase()
     );
   }
 
@@ -142,30 +139,29 @@ class DragonbaneAdapter extends SystemAdapter {
     // Dragonbane doesn't track individual speed, use system defaults
     return mounted ? this.config.movement.mounted.value : this.config.movement.onFoot.value;
   }
-  
+
   async triggerSkillRoll(actor: Actor, skillName: string): Promise<void> {
     // Find the skill item
-    const skill = actor.items.find((item: Item) => 
-      item.type === 'skill' && 
-      item.name.toLowerCase() === skillName.toLowerCase()
+    const skill = actor.items.find(
+      (item: Item) => item.type === 'skill' && item.name.toLowerCase() === skillName.toLowerCase()
     );
-    
+
     if (!skill) {
       console.warn('Skill not found:', skillName);
       return;
     }
-    
+
     // Create a fake DOM element that has the necessary methods
     const fakeSheetTableData = {
-      dataset: { 
+      dataset: {
         itemId: skill.id
       }
     };
-    
+
     const fakeElement = {
-      dataset: { 
+      dataset: {
         itemId: skill.id,
-        skillId: skill.id 
+        skillId: skill.id
       },
       closest: (selector: string) => {
         // Return the fake sheet-table-data element when requested
@@ -178,19 +174,19 @@ class DragonbaneAdapter extends SystemAdapter {
         contains: () => false
       }
     };
-    
+
     // Create a fake event
     const fakeEvent = {
       preventDefault: () => {},
       stopPropagation: () => {},
       currentTarget: fakeElement,
       target: fakeElement,
-      type: 'click',  // Important! Must be 'click' to trigger roll, not item sheet
-      shiftKey: false,  // Don't skip dialog
+      type: 'click', // Important! Must be 'click' to trigger roll, not item sheet
+      shiftKey: false, // Don't skip dialog
       ctrlKey: false,
-      button: 0  // Left click
+      button: 0 // Left click
     };
-    
+
     // Use the actor sheet's skill roll method directly
     if (actor.sheet && typeof (actor.sheet as any)._onSkillRoll === 'function') {
       await (actor.sheet as any)._onSkillRoll(fakeEvent);
@@ -229,7 +225,7 @@ class Dnd5eAdapter extends SystemAdapter {
     if (mounted && movement?.burrow) return movement.burrow;
     return movement?.walk || 30;
   }
-  
+
   triggerSkillRoll(actor: Actor, skillName: string): void {
     // In D&D 5e, use the actor's rollSkill method
     actor.rollSkill(skillName.toLowerCase());
@@ -248,7 +244,7 @@ class Pf2eAdapter extends SystemAdapter {
   protected async performSkillRoll(actor: Actor, skillName: string): Promise<SkillRollResult> {
     const skill = actor.system.skills?.[skillName.toLowerCase()];
     if (!skill) return { total: 0, success: false };
-    
+
     const roll = await skill.roll();
     const dc = 15; // Default DC
     return {
@@ -267,7 +263,7 @@ class Pf2eAdapter extends SystemAdapter {
     const speed = actor.system.attributes?.speed;
     return speed?.total || speed?.value || 25;
   }
-  
+
   triggerSkillRoll(actor: Actor, skillName: string): void {
     // In PF2e, trigger through the skill object
     const skill = actor.system.skills?.[skillName.toLowerCase()];
@@ -292,7 +288,7 @@ class ForbiddenLandsAdapter extends SystemAdapter {
     const attribute = 3; // Default attribute value
     const roll = new Roll(`${skill + attribute}d6`);
     await roll.evaluate();
-    
+
     const successes = roll.dice[0].results.filter(r => r.result >= 6).length;
     return {
       total: successes,
@@ -310,7 +306,7 @@ class ForbiddenLandsAdapter extends SystemAdapter {
     // Forbidden Lands doesn't track speed on actors
     return mounted ? this.config.movement.mounted.value : this.config.movement.onFoot.value;
   }
-  
+
   triggerSkillRoll(actor: Actor, skillName: string): void {
     // In Forbidden Lands, use the actor's rollSkill method if available
     if (typeof actor.rollSkill === 'function') {
@@ -328,9 +324,10 @@ class ForbiddenLandsAdapter extends SystemAdapter {
 class GenericAdapter extends SystemAdapter {
   protected getActorSkillValue(actor: Actor, skillName: string): number | null {
     // Try common patterns
-    const skill = actor.system.skills?.[skillName] || 
-                 actor.system.abilities?.[skillName] ||
-                 actor.system.attributes?.[skillName];
+    const skill =
+      actor.system.skills?.[skillName] ||
+      actor.system.abilities?.[skillName] ||
+      actor.system.attributes?.[skillName];
     return skill?.value ?? skill?.total ?? skill?.mod ?? null;
   }
 
@@ -338,10 +335,10 @@ class GenericAdapter extends SystemAdapter {
     // Use a simple d20 roll
     const roll = new Roll('1d20');
     await roll.evaluate();
-    
+
     const skillValue = this.getSkillValue(actor, skillName) || 0;
     const total = roll.total + skillValue;
-    
+
     return {
       total: total,
       success: total >= 15,
@@ -351,24 +348,25 @@ class GenericAdapter extends SystemAdapter {
   }
 
   hasSkill(actor: Actor, skillName: string): boolean {
-    return !!(actor.system.skills?.[skillName] || 
-             actor.system.abilities?.[skillName] ||
-             actor.system.attributes?.[skillName]);
+    return !!(
+      actor.system.skills?.[skillName] ||
+      actor.system.abilities?.[skillName] ||
+      actor.system.attributes?.[skillName]
+    );
   }
 
   getActorSpeed(actor: Actor, mounted: boolean): number {
     // Try to find speed in common locations
-    const speed = actor.system.attributes?.speed ||
-                 actor.system.movement?.speed ||
-                 actor.system.speed;
-    
+    const speed =
+      actor.system.attributes?.speed || actor.system.movement?.speed || actor.system.speed;
+
     if (typeof speed === 'number') return speed;
     if (speed?.value) return speed.value;
-    
+
     // Fall back to config defaults
     return mounted ? this.config.movement.mounted.value : this.config.movement.onFoot.value;
   }
-  
+
   triggerSkillRoll(actor: Actor, skillName: string): void {
     // For generic systems, try common methods
     if (typeof actor.rollSkill === 'function') {
@@ -390,10 +388,10 @@ export class SystemAdapterFactory {
 
   static getAdapter(): SystemAdapter {
     const systemId = game.system.id;
-    
+
     if (!this.adapters.has(systemId)) {
       let adapter: SystemAdapter;
-      
+
       switch (systemId) {
         case 'dragonbane':
           adapter = new DragonbaneAdapter();
@@ -410,10 +408,10 @@ export class SystemAdapterFactory {
         default:
           adapter = new GenericAdapter();
       }
-      
+
       this.adapters.set(systemId, adapter);
     }
-    
+
     return this.adapters.get(systemId)!;
   }
 }

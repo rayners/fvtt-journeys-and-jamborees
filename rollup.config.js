@@ -16,22 +16,22 @@ function injectReleaseUrls() {
       const moduleVersion = process.env.MODULE_VERSION;
       const ghProject = process.env.GH_PROJECT;
       const ghTag = process.env.GH_TAG;
-      
+
       // Only inject URLs if we have the required environment variables (i.e., during release build)
       if (moduleVersion && ghProject && ghTag) {
         const moduleJsonPath = join('dist', 'module.json');
-        
+
         try {
           // Read the existing module.json
           const moduleJson = JSON.parse(readFileSync(moduleJsonPath, 'utf8'));
-          
+
           // Update URLs to point to the specific release
           moduleJson.manifest = `https://github.com/${ghProject}/releases/download/${ghTag}/module.json`;
           moduleJson.download = `https://github.com/${ghProject}/releases/download/${ghTag}/module.zip`;
-          
+
           // Write the updated module.json
           writeFileSync(moduleJsonPath, JSON.stringify(moduleJson, null, 2));
-          
+
           console.log(`✅ Injected release URLs for ${ghTag}`);
         } catch (error) {
           console.warn('⚠️ Could not inject release URLs:', error.message);
@@ -49,7 +49,7 @@ export default [
     output: {
       dir: 'dist',
       format: 'es',
-      sourcemap: true,
+      sourcemap: true
     },
     plugins: [
       resolve(),
@@ -60,7 +60,7 @@ export default [
         watch: 'styles',
         // outputStyle: 'compressed',
         includePaths: ['styles'],
-        failOnError: true, // This will make the build fail if there's an SCSS error
+        failOnError: true // This will make the build fail if there's an SCSS error
       }),
       copy({
         targets: [
@@ -68,15 +68,16 @@ export default [
           { src: 'templates/*.hbs', dest: 'dist/templates/' },
           { src: 'templates/partials/*.hbs', dest: 'dist/templates/partials/' },
           { src: 'assets/**/*', dest: 'dist/' },
-          { src: 'languages/*.json', dest: 'dist/languages/' },
-        ],
+          { src: 'languages/*.json', dest: 'dist/languages/' }
+        ]
       }),
       injectReleaseUrls(),
-      process.env.SERVE === 'true' && serve({
-        contentBase: 'dist',
-        port: 29999,
-      }),
-      process.env.SERVE === 'true' && livereload('dist'),
-    ],
-  },
+      process.env.SERVE === 'true' &&
+        serve({
+          contentBase: 'dist',
+          port: 29999
+        }),
+      process.env.SERVE === 'true' && livereload('dist')
+    ]
+  }
 ];

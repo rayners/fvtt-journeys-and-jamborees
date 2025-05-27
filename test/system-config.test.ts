@@ -7,12 +7,12 @@ describe('SystemConfigManager', () => {
   beforeEach(() => {
     // Reset the singleton instance before each test
     (SystemConfigManager as any)._instance = null;
-    
+
     // Mock game.system
     global.game = {
       system: { id: 'dragonbane' }
     };
-    
+
     configManager = SystemConfigManager.getInstance();
   });
 
@@ -20,7 +20,7 @@ describe('SystemConfigManager', () => {
     it('should return a singleton instance', () => {
       const instance1 = SystemConfigManager.getInstance();
       const instance2 = SystemConfigManager.getInstance();
-      
+
       expect(instance1).toBe(instance2);
     });
   });
@@ -29,7 +29,7 @@ describe('SystemConfigManager', () => {
     it('should return Dragonbane config when system is dragonbane', () => {
       global.game.system.id = 'dragonbane';
       const config = configManager.getConfig();
-      
+
       expect(config.id).toBe('dragonbane');
       expect(config.name).toBe('Dragonbane');
       expect(config.movement.onFoot.value).toBe(15);
@@ -42,7 +42,7 @@ describe('SystemConfigManager', () => {
       global.game.system.title = 'D&D 5th Edition';
       configManager = new SystemConfigManager(); // Create new instance
       const config = configManager.getConfig();
-      
+
       expect(config.id).toBe('dnd5e');
       expect(config.name).toBe('D&D 5th Edition');
       expect(config.movement.onFoot.value).toBe(24);
@@ -55,7 +55,7 @@ describe('SystemConfigManager', () => {
       global.game.system.title = 'Unknown System';
       configManager = new SystemConfigManager();
       const config = configManager.getConfig();
-      
+
       expect(config.id).toBe('unknown-system'); // Uses system id, not 'generic'
       expect(config.name).toBe('Unknown System'); // Uses system title
       expect(config.movement.onFoot.value).toBe(25); // Default config value
@@ -66,14 +66,14 @@ describe('SystemConfigManager', () => {
   describe('getMovementRate', () => {
     it('should return on-foot movement when not mounted', () => {
       const movement = configManager.getMovementRate(false);
-      
+
       expect(movement.value).toBe(15);
       expect(movement.unit).toBe('km');
     });
 
     it('should return mounted movement when mounted', () => {
       const movement = configManager.getMovementRate(true);
-      
+
       expect(movement.value).toBe(30);
       expect(movement.unit).toBe('km');
     });

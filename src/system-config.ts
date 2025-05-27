@@ -75,15 +75,15 @@ const SYSTEM_CONFIGS: Record<string, SystemConfig> = {
     id: 'dnd5e',
     name: 'D&D 5th Edition',
     movement: {
-      onFoot: { value: 24, unit: 'miles' },  // 24 miles per day
-      mounted: { value: 30, unit: 'miles' }  // 30 miles per day (normal pace)
+      onFoot: { value: 24, unit: 'miles' }, // 24 miles per day
+      mounted: { value: 30, unit: 'miles' } // 30 miles per day (normal pace)
     },
     skills: {
-      pathfinding: 'sur',  // Survival
-      lookout: 'prc',      // Perception
+      pathfinding: 'sur', // Survival
+      lookout: 'prc', // Perception
       quartermaster: 'per', // Persuasion
-      hunting: 'sur',      // Survival (also used for hunting)
-      foraging: 'sur'      // Survival (also used for foraging)
+      hunting: 'sur', // Survival (also used for hunting)
+      foraging: 'sur' // Survival (also used for foraging)
     },
     dice: {
       randomEncounter: '1d20',
@@ -125,7 +125,7 @@ const SYSTEM_CONFIGS: Record<string, SystemConfig> = {
     id: 'forbidden-lands',
     name: 'Forbidden Lands',
     movement: {
-      onFoot: { value: 10, unit: 'km' },  // per quarter day
+      onFoot: { value: 10, unit: 'km' }, // per quarter day
       mounted: { value: 20, unit: 'km' }
     },
     skills: {
@@ -137,7 +137,7 @@ const SYSTEM_CONFIGS: Record<string, SystemConfig> = {
     },
     dice: {
       randomEncounter: '1d6',
-      encounterThreshold: 1,  // Forbidden Lands uses different encounter system
+      encounterThreshold: 1, // Forbidden Lands uses different encounter system
       pathfinding: '1d12',
       weather: '1d6'
     },
@@ -154,7 +154,7 @@ const SYSTEM_CONFIGS: Record<string, SystemConfig> = {
       mounted: { value: 50, unit: 'units' }
     },
     skills: {
-      pathfinding: 'skill',  // Generic skill name
+      pathfinding: 'skill', // Generic skill name
       lookout: 'skill',
       quartermaster: 'skill',
       hunting: 'skill',
@@ -208,7 +208,11 @@ export class SystemConfigManager {
   private constructor() {
     // Initialize with system detection
     const systemId = game.system.id;
-    this.currentConfig = SYSTEM_CONFIGS[systemId] || { ...DEFAULT_CONFIG, id: systemId, name: game.system.title };
+    this.currentConfig = SYSTEM_CONFIGS[systemId] || {
+      ...DEFAULT_CONFIG,
+      id: systemId,
+      name: game.system.title
+    };
   }
 
   static getInstance(): SystemConfigManager {

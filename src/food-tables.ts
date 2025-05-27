@@ -19,30 +19,30 @@ export interface ForagingTableResult {
 
 export class FoodTablesManager {
   private static instance: FoodTablesManager;
-  
+
   private constructor() {}
-  
+
   static getInstance(): FoodTablesManager {
     if (!FoodTablesManager.instance) {
       FoodTablesManager.instance = new FoodTablesManager();
     }
     return FoodTablesManager.instance;
   }
-  
+
   /**
    * Check if we can use official Dragonbane content
    */
   private canUseOfficialContent(): boolean {
     return game.system.id === 'dragonbane' && game.modules.get('dragonbane-coreset')?.active;
   }
-  
+
   /**
    * Get or create the hunting table
    */
   async getHuntingTable(): Promise<RollTable | null> {
     // Look for existing hunting table
-    let huntingTable = game.tables.find(t => t.name === "J&J Hunting Results");
-    
+    let huntingTable = game.tables.find(t => t.name === 'J&J Hunting Results');
+
     if (!huntingTable) {
       if (this.canUseOfficialContent()) {
         huntingTable = await this.createDragonbaneHuntingTable();
@@ -51,41 +51,40 @@ export class FoodTablesManager {
       }
     } else {
     }
-    
+
     return huntingTable;
   }
-  
+
   /**
    * Get or create the foraging table
    */
   async getForagingTable(): Promise<RollTable | null> {
     // Look for existing foraging table
-    let foragingTable = game.tables.find(t => t.name === "J&J Foraging Results");
-    
+    let foragingTable = game.tables.find(t => t.name === 'J&J Foraging Results');
+
     if (!foragingTable) {
       foragingTable = await this.createGenericForagingTable();
     }
-    
+
     return foragingTable;
   }
-  
+
   /**
    * Create the official Dragonbane hunting table (only when Core Set is available)
    */
   private async createDragonbaneHuntingTable(): Promise<RollTable> {
-    
     const tableData = {
-      name: "J&J Hunting Results",
-      description: "Official Dragonbane hunting results table (requires Core Set)",
-      formula: "1d6",
+      name: 'J&J Hunting Results',
+      description: 'Official Dragonbane hunting results table (requires Core Set)',
+      formula: '1d6',
       replacement: true,
       displayRoll: true,
       results: [
         {
           range: [1, 1],
-          text: "Squirrel",
+          text: 'Squirrel',
           flags: {
-            "journeys-and-jamborees": {
+            'journeys-and-jamborees': {
               rations: 1,
               requiresWeapon: true,
               canUseTrap: true,
@@ -95,9 +94,9 @@ export class FoodTablesManager {
         },
         {
           range: [2, 2],
-          text: "Crow",
+          text: 'Crow',
           flags: {
-            "journeys-and-jamborees": {
+            'journeys-and-jamborees': {
               rations: 1,
               requiresWeapon: true,
               canUseTrap: false,
@@ -107,10 +106,10 @@ export class FoodTablesManager {
         },
         {
           range: [3, 3],
-          text: "Rabbit",
+          text: 'Rabbit',
           flags: {
-            "journeys-and-jamborees": {
-              rations: "1d3",
+            'journeys-and-jamborees': {
+              rations: '1d3',
               requiresWeapon: true,
               canUseTrap: true,
               dangerous: false
@@ -119,10 +118,10 @@ export class FoodTablesManager {
         },
         {
           range: [4, 4],
-          text: "Fox",
+          text: 'Fox',
           flags: {
-            "journeys-and-jamborees": {
-              rations: "1d4",
+            'journeys-and-jamborees': {
+              rations: '1d4',
               requiresWeapon: true,
               canUseTrap: true,
               dangerous: false
@@ -131,10 +130,10 @@ export class FoodTablesManager {
         },
         {
           range: [5, 5],
-          text: "Boar",
+          text: 'Boar',
           flags: {
-            "journeys-and-jamborees": {
-              rations: "2d6",
+            'journeys-and-jamborees': {
+              rations: '2d6',
               requiresWeapon: true,
               canUseTrap: false,
               dangerous: true
@@ -143,10 +142,10 @@ export class FoodTablesManager {
         },
         {
           range: [6, 6],
-          text: "Deer",
+          text: 'Deer',
           flags: {
-            "journeys-and-jamborees": {
-              rations: "2d8",
+            'journeys-and-jamborees': {
+              rations: '2d8',
               requiresWeapon: true,
               canUseTrap: false,
               dangerous: false
@@ -155,27 +154,26 @@ export class FoodTablesManager {
         }
       ]
     };
-    
+
     return await RollTable.create(tableData);
   }
-  
+
   /**
    * Create a generic hunting table (no copyrighted content)
    */
   private async createGenericHuntingTable(): Promise<RollTable> {
-    
     const tableData = {
-      name: "J&J Hunting Results",
-      description: "Generic hunting results table for Journeys & Jamborees",
-      formula: "1d6",
+      name: 'J&J Hunting Results',
+      description: 'Generic hunting results table for Journeys & Jamborees',
+      formula: '1d6',
       replacement: true,
       displayRoll: true,
       results: [
         {
           range: [1, 1],
-          text: "Small Bird",
+          text: 'Small Bird',
           flags: {
-            "journeys-and-jamborees": {
+            'journeys-and-jamborees': {
               rations: 1,
               requiresWeapon: true,
               canUseTrap: true,
@@ -185,9 +183,9 @@ export class FoodTablesManager {
         },
         {
           range: [2, 2],
-          text: "Flying creature",
+          text: 'Flying creature',
           flags: {
-            "journeys-and-jamborees": {
+            'journeys-and-jamborees': {
               rations: 1,
               requiresWeapon: true,
               canUseTrap: false,
@@ -197,10 +195,10 @@ export class FoodTablesManager {
         },
         {
           range: [3, 3],
-          text: "Quick prey",
+          text: 'Quick prey',
           flags: {
-            "journeys-and-jamborees": {
-              rations: "1d3",
+            'journeys-and-jamborees': {
+              rations: '1d3',
               requiresWeapon: true,
               canUseTrap: true,
               dangerous: false
@@ -209,10 +207,10 @@ export class FoodTablesManager {
         },
         {
           range: [4, 4],
-          text: "Cunning hunter",
+          text: 'Cunning hunter',
           flags: {
-            "journeys-and-jamborees": {
-              rations: "1d4",
+            'journeys-and-jamborees': {
+              rations: '1d4',
               requiresWeapon: true,
               canUseTrap: true,
               dangerous: false
@@ -221,10 +219,10 @@ export class FoodTablesManager {
         },
         {
           range: [5, 5],
-          text: "Dangerous beast",
+          text: 'Dangerous beast',
           flags: {
-            "journeys-and-jamborees": {
-              rations: "2d4",
+            'journeys-and-jamborees': {
+              rations: '2d4',
               requiresWeapon: true,
               canUseTrap: false,
               dangerous: true
@@ -233,10 +231,10 @@ export class FoodTablesManager {
         },
         {
           range: [6, 6],
-          text: "Large herbivore",
+          text: 'Large herbivore',
           flags: {
-            "journeys-and-jamborees": {
-              rations: "2d6",
+            'journeys-and-jamborees': {
+              rations: '2d6',
               requiresWeapon: true,
               canUseTrap: false,
               dangerous: false
@@ -245,119 +243,117 @@ export class FoodTablesManager {
         }
       ]
     };
-    
+
     return await RollTable.create(tableData);
   }
-  
+
   /**
    * Create the generic foraging table
    */
   private async createGenericForagingTable(): Promise<RollTable> {
-    
     const tableData = {
-      name: "J&J Foraging Results",
-      description: "Generic foraging results table for Journeys & Jamborees",
-      formula: "1d20",
+      name: 'J&J Foraging Results',
+      description: 'Generic foraging results table for Journeys & Jamborees',
+      formula: '1d20',
       replacement: true,
       displayRoll: true,
       results: [
         {
           range: [1, 2],
-          text: "Nothing edible found",
+          text: 'Nothing edible found',
           flags: {
-            "journeys-and-jamborees": {
+            'journeys-and-jamborees': {
               rations: 0,
-              special: "failure"
+              special: 'failure'
             }
           }
         },
         {
           range: [3, 5],
-          text: "Mistook poisonous plants for edible",
+          text: 'Mistook poisonous plants for edible',
           flags: {
-            "journeys-and-jamborees": {
+            'journeys-and-jamborees': {
               rations: -1,
-              special: "poison"
+              special: 'poison'
             }
           }
         },
         {
           range: [6, 10],
-          text: "Handful of bitter berries",
+          text: 'Handful of bitter berries',
           flags: {
-            "journeys-and-jamborees": {
+            'journeys-and-jamborees': {
               rations: 1,
-              special: "basic"
+              special: 'basic'
             }
           }
         },
         {
           range: [11, 14],
-          text: "Edible roots and shoots",
+          text: 'Edible roots and shoots',
           flags: {
-            "journeys-and-jamborees": {
-              rations: "1d3",
-              special: "basic"
+            'journeys-and-jamborees': {
+              rations: '1d3',
+              special: 'basic'
             }
           }
         },
         {
           range: [15, 17],
-          text: "Nuts and wild vegetables",
+          text: 'Nuts and wild vegetables',
           flags: {
-            "journeys-and-jamborees": {
-              rations: "1d4+1",
-              special: "good"
+            'journeys-and-jamborees': {
+              rations: '1d4+1',
+              special: 'good'
             }
           }
         },
         {
           range: [18, 19],
-          text: "Bountiful patch of wild edibles",
+          text: 'Bountiful patch of wild edibles',
           flags: {
-            "journeys-and-jamborees": {
-              rations: "1d6+2",
-              special: "excellent"
+            'journeys-and-jamborees': {
+              rations: '1d6+2',
+              special: 'excellent'
             }
           }
         },
         {
           range: [20, 20],
-          text: "Rare beneficial herbs found",
+          text: 'Rare beneficial herbs found',
           flags: {
-            "journeys-and-jamborees": {
-              rations: "2d3",
-              special: "medicinal"
+            'journeys-and-jamborees': {
+              rations: '2d3',
+              special: 'medicinal'
             }
           }
         }
       ]
     };
-    
+
     return await RollTable.create(tableData);
   }
-  
+
   /**
    * Roll on the hunting table and parse results
    */
   async rollHunting(): Promise<HuntingTableResult | null> {
     const table = await this.getHuntingTable();
     if (!table) return null;
-    
+
     const roll = await table.roll();
     const result = roll.results[0];
-    
-    
+
     if (!result) return null;
-    
-    const flags = result.flags?.["journeys-and-jamborees"];
+
+    const flags = result.flags?.['journeys-and-jamborees'];
     if (!flags) {
       // Fallback parsing if no flags (for custom tables)
       return this.parseHuntingText(result.description || result.name);
     }
-    
+
     const animalName = result.description || result.name || result.text;
-    
+
     return {
       animal: animalName,
       rations: flags.rations,
@@ -366,34 +362,34 @@ export class FoodTablesManager {
       dangerous: flags.dangerous
     };
   }
-  
+
   /**
    * Roll on the foraging table and parse results
    */
   async rollForaging(): Promise<ForagingTableResult | null> {
     const table = await this.getForagingTable();
     if (!table) return null;
-    
+
     const roll = await table.roll();
     const result = roll.results[0];
-    
+
     if (!result) return null;
-    
-    const flags = result.flags?.["journeys-and-jamborees"];
+
+    const flags = result.flags?.['journeys-and-jamborees'];
     if (!flags) {
       // Fallback parsing if no flags (for custom tables)
       return this.parseForagingText(result.description || result.name);
     }
-    
+
     const itemName = result.description || result.name || result.text;
-    
+
     return {
       description: itemName,
       rations: flags.rations,
       special: flags.special
     };
   }
-  
+
   /**
    * Parse hunting result text for custom tables without flags
    * Format: "Animal|rations|weapon/trap|safe/dangerous"
@@ -409,7 +405,7 @@ export class FoodTablesManager {
         dangerous: parts[3].trim().toLowerCase().includes('dangerous')
       };
     }
-    
+
     // Fallback for simple text
     return {
       animal: text,
@@ -419,7 +415,7 @@ export class FoodTablesManager {
       dangerous: false
     };
   }
-  
+
   /**
    * Parse foraging result text for custom tables without flags
    * Format: "Description|rations|special"
@@ -433,14 +429,14 @@ export class FoodTablesManager {
         special: parts[2]?.trim()
       };
     }
-    
+
     // Fallback for simple text
     return {
       description: text,
       rations: 1
     };
   }
-  
+
   /**
    * Initialize tables on module load
    */

@@ -7,6 +7,7 @@
 ## [0.1.0] - 2025-05-25
 
 ### Added
+
 - Initial public alpha release
 - Core party management system with custom Party actor type
 - Party sheet with tabs for Members, Travel, Inventory, Journal, and Settings
@@ -34,6 +35,7 @@
 - Hunting and foraging skill configuration settings
 
 ### Changed
+
 - Movement rates now configurable per system
 - Skill names dynamically loaded from system configuration
 - Dice formulas (encounters, weather) now system-specific
@@ -42,6 +44,7 @@
 - Updated all documentation for public repository release
 
 ### Fixed
+
 - Character removal now properly uses Foundry's deletion syntax
 - Settings labels clarified for per-character consumption
 - Party sheet member count display (was showing "/" without numbers)
@@ -51,6 +54,7 @@
 ## [0.2.0] - 2024-XX-XX (In Development)
 
 ### Added
+
 - Dragonbane-styled UI matching the system's appearance
 - Travel role UI with character skill values
 - Improved party token representation
@@ -59,12 +63,14 @@
 - Movement system based on Dragonbane rules
 
 ### Changed
+
 - Refactored party member status system to use a single property instead of three arrays
 - Redesigned UI layout to be more compact and efficient
 - Consolidated template structure for better performance
 - Updated settings labels to clarify that rations and water consumption are per character per day
 
 ### Fixed
+
 - Bug where characters could appear in multiple status lists simultaneously
 - Party sheet background transparency issues
 - Template loading problems
@@ -75,6 +81,7 @@
 ## [0.1.0] - 2023-XX-XX
 
 ### Added
+
 - Initial release
 - Party Actor implementation
 - Character status management

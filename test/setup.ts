@@ -83,13 +83,17 @@ globalThis.foundry = {
   data: {
     fields: {
       HTMLField: class {
-        constructor(options = {}) { this.options = options; }
+        constructor(options = {}) {
+          this.options = options;
+        }
       },
       StringField: class {
-        constructor(options = {}) { this.options = options; }
+        constructor(options = {}) {
+          this.options = options;
+        }
       },
       NumberField: class {
-        constructor(options = {}) { 
+        constructor(options = {}) {
           this.options = options;
           if (typeof options.initial === 'function') {
             this.initial = options.initial();
@@ -99,31 +103,41 @@ globalThis.foundry = {
         }
       },
       BooleanField: class {
-        constructor(options = {}) { 
+        constructor(options = {}) {
           this.options = options;
           this.initial = options.initial || false;
         }
       },
       ObjectField: class {
-        constructor(options = {}) { this.options = options; }
+        constructor(options = {}) {
+          this.options = options;
+        }
       },
       SchemaField: class {
-        constructor(schema = {}) { this.schema = schema; }
+        constructor(schema = {}) {
+          this.schema = schema;
+        }
       },
       ArrayField: class {
-        constructor(element) { this.element = element; }
+        constructor(element) {
+          this.element = element;
+        }
       },
       DocumentIdField: class {
-        constructor(options = {}) { this.options = options; }
+        constructor(options = {}) {
+          this.options = options;
+        }
       },
       FilePathField: class {
-        constructor(options = {}) { this.options = options; }
+        constructor(options = {}) {
+          this.options = options;
+        }
       }
     }
   },
   utils: {
     mergeObject: vi.fn((original, other, options = {}) => ({ ...original, ...other })),
-    duplicate: vi.fn((obj) => JSON.parse(JSON.stringify(obj))),
+    duplicate: vi.fn(obj => JSON.parse(JSON.stringify(obj))),
     setProperty: vi.fn(),
     getProperty: vi.fn(),
     hasProperty: vi.fn(),
@@ -172,7 +186,7 @@ globalThis.loadTemplates = vi.fn().mockResolvedValue({});
 globalThis.renderTemplate = vi.fn().mockResolvedValue('<div>Mock Template</div>');
 globalThis.getTemplate = vi.fn().mockResolvedValue(() => '<div>Mock Template</div>');
 
-// Mock utility functions  
+// Mock utility functions
 globalThis.mergeObject = globalThis.foundry.utils.mergeObject;
 globalThis.duplicate = globalThis.foundry.utils.duplicate;
 globalThis.setProperty = globalThis.foundry.utils.setProperty;
@@ -186,5 +200,5 @@ globalThis.fromUuid = vi.fn();
 globalThis.fromUuidSync = vi.fn();
 
 globalThis.TextEditor = {
-  enrichHTML: vi.fn((content) => content)
+  enrichHTML: vi.fn(content => content)
 };

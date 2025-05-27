@@ -28,7 +28,7 @@ vi.mock('@/registration', () => ({
 describe('utils', () => {
   describe('patchPartyActor', () => {
     let mockActor: any;
-    
+
     beforeEach(() => {
       mockActor = {
         type: 'party',
@@ -39,10 +39,10 @@ describe('utils', () => {
 
     it('should not patch actors that are null/undefined', () => {
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-      
+
       patchPartyActor(null);
       patchPartyActor(undefined);
-      
+
       expect(consoleSpy).not.toHaveBeenCalled();
       consoleSpy.mockRestore();
     });
@@ -50,32 +50,35 @@ describe('utils', () => {
     it('should not patch non-party actors', () => {
       const nonPartyActor = { type: 'character', name: 'Test Character' };
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-      
+
       patchPartyActor(nonPartyActor);
-      
+
       expect(consoleSpy).not.toHaveBeenCalled();
       consoleSpy.mockRestore();
     });
 
     it('should patch party actors missing methods', () => {
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-      
+
       patchPartyActor(mockActor);
-      
-      expect(consoleSpy).toHaveBeenCalledWith('Patching party actor with missing methods:', 'Test Party');
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Patching party actor with missing methods:',
+        'Test Party'
+      );
       expect(mockActor.setCharacterStatus).toBeDefined();
       expect(mockActor.assignTravelRole).toBeDefined();
       expect(mockActor.addResource).toBeDefined();
-      
+
       consoleSpy.mockRestore();
     });
 
     it('should not patch actors that already have the methods', () => {
       mockActor.setCharacterStatus = vi.fn();
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-      
+
       patchPartyActor(mockActor);
-      
+
       expect(consoleSpy).not.toHaveBeenCalled();
       consoleSpy.mockRestore();
     });
@@ -83,10 +86,13 @@ describe('utils', () => {
     it('should handle alternate party type names', () => {
       mockActor.type = 'journeys-and-jamborees.party';
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-      
+
       patchPartyActor(mockActor);
-      
-      expect(consoleSpy).toHaveBeenCalledWith('Patching party actor with missing methods:', 'Test Party');
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Patching party actor with missing methods:',
+        'Test Party'
+      );
       consoleSpy.mockRestore();
     });
   });

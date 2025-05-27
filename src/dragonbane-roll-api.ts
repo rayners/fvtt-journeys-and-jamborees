@@ -62,12 +62,10 @@ export class DragonbaneRollAPI {
 
     // Apply the advancement mark
     await skill.update({ 'system.advance': true });
-    
+
     // Show notification
-    ui.notifications.info(
-      game.i18n.format("DoD.skill.advanceTooltip", { skill: skill.name })
-    );
-    
+    ui.notifications.info(game.i18n.format('DoD.skill.advanceTooltip', { skill: skill.name }));
+
     return true;
   }
 
@@ -82,12 +80,12 @@ export class DragonbaneRollAPI {
 
     const actor = result.actor;
     const skill = result.skill;
-    
+
     // Build the message content
     let content = `
       <div class="dragonbane skill-roll">
         <div class="roll-header">
-          <h4>${game.i18n.localize("DoD.roll.skillRoll")}: ${skill.name}</h4>
+          <h4>${game.i18n.localize('DoD.roll.skillRoll')}: ${skill.name}</h4>
         </div>
         <div class="roll-result">
           <div class="dice-roll">
@@ -96,32 +94,32 @@ export class DragonbaneRollAPI {
             </div>
           </div>
           <div class="roll-details">
-            <span class="skill-value">${game.i18n.localize("DoD.skill.value")}: ${result.skillValue}</span>
+            <span class="skill-value">${game.i18n.localize('DoD.skill.value')}: ${result.skillValue}</span>
           </div>
         </div>
         <div class="roll-outcome">
     `;
 
     if (result.criticalSuccess) {
-      content += `<span class="success critical">${game.i18n.localize("DoD.roll.criticalSuccess")}</span>`;
+      content += `<span class="success critical">${game.i18n.localize('DoD.roll.criticalSuccess')}</span>`;
       if (result.advancementMarkApplied) {
-        content += `<div class="advancement-mark">${game.i18n.format("DoD.skill.advanceTooltip", { skill: skill.name })}</div>`;
+        content += `<div class="advancement-mark">${game.i18n.format('DoD.skill.advanceTooltip', { skill: skill.name })}</div>`;
       }
     } else if (result.criticalFailure) {
-      content += `<span class="failure fumble">${game.i18n.localize("DoD.roll.failure")}</span>`;
+      content += `<span class="failure fumble">${game.i18n.localize('DoD.roll.failure')}</span>`;
       if (result.advancementMarkApplied) {
-        content += `<div class="advancement-mark">${game.i18n.format("DoD.skill.advanceTooltip", { skill: skill.name })}</div>`;
+        content += `<div class="advancement-mark">${game.i18n.format('DoD.skill.advanceTooltip', { skill: skill.name })}</div>`;
       }
     } else if (result.success) {
-      content += `<span class="success">${game.i18n.localize("DoD.roll.success")}</span>`;
+      content += `<span class="success">${game.i18n.localize('DoD.roll.success')}</span>`;
     } else {
-      content += `<span class="failure">${game.i18n.localize("DoD.roll.failure")}</span>`;
-      
+      content += `<span class="failure">${game.i18n.localize('DoD.roll.failure')}</span>`;
+
       // Only show push option if allowed and not already pushed
       if (options.allowPush !== false && result.canPush && !result.pushed) {
         content += `
           <div class="push-option" style="margin-top: 0.5em; font-style: italic; color: #666;">
-            ${game.i18n.localize("DoD.roll.pushHint")}
+            ${game.i18n.localize('DoD.roll.pushHint')}
           </div>
         `;
       }
@@ -155,9 +153,9 @@ export class DragonbaneRollAPI {
     // Find the skill
     let skill = actor.items.get(skillNameOrId);
     if (!skill) {
-      skill = actor.items.find((item: Item) =>
-        item.type === 'skill' &&
-        item.name.toLowerCase() === skillNameOrId.toLowerCase()
+      skill = actor.items.find(
+        (item: Item) =>
+          item.type === 'skill' && item.name.toLowerCase() === skillNameOrId.toLowerCase()
       );
     }
 
@@ -179,7 +177,7 @@ export class DragonbaneRollAPI {
       // Boons - roll multiple dice and take lowest
       rollFormula = `${netModifier + 1}d20kl`;
     } else if (netModifier < 0) {
-      // Banes - roll multiple dice and take highest  
+      // Banes - roll multiple dice and take highest
       rollFormula = `${Math.abs(netModifier) + 1}d20kh`;
     }
 
@@ -241,7 +239,7 @@ export class DragonbaneRollAPI {
   private static getAvailableConditions(actor: Actor): string[] {
     const allConditions = ['exhausted', 'sickly', 'dazed', 'angry', 'scared', 'disheartened'];
     const currentConditions = actor.system.conditions || {};
-    
+
     // Filter out conditions the actor already has
     return allConditions.filter(condition => !currentConditions[condition]);
   }
@@ -265,7 +263,7 @@ export class DragonbaneRollAPI {
     // Check available conditions
     const availableConditions = this.getAvailableConditions(originalResult.actor);
     if (availableConditions.length === 0) {
-      ui.notifications.warn(game.i18n.localize("DoD.roll.cannotPushAllConditions"));
+      ui.notifications.warn(game.i18n.localize('DoD.roll.cannotPushAllConditions'));
       return originalResult; // Cannot push
     }
 
@@ -317,7 +315,7 @@ export class DragonbaneRollAPI {
     const content = `
       <div class="dragonbane skill-roll pushed">
         <div class="roll-header">
-          <h4>${game.i18n.localize("DoD.roll.pushed")}: ${originalResult.skill.name}</h4>
+          <h4>${game.i18n.localize('DoD.roll.pushed')}: ${originalResult.skill.name}</h4>
         </div>
         <div class="roll-result">
           <div class="dice-roll">
@@ -327,14 +325,22 @@ export class DragonbaneRollAPI {
           </div>
         </div>
         <div class="roll-outcome">
-          ${isDragon ? `<span class="success critical">${game.i18n.localize("DoD.roll.criticalSuccess")}</span>` :
-            isDemon ? `<span class="failure fumble">${game.i18n.localize("DoD.roll.criticalFailure")}</span>` :
-            success ? `<span class="success">${game.i18n.localize("DoD.roll.success")}</span>` :
-            `<span class="failure">${game.i18n.localize("DoD.roll.failure")}</span>`}
-          ${advancementMarkApplied && !originalResult.advancementMarkApplied ? 
-            `<div class="advancement-mark">${game.i18n.format("DoD.skill.advanceTooltip", { skill: originalResult.skill.name })}</div>` : ''}
+          ${
+            isDragon
+              ? `<span class="success critical">${game.i18n.localize('DoD.roll.criticalSuccess')}</span>`
+              : isDemon
+                ? `<span class="failure fumble">${game.i18n.localize('DoD.roll.criticalFailure')}</span>`
+                : success
+                  ? `<span class="success">${game.i18n.localize('DoD.roll.success')}</span>`
+                  : `<span class="failure">${game.i18n.localize('DoD.roll.failure')}</span>`
+          }
+          ${
+            advancementMarkApplied && !originalResult.advancementMarkApplied
+              ? `<div class="advancement-mark">${game.i18n.format('DoD.skill.advanceTooltip', { skill: originalResult.skill.name })}</div>`
+              : ''
+          }
           <div class="condition-taken" style="margin-top: 0.5em; font-style: italic;">
-            ${game.i18n.format("DoD.condition.gained", { condition: game.i18n.localize(`DoD.condition.${conditionToTake}`) })}
+            ${game.i18n.format('DoD.condition.gained', { condition: game.i18n.localize(`DoD.condition.${conditionToTake}`) })}
           </div>
         </div>
       </div>
@@ -369,9 +375,9 @@ export class DragonbaneRollAPI {
     // Find the skill
     let skill = actor.items.get(skillNameOrId);
     if (!skill) {
-      skill = actor.items.find((item: Item) =>
-        item.type === 'skill' &&
-        item.name.toLowerCase() === skillNameOrId.toLowerCase()
+      skill = actor.items.find(
+        (item: Item) =>
+          item.type === 'skill' && item.name.toLowerCase() === skillNameOrId.toLowerCase()
       );
     }
 
@@ -387,17 +393,17 @@ export class DragonbaneRollAPI {
 
     // Create a fake event for the sheet
     const fakeEvent = {
-      type: "click",
+      type: 'click',
       currentTarget: {
         closest: (selector: string) => {
-          if (selector === ".sheet-table-data") {
+          if (selector === '.sheet-table-data') {
             return { dataset: { itemId: skill.id } };
           }
           return null;
         }
       },
       preventDefault: () => {},
-      shiftKey: options.skipDialog !== false,  // Skip dialog by default
+      shiftKey: options.skipDialog !== false, // Skip dialog by default
       ctrlKey: false
     };
 
@@ -441,10 +447,10 @@ export class DragonbaneRollAPI {
     if (rollMessage && !success && !options.allowPush) {
       // Remove push UI from the message by updating its content
       let content = rollMessage.content;
-      
+
       // Remove the push form if it exists
       content = content.replace(/<form[^>]*class="push-roll-form"[^>]*>[\s\S]*?<\/form>/gi, '');
-      
+
       // Update the message
       await rollMessage.update({ content });
     }
@@ -512,7 +518,7 @@ Hooks.once('ready', () => {
   if (game.system.id === 'dragonbane') {
     // Add to Actor prototype
     Object.defineProperty(Actor.prototype, 'rollSkill', {
-      value: async function(skillNameOrId: string, options: SkillRollOptions = {}) {
+      value: async function (skillNameOrId: string, options: SkillRollOptions = {}) {
         return DragonbaneRollAPI.rollSkill(this, skillNameOrId, options);
       },
       writable: true,
@@ -520,7 +526,7 @@ Hooks.once('ready', () => {
     });
 
     Object.defineProperty(Actor.prototype, 'rollSkillSimple', {
-      value: async function(skillNameOrId: string, options = {}) {
+      value: async function (skillNameOrId: string, options = {}) {
         return DragonbaneRollAPI.rollSkillSimple(this, skillNameOrId, options);
       },
       writable: true,

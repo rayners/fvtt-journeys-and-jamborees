@@ -35,11 +35,13 @@ If you discover a security vulnerability in Journeys & Jamborees, please report 
 ### Security Considerations
 
 This module handles:
+
 - Actor data and permissions
 - User-generated content in party notes
 - Module settings and configurations
 
 Common security concerns:
+
 - Cross-site scripting (XSS) in user inputs
 - Permission bypasses
 - Data exposure between users

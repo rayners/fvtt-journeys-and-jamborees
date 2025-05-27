@@ -1,0 +1,20 @@
+# Build output
+dist/
+coverage/
+
+# Dependencies
+node_modules/
+
+# Config files
+rollup.config.js
+vitest.config.ts
+.eslintrc.js
+
+# Generated files
+*.min.js
+*.min.css
+
+# Other
+*.log
+.DS_Store
+.env

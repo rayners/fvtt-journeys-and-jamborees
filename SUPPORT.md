@@ -5,6 +5,7 @@ Need help with Journeys & Jamborees? Here are the best ways to get assistance:
 ## Documentation
 
 First, check our comprehensive documentation:
+
 - **User Guide**: [docs.rayners.dev/journeys-and-jamborees](https://docs.rayners.dev/journeys-and-jamborees)
 - **FAQ**: Common questions and solutions
 - **System Guides**: Setup for different game systems
@@ -12,12 +13,15 @@ First, check our comprehensive documentation:
 ## Community Support
 
 ### Foundry VTT Discord
+
 Join the Foundry VTT Discord server and ask in:
+
 - `#modules-troubleshooting` - For technical issues
 - `#modules` - For general questions
 - Find **@rayners** for direct questions
 
 ### GitHub Discussions
+
 - Ask questions in [GitHub Discussions](https://github.com/rayners/fvtt-journeys-and-jamborees/discussions)
 - Share tips and tricks with other users
 - Request new features
@@ -25,13 +29,17 @@ Join the Foundry VTT Discord server and ask in:
 ## Reporting Issues
 
 ### Bugs
+
 Use our [bug report template](.github/ISSUE_TEMPLATE/bug_report.md) to report:
+
 - Module not working correctly
 - Console errors
 - Compatibility issues
 
 ### Feature Requests
+
 Use our [feature request template](.github/ISSUE_TEMPLATE/feature_request.md) for:
+
 - New functionality ideas
 - Workflow improvements
 - System-specific enhancements
@@ -41,12 +49,14 @@ Use our [feature request template](.github/ISSUE_TEMPLATE/feature_request.md) fo
 When asking for support, please include:
 
 1. **Environment Details**:
+
    - Foundry VTT version
    - Game system and version
    - Module version
    - Browser
 
 2. **Clear Description**:
+
    - What you were trying to do
    - What happened instead
    - Any error messages
@@ -71,6 +81,7 @@ When asking for support, please include:
 ## Contributing
 
 Want to help improve support for everyone?
+
 - Update documentation when you find gaps
 - Answer questions in the community
 - Report bugs and test fixes

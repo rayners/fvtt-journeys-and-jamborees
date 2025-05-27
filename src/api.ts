@@ -14,30 +14,30 @@ export const JourneysAndJamboreesAPI = {
   get systemAdapter() {
     return SystemAdapterFactory.getAdapter();
   },
-  
+
   // Skill manager for skill detection and configuration
   get skillManager() {
     return SkillManager.getInstance();
   },
-  
+
   // System configuration manager
   get systemConfig() {
     return SystemConfigManager.getInstance();
   },
-  
+
   // Skill roll tracker for monitoring chat messages
   get skillRollTracker() {
     return SkillRollTracker.getInstance();
   },
-  
+
   // Food gathering system
   get foodGathering() {
     return FoodGatheringSystem.getInstance();
   },
-  
+
   // Version info
   version: '0.1.0',
-  
+
   // Helper to check if using a specific adapter
   isUsingAdapter(adapterName: string): boolean {
     const adapter = this.systemAdapter;

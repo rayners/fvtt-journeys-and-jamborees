@@ -1,10 +1,10 @@
 # Journeys & Jamborees
 
 > ⚠️ **ALPHA SOFTWARE - NOT READY FOR USE** ⚠️
-> 
+>
 > This module is in early development and is not ready for production use.
 > Features are incomplete, APIs will change, and bugs are expected.
-> 
+>
 > **Do not use this in your active games yet!**
 
 A comprehensive party management system for Foundry VTT that works with multiple game systems including Dragonbane, D&D 5e, Pathfinder 2e, and more.
@@ -28,7 +28,7 @@ This module is being actively developed. Major features are still being implemen
 
 - [x] Core party management
 - [x] Character status tracking
-- [x] Resource tracking  
+- [x] Resource tracking
 - [ ] Journey logging system
 - [ ] Weather and encounter integration
 - [ ] Mount management
@@ -41,6 +41,7 @@ Development is tracked privately but bug reports are welcome via [GitHub Issues]
 ## Features
 
 ### ✅ Currently Implemented
+
 - **Party Actor**: Custom actor type representing the entire party
 - **Character Management**: Add/remove party members with proper permission handling
 - **Character Status**: Active, traveling, or staying behind
@@ -55,6 +56,7 @@ Development is tracked privately but bug reports are welcome via [GitHub Issues]
 - **Testing Framework**: Comprehensive test suite with Vitest and Quench integration
 
 ### 🚧 In Development
+
 - Enhanced journey logging with session history
 - Advanced weather and encounter systems
 - Mount management
@@ -79,6 +81,7 @@ Development is tracked privately but bug reports are welcome via [GitHub Issues]
 ### Future Installation
 
 Once published to the Foundry package repository:
+
 ```
 https://github.com/rayners/fvtt-journeys-and-jamborees/releases/latest/download/module.json
 ```
@@ -124,10 +127,12 @@ Thank you for your interest in contributing to Journeys & Jamborees! We welcome 
 ### Testing & Debugging
 
 This module includes comprehensive test coverage:
+
 - **Unit tests** via `npm test` for development
 - **In-app tests** via [Quench](https://foundryvtt.com/packages/quench) for end-to-end testing
 
 When reporting bugs:
+
 1. Use the bug report template with all required information
 2. Run Quench test suites and include results
 3. Include console errors and reproduction steps

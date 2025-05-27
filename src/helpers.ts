@@ -12,7 +12,7 @@ import { SystemAdapterFactory } from './system-adapter';
  */
 export function getSkillValue(actor, skillName) {
   if (!actor) return 0;
-  
+
   try {
     const adapter = SystemAdapterFactory.getAdapter();
     const value = adapter.getSkillValue(actor, skillName);
@@ -31,10 +31,10 @@ export function getSkillValue(actor, skillName) {
  */
 export function getRoleSkillValues(actor, skillConfig) {
   if (!actor) return {};
-  
+
   const result = {};
   const adapter = SystemAdapterFactory.getAdapter();
-  
+
   // Get skill values for each role using the system adapter
   Object.entries(skillConfig).forEach(([role, skillName]) => {
     try {
@@ -45,6 +45,6 @@ export function getRoleSkillValues(actor, skillConfig) {
       result[role] = 0;
     }
   });
-  
+
   return result;
 }

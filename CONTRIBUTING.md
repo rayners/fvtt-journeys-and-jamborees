@@ -30,6 +30,7 @@ Journeys & Jamborees is in **ALPHA** stage. This means:
 ### 1. Report Bugs
 
 Use our [bug report template](.github/ISSUE_TEMPLATE/bug_report.md) and include:
+
 - Clear description and reproduction steps
 - Environment details (Foundry version, game system, etc.)
 - Console errors (F12 in browser)
@@ -52,6 +53,7 @@ Use our [bug report template](.github/ISSUE_TEMPLATE/bug_report.md) and include:
 ### 4. Share Ideas
 
 Before suggesting features:
+
 - Check the [README](README.md) for planned features
 - Search existing issues
 - Focus on user experience improvements
@@ -68,22 +70,26 @@ Before suggesting features:
 ### Setup Steps
 
 1. Fork and clone the repository:
+
    ```bash
    git clone https://github.com/YOUR_USERNAME/fvtt-journeys-and-jamborees.git
    cd fvtt-journeys-and-jamborees
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
 
 3. Link to your Foundry modules directory:
+
    ```bash
    ./link-module.sh /path/to/FoundryVTT/Data/modules
    ```
 
 4. Build the module:
+
    ```bash
    npm run build
    ```
@@ -154,6 +160,7 @@ export function calculatePartyWeight(party: Actor): number {
 ### Linear Integration
 
 We use Linear for issue tracking. Branch names should include the issue ID:
+
 - `feature/FOU-123-party-inventory`
 - `fix/FOU-456-member-removal`
 
@@ -162,6 +169,7 @@ We use Linear for issue tracking. Branch names should include the issue ID:
 We follow [Conventional Commits](https://www.conventionalcommits.org/):
 
 ### Format
+
 ```
 <type>(<scope>): <subject>
 
@@ -247,11 +255,11 @@ describe('PartyModel', () => {
 For Foundry-specific testing:
 
 ```typescript
-quench.registerBatch('journeys-and-jamborees.party', (context) => {
+quench.registerBatch('journeys-and-jamborees.party', context => {
   const { describe, it, assert } = context;
-  
-  describe('Party Operations', function() {
-    it('should create party actor', async function() {
+
+  describe('Party Operations', function () {
+    it('should create party actor', async function () {
       const party = await Actor.create({
         name: 'Test Party',
         type: 'journeys-and-jamborees.party'
@@ -265,6 +273,7 @@ quench.registerBatch('journeys-and-jamborees.party', (context) => {
 ### Test Coverage
 
 Aim for:
+
 - 80%+ code coverage for utilities
 - Comprehensive Quench tests for Foundry integration
 - Manual testing across supported game systems
@@ -273,20 +282,20 @@ Aim for:
 
 ### Code Comments
 
-```typescript
+````typescript
 /**
  * Brief description of what the function does
- * 
+ *
  * @param param1 - Description of parameter
  * @returns Description of return value
  * @throws {ErrorType} Description of when this error occurs
- * 
+ *
  * @example
  * ```typescript
  * const result = myFunction('test');
  * ```
  */
-```
+````
 
 ### User Documentation
 
