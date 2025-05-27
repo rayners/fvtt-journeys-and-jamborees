@@ -629,6 +629,12 @@ export class PartyActorSheet extends ActorSheet {
   async _onRandomEncounterClick(event) {
     event.preventDefault();
 
+    // Only GMs can trigger random encounters
+    if (!game.user.isGM) {
+      ui.notifications.warn(game.i18n.localize('J&J.errors.gmOnly'));
+      return;
+    }
+
     // Use system-specific dice formulas
     const encounterFormula = SystemConfigManager.getInstance().getDiceFormula('randomEncounter');
     const encounterThreshold =
@@ -647,6 +653,12 @@ export class PartyActorSheet extends ActorSheet {
    */
   async _onRollWeatherClick(event) {
     event.preventDefault();
+
+    // Only GMs can roll for weather
+    if (!game.user.isGM) {
+      ui.notifications.warn(game.i18n.localize('J&J.errors.gmOnly'));
+      return;
+    }
 
     // Use system-specific weather dice formula
     const weatherFormula = SystemConfigManager.getInstance().getDiceFormula('weather');

@@ -215,5 +215,8 @@
     "FoodGatheringRollTimeout": "Food Gathering Roll Timeout",
     "FoodGatheringRollTimeoutHint": "How many seconds to wait for a player to complete their skill roll during food gathering activities"
   },
+  "errors": {
+    "gmOnly": "This action can only be performed by the GM."
+  },
   "TYPES.Actor.journeys-and-jamborees.party": "Party"
 }

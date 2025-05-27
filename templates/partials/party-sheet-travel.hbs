@@ -5,12 +5,14 @@
             <button type="button" class="roll-pathfinding">
                 <i class="fas fa-map-signs"></i> {{localize "J&J.travelActions.findPath"}}
             </button>
+            {{#if isGM}}
             <button type="button" class="random-encounter">
                 <i class="fas fa-dice-d20"></i> {{localize "J&J.travelActions.randomEncounter"}}
             </button>
             <button type="button" class="roll-weather">
                 <i class="fas fa-cloud-sun-rain"></i> {{localize "J&J.travelActions.rollWeather"}}
             </button>
+            {{/if}}
             <button type="button" class="make-camp">
                 <i class="fas fa-campground"></i> {{localize "J&J.travelActions.makeCamp"}}
             </button>
