@@ -4,6 +4,25 @@
 
 ## [Unreleased]
 
+### Added
+
+- Comprehensive TypeScript type definitions for Dragonbane system
+- Runtime type guards for type-safe system detection
+- Development environment tooling (.vscode configuration, recommended extensions)
+- 'P' keybinding to quickly open party sheet
+- ESLint and Prettier for code quality enforcement
+
+### Changed
+
+- Random encounter and weather buttons now limited to GMs only
+- Enhanced VS Code workspace configuration for better development experience
+- Improved TypeScript compiler configuration and type coverage
+
+### Fixed
+
+- TypeScript build warnings and missing type definitions
+- Code formatting consistency across the project
+
 ## [0.1.0] - 2025-05-25
 
 ### Added
@@ -78,14 +97,3 @@
 - Multiple localization issues
 - Missing translation for Party Journal heading
 
-## [0.1.0] - 2023-XX-XX
-
-### Added
-
-- Initial release
-- Party Actor implementation
-- Character status management
-- Travel role assignments
-- Resource tracking
-- Party inventory system
-- Token HUD integration
