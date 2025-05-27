@@ -2,6 +2,21 @@
 
 > ⚠️ **Alpha Software**: This guide describes features as they currently exist. Some functionality may be incomplete or change in future versions.
 
+## Table of Contents
+
+- [Quick Start](#quick-start)
+- [Character Status](#character-status)
+- [Resource Management](#resource-management)
+- [Travel Features](#travel-features)
+- [Food Gathering (Dragonbane)](#food-gathering-dragonbane)
+- [Party Inventory](#party-inventory)
+- [Journal and Notes](#journal-and-notes)
+- [Settings and Configuration](#settings-and-configuration)
+- [System Support](#system-support)
+- [Permissions and Ownership](#permissions-and-ownership)
+- [Tips and Best Practices](#tips-and-best-practices)
+- [Troubleshooting](#troubleshooting)
+
 ## Quick Start
 
 ### Creating Your First Party
@@ -32,11 +47,11 @@ Travel roles help organize party responsibilities:
 2. **Go to the Members tab**
 3. **Scroll down to "Travel Roles"**
 4. **Assign roles from dropdown menus:**
-   - **Pathfinder**: Uses Bushcraft skill for navigation
-   - **Lookout**: Uses Awareness skill to spot danger
-   - **Quartermaster**: Uses Bartering skill for supplies
+   - **Pathfinder**: Responsible for navigation (skill depends on system)
+   - **Lookout**: Watches for danger (skill depends on system)
+   - **Quartermaster**: Manages supplies (skill depends on system)
 
-*Note: Only "Active" characters can be assigned to roles*
+*Note: Only "Active" characters can be assigned to roles. The actual skill used varies by game system - see [System Support](#system-support) for details.*
 
 ## Character Status
 
@@ -101,8 +116,6 @@ Set the party's current activity:
 
 ### Journey Tracking
 
-*Note: Journey features are partially implemented*
-
 1. **Go to the Travel tab**
 2. **Fill in journey details:**
    - Origin and destination
@@ -110,14 +123,24 @@ Set the party's current activity:
    - Distance traveled
    - Terrain type
 
+The module automatically calculates daily progress based on:
+- **Movement rate** (configurable per system)
+- **Travel conditions** (terrain, weather)
+- **Party status** (mounted vs on foot)
+
 ### Travel Actions
 
-*Note: These buttons exist but functionality is limited*
+- **Find Path**: Roll pathfinding checks using the assigned pathfinder's skill
+- **Random Encounter**: Generate encounters based on system dice formula
+- **Roll Weather**: Determine weather conditions (system-specific)
+- **Make Camp**: Set up camp for rest and trigger overnight resource consumption
 
-- **Find Path**: Roll pathfinding checks
-- **Random Encounter**: Generate encounters
-- **Roll Weather**: Determine weather conditions
-- **Make Camp**: Set up camp for rest
+### Rest Mechanics
+
+When making camp or resting overnight:
+1. **Resource Consumption**: The module automatically consumes rations and water
+2. **Consumption Rate**: Based on party settings (default: 1 ration, 1 water per character per day)
+3. **Automatic Deduction**: Enable/disable in settings
 
 ## Food Gathering (Dragonbane)
 
@@ -269,6 +292,58 @@ Connect Foundry journal entries to your party:
 
 **Reset Party Data**: Clears all party information (use with caution!)
 
+## System Support
+
+Journeys & Jamborees is designed to work with multiple game systems. The module automatically detects your game system and configures appropriate settings.
+
+### Supported Systems
+
+#### Dragonbane
+- **Movement**: 15km/day on foot, 30km/day mounted
+- **Skills**: BUSHCRAFT (pathfinding), AWARENESS (lookout), BARTER (quartermaster)
+- **Encounters**: 1d20, encounter on 18+
+- **Special Features**: Full food gathering system with hunting, fishing, and foraging
+
+#### D&D 5th Edition
+- **Movement**: 24 miles/day on foot, 30 miles/day mounted
+- **Skills**: Survival (pathfinding), Perception (lookout), Persuasion (quartermaster)
+- **Encounters**: 1d20, encounter on 18+
+- **Notes**: Uses standard D&D 5e skill system
+
+#### Pathfinder 2nd Edition
+- **Movement**: 24 miles/day on foot, 32 miles/day mounted
+- **Skills**: Survival (pathfinding), Perception (lookout), Society (quartermaster)
+- **Encounters**: 1d20, encounter on 18+
+- **Notes**: Compatible with PF2e's skill system
+
+#### Forbidden Lands
+- **Movement**: 10km/day on foot, 20km/day mounted
+- **Skills**: Survival (pathfinding), Scouting (lookout), Manipulation (quartermaster)
+- **Encounters**: Custom d66 system
+- **Notes**: Integrates with Forbidden Lands' journey rules
+
+#### Simple Worldbuilding
+- **Movement**: 1 unit/day on foot, 2 units/day mounted
+- **Skills**: User-defined attributes
+- **Encounters**: 1d20, encounter on 15+
+- **Notes**: Fully customizable for any homebrew system
+
+### Configuring for Your System
+
+1. **Module Settings**: Access via Game Settings → Module Settings → Journeys & Jamborees
+2. **Movement Rates**: Adjust base movement for on foot and mounted travel
+3. **Skill Names**: Select which skills to use for each travel role
+4. **Dice Formulas**: Customize encounter and weather roll formulas
+5. **Units**: Set appropriate distance units (miles, kilometers, etc.)
+
+### Adding Support for New Systems
+
+If your system isn't supported, you can:
+1. Use the module with default settings
+2. Manually configure all settings for your system
+3. Request support via GitHub issues
+4. Contribute a system configuration (see system-configuration.md)
+
 ## Permissions and Ownership
 
 ### Player Permissions
@@ -320,17 +395,27 @@ When you add a character to a party:
 **"Party" actor type not available:**
 - Restart Foundry VTT completely
 - Check that the module is enabled
-- Verify you're using Dragonbane system
+- Verify your game system is supported (see [System Support](#system-support))
+- For Simple Worldbuilding: This is expected behavior - the system has strict template requirements
 
 **Characters not appearing:**
 - Check character ownership
 - Verify the character is properly created
 - Try refreshing the party sheet
 
+**Skills not showing in dropdowns:**
+- Skills are loaded dynamically from your system
+- Ensure you have at least one character with skills in your world
+- Check module settings to verify skill configuration
+
 **Permission errors:**
 - Ensure you own the character you're trying to add
 - Check that you have appropriate permissions
 - Contact your GM if issues persist
+
+**Food gathering not available:**
+- This feature is currently Dragonbane-only
+- Requires the Dragonbane Core Set module to be installed and active
 
 ### Getting Help
 

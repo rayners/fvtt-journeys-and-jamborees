@@ -45,21 +45,27 @@ Development is tracked privately but bug reports are welcome via [GitHub Issues]
 - **Character Management**: Add/remove party members with proper permission handling
 - **Character Status**: Active, traveling, or staying behind
 - **Travel Roles**: Pathfinder, lookout, and quartermaster assignments
-- **Resource Tracking**: Shared rations, water, and gold
+- **Resource Tracking**: Shared rations, water, and gold with automatic consumption
 - **Party Inventory**: Separate from character inventories
 - **Permission System**: Automatic ownership for party members
+- **Multi-System Support**: Works with D&D 5e, Pathfinder 2e, Forbidden Lands, Simple Worldbuilding, and more
+- **Rest Mechanics**: Automatic resource consumption when camping
+- **Food Gathering** (Dragonbane): Hunting, fishing, and foraging with customizable RollTables
+- **Journey Tracking**: Distance-based travel with configurable movement rates
 - **Testing Framework**: Comprehensive test suite with Vitest and Quench integration
 
 ### 🚧 In Development
-- Journey tracking and logging
-- Weather and encounter systems
+- Enhanced journey logging with session history
+- Advanced weather and encounter systems
 - Mount management
 - Multi-language support
+- Additional system integrations
+- Advanced automation features
 
 ## Requirements
 
 - Foundry VTT v13.0.0 or later
-- Dragonbane (Drakar och Demoner) game system v1.0.0 or later
+- A compatible game system (Dragonbane, D&D 5e, Pathfinder 2e, Forbidden Lands, Simple Worldbuilding, or any system with configurable support)
 
 ## Installation
 
