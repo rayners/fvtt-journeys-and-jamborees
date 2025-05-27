@@ -1,5 +1,11 @@
 {
   "J&J": {
+    "Keybindings": {
+      "OpenPartySheet": "Open Party Sheet",
+      "OpenPartySheetHint": "Open the party sheet window",
+      "NoPartyFound": "No party found that you have permission to view.",
+      "MultiplePartiesFound": "Opened the first of {count} available party sheets."
+    },
     "ui": {
       "party-sheet": {
         "members": "Members",

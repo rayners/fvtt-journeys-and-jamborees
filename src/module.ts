@@ -9,6 +9,7 @@ import { registerHooks } from './hooks';
 import { registerPartyActorType, setupActorCreationHook } from './registration';
 import { patchPartyActor } from './utils';
 import { SkillRollTracker } from './skill-roll-tracker';
+import { registerKeybindings } from './keybindings';
 // Import API for external access
 import './api';
 // Import quench tests - they self-register via the quenchReady hook
@@ -34,6 +35,9 @@ Hooks.once('init', async function () {
 
   // Register custom settings
   registerSettings();
+
+  // Register keybindings
+  registerKeybindings();
 
   // Preload Handlebars templates
   await preloadTemplates();

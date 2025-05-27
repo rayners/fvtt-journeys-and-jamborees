@@ -48,6 +48,7 @@ Development is tracked privately but bug reports are welcome via [GitHub Issues]
 - **Travel Roles**: Pathfinder, lookout, and quartermaster assignments
 - **Resource Tracking**: Shared rations, water, and gold with automatic consumption
 - **Party Inventory**: Separate from character inventories
+- **Keybinding**: Press 'P' to quickly open the party sheet
 - **Permission System**: Automatic ownership for party members
 - **Multi-System Support**: Works with D&D 5e, Pathfinder 2e, Forbidden Lands, Simple Worldbuilding, and more
 - **Rest Mechanics**: Automatic resource consumption when camping
