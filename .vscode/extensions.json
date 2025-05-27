@@ -1,0 +1,25 @@
+{
+  "recommendations": [
+    // TypeScript and JavaScript
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "ms-vscode.vscode-typescript-next",
+    
+    // Code quality
+    "streetsidesoftware.code-spell-checker",
+    
+    // Handlebars template support
+    "andrejunges.Handlebars",
+    
+    // Testing
+    "Orta.vscode-jest",
+    
+    // Git
+    "eamodio.gitlens",
+    
+    // General development
+    "christian-kohler.path-intellisense",
+    "aaron-bond.better-comments",
+    "wayou.vscode-todo-highlight"
+  ]
+}
