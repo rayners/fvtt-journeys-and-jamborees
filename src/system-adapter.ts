@@ -14,6 +14,7 @@
  */
 
 import { SystemConfigManager } from './system-config';
+import { isDragonbaneActor, isDragonbaneSkill } from './types/dragonbane-guards';
 
 export interface SkillRollResult {
   total: number;
@@ -89,8 +90,14 @@ export abstract class SystemAdapter {
  */
 class DragonbaneAdapter extends SystemAdapter {
   protected getActorSkillValue(actor: Actor, skillName: string): number | null {
+    if (!isDragonbaneActor(actor)) {
+      return null;
+    }
     const skill = actor.getSkill(skillName);
-    return skill?.system?.value ?? null;
+    if (skill && isDragonbaneSkill(skill)) {
+      return skill.system.value;
+    }
+    return null;
   }
 
   protected async performSkillRoll(actor: Actor, skillName: string): Promise<SkillRollResult> {
@@ -131,7 +138,7 @@ class DragonbaneAdapter extends SystemAdapter {
   hasSkill(actor: Actor, skillName: string): boolean {
     // In Dragonbane, skills are items, not properties in system.skills
     return actor.items.some(
-      (item: Item) => item.type === 'skill' && item.name.toLowerCase() === skillName.toLowerCase()
+      (item: Item) => isDragonbaneSkill(item) && item.name.toLowerCase() === skillName.toLowerCase()
     );
   }
 
@@ -143,7 +150,7 @@ class DragonbaneAdapter extends SystemAdapter {
   async triggerSkillRoll(actor: Actor, skillName: string): Promise<void> {
     // Find the skill item
     const skill = actor.items.find(
-      (item: Item) => item.type === 'skill' && item.name.toLowerCase() === skillName.toLowerCase()
+      (item: Item) => isDragonbaneSkill(item) && item.name.toLowerCase() === skillName.toLowerCase()
     );
 
     if (!skill) {

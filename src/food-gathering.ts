@@ -6,6 +6,7 @@
 import { SystemAdapterFactory } from './system-adapter';
 import { FoodTablesManager } from './food-tables';
 import { SkillRollTracker } from './skill-roll-tracker';
+import { isDragonbaneWeapon } from './types/dragonbane-guards';
 
 export interface FoodGatheringResult {
   success: boolean;
@@ -173,16 +174,17 @@ export class FoodGatheringSystem {
 
     // Find ranged weapons (range >= 10 and not thrown)
     for (const weapon of weapons) {
-      const isThrown = weapon.system.features?.thrown || false;
-      const range =
-        weapon.system.calculatedRange || weapon.system.range?.value || weapon.system.range || 0;
+      if (isDragonbaneWeapon(weapon)) {
+        const isThrown = weapon.system.features?.thrown || false;
+        const range = weapon.system.calculatedRange || 0;
 
-      if (!isThrown && range >= 10) {
-        return {
-          hasRangedWeapon: true,
-          weaponSkill: weapon.system.skill?.name,
-          weapon: weapon
-        };
+        if (!isThrown && range >= 10) {
+          return {
+            hasRangedWeapon: true,
+            weaponSkill: weapon.system.skill?.name,
+            weapon: weapon
+          };
+        }
       }
     }
 
