@@ -19,6 +19,7 @@ export interface ForagingTableResult {
 
 export class FoodTablesManager {
   private static instance: FoodTablesManager;
+  private jjFolder: Folder | null = null;
 
   private constructor() {}
 
@@ -27,6 +28,35 @@ export class FoodTablesManager {
       FoodTablesManager.instance = new FoodTablesManager();
     }
     return FoodTablesManager.instance;
+  }
+
+  /**
+   * Get or create the Journeys & Jamborees folder for RollTables
+   */
+  private async getJJFolder(): Promise<Folder | null> {
+    if (this.jjFolder) return this.jjFolder;
+
+    // Look for existing folder
+    this.jjFolder = game.folders.find(f => 
+      f.type === 'RollTable' && 
+      f.name === 'Journeys & Jamborees'
+    ) || null;
+
+    if (!this.jjFolder && game.user.isGM) {
+      try {
+        this.jjFolder = await Folder.create({
+          name: 'Journeys & Jamborees',
+          type: 'RollTable',
+          sorting: 'a',
+          color: '#4b0082',
+          description: 'RollTables created by the Journeys & Jamborees module'
+        });
+      } catch (error) {
+        console.warn('J&J | Failed to create folder:', error);
+      }
+    }
+
+    return this.jjFolder;
   }
 
   /**
@@ -73,12 +103,14 @@ export class FoodTablesManager {
    * Create the official Dragonbane hunting table (only when Core Set is available)
    */
   private async createDragonbaneHuntingTable(): Promise<RollTable> {
+    const folder = await this.getJJFolder();
     const tableData = {
       name: 'J&J Hunting Results',
       description: 'Official Dragonbane hunting results table (requires Core Set)',
       formula: '1d6',
       replacement: true,
       displayRoll: true,
+      folder: folder?.id || null,
       results: [
         {
           range: [1, 1],
@@ -162,12 +194,14 @@ export class FoodTablesManager {
    * Create a generic hunting table (no copyrighted content)
    */
   private async createGenericHuntingTable(): Promise<RollTable> {
+    const folder = await this.getJJFolder();
     const tableData = {
       name: 'J&J Hunting Results',
       description: 'Generic hunting results table for Journeys & Jamborees',
       formula: '1d6',
       replacement: true,
       displayRoll: true,
+      folder: folder?.id || null,
       results: [
         {
           range: [1, 1],
@@ -251,12 +285,14 @@ export class FoodTablesManager {
    * Create the generic foraging table
    */
   private async createGenericForagingTable(): Promise<RollTable> {
+    const folder = await this.getJJFolder();
     const tableData = {
       name: 'J&J Foraging Results',
       description: 'Generic foraging results table for Journeys & Jamborees',
       formula: '1d20',
       replacement: true,
       displayRoll: true,
+      folder: folder?.id || null,
       results: [
         {
           range: [1, 2],

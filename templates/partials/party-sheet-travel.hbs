@@ -16,6 +16,9 @@
             <button type="button" class="make-camp">
                 <i class="fas fa-campground"></i> {{localize "J&J.travelActions.makeCamp"}}
             </button>
+            <button type="button" class="toggle-mounted {{#if system.movement.isMounted}}active{{/if}}">
+                <i class="fas fa-horse"></i> {{#if system.movement.isMounted}}{{localize "J&J.travelActions.dismount"}}{{else}}{{localize "J&J.travelActions.mount"}}{{/if}}
+            </button>
         </div>
         
         {{!-- Travel Roles Section --}}
