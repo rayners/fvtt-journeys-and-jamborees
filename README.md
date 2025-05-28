@@ -1,5 +1,7 @@
 # Journeys & Jamborees
 
+[![Test Module](https://github.com/rayners/fvtt-journeys-and-jamborees/actions/workflows/test.yml/badge.svg)](https://github.com/rayners/fvtt-journeys-and-jamborees/actions/workflows/test.yml)
+
 > ⚠️ **ALPHA SOFTWARE - NOT READY FOR USE** ⚠️
 >
 > This module is in early development and is not ready for production use.
