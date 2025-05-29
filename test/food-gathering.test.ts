@@ -53,9 +53,11 @@ describe('FoodGatheringSystem', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Reset singleton
+    // Reset singletons
     // @ts-ignore
     FoodGatheringSystem.instance = undefined;
+    // @ts-ignore
+    FoodTablesManager.instance = undefined;
 
     // Set up mocks
     mockTracker = {
@@ -196,7 +198,7 @@ describe('FoodGatheringSystem', () => {
         {
           type: 'weapon',
           system: {
-            range: 20,
+            calculatedRange: 20,
             features: { thrown: false },
             skill: { name: 'bows' }
           }
@@ -277,7 +279,7 @@ describe('FoodGatheringSystem', () => {
         {
           type: 'weapon',
           system: {
-            range: 20,
+            calculatedRange: 20,
             features: { thrown: false },
             skill: { name: 'bows' }
           }
