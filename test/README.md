@@ -2,6 +2,38 @@
 
 This directory contains the test suite for the Journeys & Jamborees Foundry VTT module.
 
+## Shared Foundry Mock Setup
+
+### `foundry-mocks.ts` - Comprehensive Mock Library
+A shared, reusable mock setup for Foundry VTT that provides:
+
+- **Document Classes**: Actor, RollTable, Folder, Dialog, ChatMessage
+- **Foundry Globals**: game, ui, canvas, CONFIG, foundry, Hooks  
+- **Utility Functions**: All foundry.utils methods, template functions
+- **Canvas Support**: PIXI graphics, CanvasLayer, regions
+- **System Support**: Configurable for different game systems
+
+**Key Features:**
+- ✅ **Shared between projects** - Used by both J&J and R&R
+- ✅ **Complete API coverage** - Mocks all common Foundry APIs
+- ✅ **Region support** - Full Scene.regions collection with filter()
+- ✅ **Document creation** - Async create/update/delete methods
+- ✅ **System agnostic** - Works with any game system
+
+**Usage:**
+```typescript
+import { setupFoundryMocks, createMockScene, createMockRegion } from './foundry-mocks';
+
+setupFoundryMocks({
+  systemId: 'dragonbane',
+  user: { isGM: false },
+  includeCanvas: true
+});
+```
+
+### `setup.ts` - J&J Specific Configuration
+Project-specific setup that configures the shared mocks for Journeys & Jamborees needs.
+
 ## Test Frameworks
 
 We use a dual testing approach:
