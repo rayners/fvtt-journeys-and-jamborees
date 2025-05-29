@@ -2,6 +2,7 @@
   "name": "journeys-and-jamborees",
   "version": "0.1.0",
   "description": "A party management system for Dragonbane in Foundry VTT",
+  "type": "module",
   "main": "dist/module.js",
   "scripts": {
     "build": "rollup -c",
