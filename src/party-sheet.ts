@@ -4,7 +4,7 @@ declare global {
 }
 
 import { patchPartyActor } from './utils';
-import { getSkillValue, getRoleSkillValues } from './helpers';
+import { getSkillValue } from './helpers';
 import { SystemConfigManager } from './system-config';
 import { SkillManager } from './skill-manager';
 
@@ -348,7 +348,7 @@ export class PartyActorSheet extends ActorSheet {
 
     // Find all users with owner permission (level 3)
     const ownerIds = Object.entries(character.ownership || {})
-      .filter(([id, level]) => level === 3)
+      .filter(([_id, level]) => level === 3)
       .map(([id]) => id);
 
     if (ownerIds.length === 0) return null;
@@ -417,7 +417,7 @@ export class PartyActorSheet extends ActorSheet {
   _fixPortraitSizes(html) {
     // Set size for all character portraits
     const portraits = html.find('.character-portrait, .thumbnail');
-    portraits.each((i, img) => {
+    portraits.each((_i, img) => {
       img.style.width = '48px';
       img.style.height = '48px';
       img.style.maxWidth = '48px';
@@ -429,7 +429,7 @@ export class PartyActorSheet extends ActorSheet {
 
     // Also target any images with 'mage.webp' or similar in src
     const characterImages = html.find('img[src*="actors/"]');
-    characterImages.each((i, img) => {
+    characterImages.each((_i, img) => {
       // Skip profile image
       if (img.classList.contains('profile-img')) return;
 

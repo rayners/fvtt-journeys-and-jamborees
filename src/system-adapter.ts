@@ -266,7 +266,7 @@ class Pf2eAdapter extends SystemAdapter {
     return skillName.toLowerCase() in (actor.system.skills || {});
   }
 
-  getActorSpeed(actor: Actor, mounted: boolean): number {
+  getActorSpeed(actor: Actor, _mounted: boolean): number {
     const speed = actor.system.attributes?.speed;
     return speed?.total || speed?.value || 25;
   }

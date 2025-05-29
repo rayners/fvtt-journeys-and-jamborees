@@ -99,7 +99,7 @@ export class SkillRollTracker {
 
     // Extract data from the skill roll
     const actorId = skillRollDiv.getAttribute('data-actor-id');
-    const skillId = skillRollDiv.getAttribute('data-skill-id');
+    const _skillId = skillRollDiv.getAttribute('data-skill-id');
     const result = parseInt(skillRollDiv.getAttribute('data-result') || '0');
     const target = parseInt(skillRollDiv.getAttribute('data-target') || '0');
 

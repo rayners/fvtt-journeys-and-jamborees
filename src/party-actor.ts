@@ -381,11 +381,12 @@ export class PartyActorType extends Actor {
     const hasCoreSet = game.modules.get('dragonbane-coreset')?.active;
 
     // Store reference to this actor before creating dialog
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const partyActor = this;
 
     if (isDragonbane && hasCoreSet) {
       // Show food gathering dialog
-      const foodGatheringAvailable = true;
+      const _foodGatheringAvailable = true;
 
       // Create dialog for camp activities
       new Dialog({
@@ -781,8 +782,11 @@ export class PartyActorType extends Actor {
       if (typeof this._updateOwnershipAfterRemoval === 'function') {
         try {
           await this._updateOwnershipAfterRemoval();
-        } catch (error) {}
+        } catch (error) {
+          // Ignore errors when updating ownership after removal
+        }
       } else {
+        // Method not available, continue without updating ownership
       }
     }
 
@@ -828,6 +832,7 @@ export class PartyActorType extends Actor {
     if (typeof this._resetOwnershipToGMOnly === 'function') {
       await this._resetOwnershipToGMOnly();
     } else {
+      // Method not available, continue without resetting ownership
     }
 
     ui.notifications.info(`Removed all ${characterCount} characters from the party.`);

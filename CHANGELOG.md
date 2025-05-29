@@ -96,4 +96,3 @@
 - Method availability on party actor instances
 - Multiple localization issues
 - Missing translation for Party Journal heading
-

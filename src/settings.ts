@@ -1,5 +1,5 @@
 import { SystemConfigManager } from './system-config';
-import { SkillManager } from './skill-manager';
+// import { SkillManager } from './skill-manager'; // Not used in this file
 
 export const registerSettings = function () {
   // Register any module settings here
@@ -20,7 +20,7 @@ export const registerSettings = function () {
     config: true,
     type: Number,
     default: SystemConfigManager.getInstance().getConfig().movement.onFoot.value,
-    onChange: value => updateSystemConfig()
+    onChange: _value => updateSystemConfig()
   });
 
   game.settings.register('journeys-and-jamborees', 'movementMounted', {
@@ -30,7 +30,7 @@ export const registerSettings = function () {
     config: true,
     type: Number,
     default: SystemConfigManager.getInstance().getConfig().movement.mounted.value,
-    onChange: value => updateSystemConfig()
+    onChange: _value => updateSystemConfig()
   });
 
   game.settings.register('journeys-and-jamborees', 'movementUnit', {
@@ -40,7 +40,7 @@ export const registerSettings = function () {
     config: true,
     type: String,
     default: SystemConfigManager.getInstance().getConfig().movement.onFoot.unit,
-    onChange: value => updateSystemConfig()
+    onChange: _value => updateSystemConfig()
   });
 
   // Skill settings will be registered after the game is ready
@@ -53,7 +53,7 @@ export const registerSettings = function () {
     config: true,
     type: String,
     default: SystemConfigManager.getInstance().getConfig().dice.randomEncounter,
-    onChange: value => updateSystemConfig()
+    onChange: _value => updateSystemConfig()
   });
 
   game.settings.register('journeys-and-jamborees', 'encounterThreshold', {
@@ -63,7 +63,7 @@ export const registerSettings = function () {
     config: true,
     type: Number,
     default: SystemConfigManager.getInstance().getConfig().dice.encounterThreshold,
-    onChange: value => updateSystemConfig()
+    onChange: _value => updateSystemConfig()
   });
 
   game.settings.register('journeys-and-jamborees', 'weatherDice', {
@@ -73,7 +73,7 @@ export const registerSettings = function () {
     config: true,
     type: String,
     default: SystemConfigManager.getInstance().getConfig().dice.weather,
-    onChange: value => updateSystemConfig()
+    onChange: _value => updateSystemConfig()
   });
 
   // Add setting for auto-adding characters on party creation

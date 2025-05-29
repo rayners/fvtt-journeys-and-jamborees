@@ -12,12 +12,14 @@ This guide helps contributors set up their development environment for the Journ
 ## Initial Setup
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/rayners/fvtt-journeys-and-jamborees.git
    cd fvtt-journeys-and-jamborees
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
@@ -45,12 +47,14 @@ This guide helps contributors set up their development environment for the Journ
 To test the module in Foundry VTT, you need to link it to your Foundry data directory:
 
 **macOS/Linux:**
+
 ```bash
 # Find your Foundry data directory (usually ~/Documents/FoundryVTT/Data)
 ln -s $(pwd)/dist ~/Documents/FoundryVTT/Data/modules/journeys-and-jamborees
 ```
 
 **Windows:**
+
 ```cmd
 # Run as Administrator
 mklink /D "C:\Users\%USERNAME%\AppData\Local\FoundryVTT\Data\modules\journeys-and-jamborees" "%CD%\dist"
@@ -61,6 +65,7 @@ After linking, restart Foundry VTT and enable the module in your world.
 ## Code Style
 
 This project uses:
+
 - **ESLint** for TypeScript linting
 - **Prettier** for code formatting
 - **EditorConfig** for consistent editor settings
@@ -68,6 +73,7 @@ This project uses:
 ### VS Code Setup
 
 If you use VS Code, install the recommended extensions when prompted. The workspace settings are already configured for:
+
 - Format on save
 - ESLint auto-fix on save
 - TypeScript validation

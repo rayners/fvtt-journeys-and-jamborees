@@ -74,7 +74,7 @@ declare global {
     // For skills
     value?: number;
     advance?: boolean;
-    
+
     // For weapons
     features?: {
       thrown?: boolean;
@@ -101,7 +101,7 @@ declare global {
 }
 
 // Type guard functions that can be used in the module
-declare module "dragonbane-types" {
+declare module 'dragonbane-types' {
   export function isDragonbaneActor(actor: Actor): actor is Actor & {
     getSkill(skillName: string): Item | undefined;
     system: ActorDataProperties & Dragonbane.SystemData;

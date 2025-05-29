@@ -373,7 +373,7 @@ export class FoodGatheringSystem {
     // Modify the roll based on season
     // In Dragonbane, bane/boon would be handled differently
     // For now, we'll just note it in the description
-    const seasonModifier = season === 'winter' ? 'bane' : season === 'fall' ? 'boon' : 'normal';
+    const _seasonModifier = season === 'winter' ? 'bane' : season === 'fall' ? 'boon' : 'normal';
 
     const foragingResult = await this.rollSkillWithTracking(actor, foragingSkill, 'forage');
 

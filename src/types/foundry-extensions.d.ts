@@ -57,17 +57,13 @@ declare global {
     type: string;
     system: any;
     sheet: ActorSheet;
-    
+
     // System-specific methods
     getSkill?(skillName: string): any;
     rollSkill?(skillName: string, options?: any): Promise<any>;
     rollAbility?(abilityName: string, options?: any): Promise<any>;
-    createEmbeddedDocuments?(
-      embeddedName: string,
-      data: any[],
-      context?: any
-    ): Promise<any[]>;
-    
+    createEmbeddedDocuments?(embeddedName: string, data: any[], context?: any): Promise<any[]>;
+
     // Party-specific methods (added by our module)
     getCharacters?(): Actor[];
     setCharacterStatus?(characterId: string, status: string): Promise<void>;

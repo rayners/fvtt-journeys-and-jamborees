@@ -23,8 +23,7 @@ export function registerKeybindings(): void {
 function openPartySheet(): void {
   // Find all party actors the user has permission to view
   const partyActors = game.actors.filter(actor => {
-    const isPartyActor =
-      actor.type === 'party' || actor.type === 'journeys-and-jamborees.party';
+    const isPartyActor = actor.type === 'party' || actor.type === 'journeys-and-jamborees.party';
     const hasPermission = actor.testUserPermission(game.user, 'OBSERVER');
     return isPartyActor && hasPermission;
   });

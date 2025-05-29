@@ -10,7 +10,7 @@ describe('FoodTablesManager Folder Organization', () => {
     // Setup Foundry mocks
     vi.clearAllMocks();
     tablesManager = FoodTablesManager.getInstance();
-    
+
     // Mock folder
     mockFolder = {
       id: 'test-folder-id',
@@ -28,7 +28,7 @@ describe('FoodTablesManager Folder Organization', () => {
 
     // Mock RollTable.create to capture folder assignment
     (global as any).RollTable = {
-      create: vi.fn().mockImplementation((data) => {
+      create: vi.fn().mockImplementation(data => {
         const table = { id: 'test-table-id', ...data };
         mockTables.push(table);
         return Promise.resolve(table);

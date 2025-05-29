@@ -136,13 +136,13 @@ export const registerPartyActorType = function () {
 /**
  * Handles adding the party type to the actor creation dialog
  */
-export const setupActorCreationHook = function (partyType) {
+export const setupActorCreationHook = function (_partyType) {
   // The full namespaced type as Foundry would generate it
   const namespacedType = 'journeys-and-jamborees.party';
   const doubleNamespacedType = 'journeys-and-jamborees.journeys-and-jamborees.party';
 
   // Add a hook to inject our actor type into the creation dialog
-  Hooks.on('renderDialog', (dialog, html, data) => {
+  Hooks.on('renderDialog', (dialog, html, _data) => {
     // Check if this is the create actor dialog
     const title = dialog.title;
     if (title === 'Create Actor') {

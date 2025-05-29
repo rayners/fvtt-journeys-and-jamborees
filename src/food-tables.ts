@@ -37,10 +37,8 @@ export class FoodTablesManager {
     if (this.jjFolder) return this.jjFolder;
 
     // Look for existing folder
-    this.jjFolder = game.folders.find(f => 
-      f.type === 'RollTable' && 
-      f.name === 'Journeys & Jamborees'
-    ) || null;
+    this.jjFolder =
+      game.folders.find(f => f.type === 'RollTable' && f.name === 'Journeys & Jamborees') || null;
 
     if (!this.jjFolder && game.user.isGM) {
       try {
@@ -80,6 +78,7 @@ export class FoodTablesManager {
         huntingTable = await this.createGenericHuntingTable();
       }
     } else {
+      // Hunting table already exists, use it
     }
 
     return huntingTable;

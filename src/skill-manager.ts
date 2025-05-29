@@ -222,7 +222,7 @@ export class SkillManager {
     // For Dragonbane specifically, check if the coreset module is active
     if (game.system.id === 'dragonbane' && game.modules.get('dragonbane-coreset')?.active) {
       // The module is installed and active, so we can safely check its compendiums
-      const coresetPacks = game.packs.filter(
+      const _coresetPacks = game.packs.filter(
         (pack: CompendiumCollection) =>
           pack.metadata.packageName === 'dragonbane-coreset' && pack.documentName === 'Item'
       );
@@ -280,7 +280,7 @@ export class SkillManager {
       type: String,
       default: this.findBestMatch(config.skills.pathfinding, availableSkills),
       choices: skillChoices,
-      onChange: value => this.onSkillChange()
+      onChange: _value => this.onSkillChange()
     });
 
     // Register lookout skill
@@ -292,7 +292,7 @@ export class SkillManager {
       type: String,
       default: this.findBestMatch(config.skills.lookout, availableSkills),
       choices: skillChoices,
-      onChange: value => this.onSkillChange()
+      onChange: _value => this.onSkillChange()
     });
 
     // Register quartermaster skill
@@ -304,7 +304,7 @@ export class SkillManager {
       type: String,
       default: this.findBestMatch(config.skills.quartermaster, availableSkills),
       choices: skillChoices,
-      onChange: value => this.onSkillChange()
+      onChange: _value => this.onSkillChange()
     });
 
     // Register hunting skill
@@ -316,7 +316,7 @@ export class SkillManager {
       type: String,
       default: this.findBestMatch(config.skills.hunting, availableSkills),
       choices: skillChoices,
-      onChange: value => this.onSkillChange()
+      onChange: _value => this.onSkillChange()
     });
 
     // Register foraging skill
@@ -328,7 +328,7 @@ export class SkillManager {
       type: String,
       default: this.findBestMatch(config.skills.foraging, availableSkills),
       choices: skillChoices,
-      onChange: value => this.onSkillChange()
+      onChange: _value => this.onSkillChange()
     });
   }
 

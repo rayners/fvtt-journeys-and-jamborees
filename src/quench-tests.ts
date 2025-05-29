@@ -23,7 +23,7 @@ export function registerQuenchTests(): void {
 
   // Register Party Actor tests
   quench.registerBatch('journeys-and-jamborees.party-actor', context => {
-    const { describe, it, assert, expect, beforeEach, afterEach } = context;
+    const { describe, it, assert, beforeEach, afterEach } = context;
 
     describe('Party Actor Integration Tests', function () {
       let partyActor: Actor;
@@ -190,7 +190,7 @@ export function registerQuenchTests(): void {
 
   // Register Party Sheet UI tests
   quench.registerBatch('journeys-and-jamborees.party-sheet', context => {
-    const { describe, it, assert, expect, beforeEach, afterEach } = context;
+    const { describe, it, assert, beforeEach, afterEach } = context;
 
     describe('Party Sheet UI Tests', function () {
       let partyActor: Actor;
@@ -332,7 +332,7 @@ export function registerQuenchTests(): void {
   // Dragonbane-specific tests
   if (systemId === 'dragonbane') {
     quench.registerBatch('journeys-and-jamborees.system-dragonbane', context => {
-      const { describe, it, assert, expect } = context;
+      const { describe, it, assert } = context;
 
       describe('Dragonbane System Tests', function () {
         let partyActor: Actor;
@@ -437,7 +437,7 @@ export function registerQuenchTests(): void {
   // D&D 5e-specific tests
   if (systemId === 'dnd5e') {
     quench.registerBatch('journeys-and-jamborees.system-dnd5e', context => {
-      const { describe, it, assert, expect } = context;
+      const { describe, it, assert } = context;
 
       describe('D&D 5e System Tests', function () {
         let partyActor: Actor;
@@ -830,7 +830,7 @@ export function registerQuenchTests(): void {
   // Register Food Gathering tests
   if (game.system.id === 'dragonbane') {
     quench.registerBatch('journeys-and-jamborees.food-gathering', context => {
-      const { describe, it, assert, expect, beforeEach, afterEach } = context;
+      const { describe, it, assert, beforeEach, afterEach } = context;
 
       describe('Food Gathering System Tests', function () {
         let partyActor: Actor;
