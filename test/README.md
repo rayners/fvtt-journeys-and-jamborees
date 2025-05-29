@@ -2,6 +2,11 @@
 
 This directory contains the test suite for the Journeys & Jamborees Foundry VTT module.
 
+## ✅ **CURRENT STATUS: 100% PASS RATE**
+- **64/64 tests passing** (Last updated: 2025-01-28)
+- **Complete CI pipeline success**
+- **All mock integration issues resolved**
+
 ## Shared Foundry Mock Setup
 
 ### `foundry-mocks.ts` - Comprehensive Mock Library
@@ -352,3 +357,50 @@ Tests run automatically on:
 - Release preparation
 
 Test results are reported in GitHub Actions and must pass for merges.
+
+## Recent Testing Achievements ✅
+
+### 100% Pass Rate Milestone (2025-01-28)
+
+**Background**: J&J previously had 2 failing tests in the food gathering system that were preventing complete CI success.
+
+**Root Causes Identified**:
+1. **Singleton Mock Issues**: `FoodTablesManager.instance` wasn't being reset between tests, causing the mock to not be applied properly
+2. **Type Definition Mismatch**: Test weapon objects used `range` instead of `calculatedRange`, failing Dragonbane type validation
+
+**Solutions Implemented**:
+
+1. **Comprehensive Singleton Reset Pattern**:
+   ```typescript
+   beforeEach(() => {
+     vi.clearAllMocks();
+     
+     // Reset ALL singleton instances
+     // @ts-ignore
+     FoodGatheringSystem.instance = undefined;
+     // @ts-ignore  
+     FoodTablesManager.instance = undefined;
+     // @ts-ignore
+     SkillRollTracker.instance = undefined;
+   });
+   ```
+
+2. **Correct Dragonbane Weapon Structure**:
+   ```typescript
+   const mockWeapon = {
+     type: 'weapon',
+     system: {
+       calculatedRange: 20,  // Fixed: was 'range'
+       features: { thrown: false },
+       skill: { name: 'bows' }
+     }
+   };
+   ```
+
+**Impact**:
+- ✅ **Before**: 62/64 tests passing (97% pass rate)
+- ✅ **After**: 64/64 tests passing (100% pass rate)
+- ✅ **Result**: Complete green CI build status
+- ✅ **Benefit**: Reliable development environment for ongoing work
+
+**Key Learning**: Always reset singleton instances in test setup when using dependency injection patterns with mocks. This pattern applies to any module using singleton classes.
