@@ -34,6 +34,16 @@
   "documentation": "https://docs.rayners.dev/journeys-and-jamborees",
   "bugs": "https://github.com/rayners/fvtt-journeys-and-jamborees/issues",
   "changelog": "https://github.com/rayners/fvtt-journeys-and-jamborees/blob/main/CHANGELOG.md",
+  "funding": [
+    {
+      "type": "patreon",
+      "url": "https://patreon.com/rayners"
+    },
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/rayners"
+    }
+  ],
   "documentTypes": {
     "Actor": {
       "party": {

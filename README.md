@@ -148,6 +148,15 @@ For more details, see our [full documentation](https://docs.rayners.dev/journeys
 - **Bug Reports**: [GitHub Issues](https://github.com/rayners/fvtt-journeys-and-jamborees/issues)
 - **Discussion**: Foundry VTT Discord #module-discussion
 
+### Supporting Development
+
+Consider supporting continued development of this module:
+
+- **GitHub Sponsors**: [github.com/sponsors/rayners](https://github.com/sponsors/rayners)
+- **Patreon**: [patreon.com/rayners](https://patreon.com/rayners)
+
+Your support helps fund ongoing development and maintenance.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

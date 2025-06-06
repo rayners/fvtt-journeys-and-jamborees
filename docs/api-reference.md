@@ -369,3 +369,12 @@ Hooks.on("jj.resourcesConsumed", (party, consumed) => {
 4. **Listen to hooks** instead of polling for changes
 
 5. **Respect permissions** - the API enforces the same permission rules as the UI
+
+## Supporting Development
+
+Consider supporting continued development of this module:
+
+- **GitHub Sponsors**: [github.com/sponsors/rayners](https://github.com/sponsors/rayners)
+- **Patreon**: [patreon.com/rayners](https://patreon.com/rayners)
+
+Your support helps fund ongoing development and maintenance.

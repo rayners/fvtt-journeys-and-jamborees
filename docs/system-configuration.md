@@ -114,3 +114,12 @@ If you'd like to contribute pre-configured settings for additional systems, plea
 - Skill names for pathfinding, lookout, and quartermaster roles
 - Dice formulas and thresholds
 - Any special considerations
+
+## Supporting Development
+
+Consider supporting continued development of this module:
+
+- **GitHub Sponsors**: [github.com/sponsors/rayners](https://github.com/sponsors/rayners)
+- **Patreon**: [patreon.com/rayners](https://patreon.com/rayners)
+
+Your support helps fund ongoing development and maintenance.

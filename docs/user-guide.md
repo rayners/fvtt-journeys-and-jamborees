@@ -439,6 +439,15 @@ When you add a character to a party:
 - Campaign milestone tracking
 - Enhanced automation features
 
+## Supporting Development
+
+Consider supporting continued development of this module:
+
+- **GitHub Sponsors**: [github.com/sponsors/rayners](https://github.com/sponsors/rayners)
+- **Patreon**: [patreon.com/rayners](https://patreon.com/rayners)
+
+Your support helps fund ongoing development and maintenance.
+
 ---
 
 *This guide will be updated as features are added and refined. Check back regularly for the latest information!*

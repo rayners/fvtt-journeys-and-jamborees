@@ -156,3 +156,12 @@ Here's a sample configuration for a fantasy world:
 - Quartermaster Skill: Leadership
 
 This creates a simple but functional travel system for your Simple Worldbuilding game!
+
+## Supporting Development
+
+Consider supporting continued development of this module:
+
+- **GitHub Sponsors**: [github.com/sponsors/rayners](https://github.com/sponsors/rayners)
+- **Patreon**: [patreon.com/rayners](https://patreon.com/rayners)
+
+Your support helps fund ongoing development and maintenance.
