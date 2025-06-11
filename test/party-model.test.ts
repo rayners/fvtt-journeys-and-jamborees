@@ -126,7 +126,7 @@ describe('PartyModel', () => {
       // Test that the movement calculation doesn't crash when mounted config is missing
       // This simulates a system that only defines on-foot movement
       partyModel.movement.isMounted = true;
-      
+
       // The current implementation should handle this gracefully
       expect(() => partyModel._calculateMovement()).not.toThrow();
       expect(partyModel.movement.value).toBeDefined();
@@ -163,13 +163,16 @@ describe('PartyModel', () => {
     it('should handle very large party sizes', () => {
       const largeMemberStatus = {};
       for (let i = 0; i < 100; i++) {
-        largeMemberStatus[`char${i}`] = i % 3 === 0 ? 'active' : i % 3 === 1 ? 'traveling' : 'stayingBehind';
+        largeMemberStatus[`char${i}`] =
+          i % 3 === 0 ? 'active' : i % 3 === 1 ? 'traveling' : 'stayingBehind';
       }
       partyModel.memberStatus = largeMemberStatus;
       partyModel.prepareDerivedData();
 
       expect(partyModel.totalMembers).toBe(100);
-      expect(partyModel.activeCount + partyModel.travelingCount + partyModel.stayingBehindCount).toBe(100);
+      expect(
+        partyModel.activeCount + partyModel.travelingCount + partyModel.stayingBehindCount
+      ).toBe(100);
     });
 
     it('should handle zero resources with zero members', () => {

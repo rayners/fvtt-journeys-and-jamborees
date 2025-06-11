@@ -11,9 +11,7 @@ setupFoundryMocks({
 // J&J-specific game enhancements
 if (globalThis.game) {
   // Add modules map for coreset detection
-  globalThis.game.modules = new Map([
-    ['dragonbane-coreset', { active: false }]
-  ]);
+  globalThis.game.modules = new Map([['dragonbane-coreset', { active: false }]]);
 
   // Add tables map for FoodTablesManager
   globalThis.game.tables = {
