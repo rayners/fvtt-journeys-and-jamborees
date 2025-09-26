@@ -1,0 +1,1 @@
+../local-docs/fvtt-journeys-and-jamborees/development/CLAUDE.md
