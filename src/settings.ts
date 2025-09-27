@@ -1,4 +1,4 @@
-import { SystemConfigManager } from './system-config';
+import { SystemConfigManager } from './core/system-config';
 // import { SkillManager } from './skill-manager'; // Not used in this file
 
 export const registerSettings = function () {

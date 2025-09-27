@@ -1,4 +1,4 @@
-import { SystemConfigManager } from './system-config.js';
+import { SystemConfigManager } from './core/system-config.js';
 
 /**
  * Extends the base Actor class to implement additional party-specific logic.

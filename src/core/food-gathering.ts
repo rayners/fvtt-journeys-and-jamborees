@@ -4,9 +4,9 @@
  */
 
 import { SystemAdapterFactory } from './system-adapter';
-import { FoodTablesManager } from './food-tables';
+import { FoodTablesManager } from '../food-tables';
 import { SkillRollTracker } from './skill-roll-tracker';
-import { isDragonbaneWeapon } from './types/dragonbane-guards';
+import { isDragonbaneWeapon } from '../types/systems/dragonbane-guards';
 
 export interface FoodGatheringResult {
   success: boolean;

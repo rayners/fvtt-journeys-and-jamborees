@@ -3,10 +3,10 @@ declare global {
   let Dialog: any; // Use global Dialog but suppress the warning
 }
 
-import { patchPartyActor } from './utils';
-import { getSkillValue } from './helpers';
-import { SystemConfigManager } from './system-config';
-import { SkillManager } from './skill-manager';
+import { patchPartyActor } from '../core/utils';
+import { getSkillValue } from '../helpers';
+import { SystemConfigManager } from '../core/system-config';
+import { SkillManager } from '../core/skill-manager';
 
 /**
  * Extends the basic ActorSheet with specific logic for the party actor sheet.

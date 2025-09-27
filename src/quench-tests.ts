@@ -4,8 +4,8 @@
  */
 
 import type * as Quench from '@ethaks/fvtt-quench';
-import { patchPartyActor } from './utils';
-import { SystemConfigManager } from './system-config';
+import { patchPartyActor } from './core/utils';
+import { SystemConfigManager } from './core/system-config';
 
 declare global {
   interface Window {

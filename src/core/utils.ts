@@ -2,7 +2,7 @@
  * Utility functions for the Journeys & Jamborees module
  */
 
-import { PartyActorType } from './party-actor';
+import { PartyActorType } from '../party-actor';
 
 /**
  * Patches a party actor with the required methods if they're missing

@@ -1,7 +1,7 @@
 // Import required classes
 import { PartyActorType } from './party-actor';
-import { PartyModel } from './party-model';
-import { PartyActorSheet } from './party-sheet';
+import { PartyModel } from './core/party-model';
+import { PartyActorSheet } from './ui/party-sheet';
 
 /**
  * Handles registration of the party actor type with Foundry VTT
