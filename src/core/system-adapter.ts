@@ -14,7 +14,7 @@
  */
 
 import { SystemConfigManager } from './system-config';
-import { isDragonbaneActor, isDragonbaneSkill } from './types/dragonbane-guards';
+import { isDragonbaneActor, isDragonbaneSkill } from '../types/systems/dragonbane-guards';
 
 export interface SkillRollResult {
   total: number;

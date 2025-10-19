@@ -2,7 +2,7 @@
  * Helper functions for skills and character data in Journeys & Jamborees
  */
 
-import { SystemAdapterFactory } from './system-adapter';
+import { SystemAdapterFactory } from './core/system-adapter';
 
 /**
  * Get the value of a specific skill from an actor

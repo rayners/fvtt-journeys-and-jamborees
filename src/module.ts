@@ -3,15 +3,15 @@ import '../styles/journeys-and-jamborees.scss';
 
 // Import required modules
 import { registerSettings } from './settings';
-import { SkillManager } from './skill-manager';
+import { SkillManager } from './core/skill-manager';
 import { preloadTemplates } from './templates';
 import { registerHooks } from './hooks';
 import { registerPartyActorType, setupActorCreationHook } from './registration';
-import { patchPartyActor } from './utils';
-import { SkillRollTracker } from './skill-roll-tracker';
+import { patchPartyActor } from './core/utils';
+import { SkillRollTracker } from './core/skill-roll-tracker';
 import { registerKeybindings } from './keybindings';
 // Import API for external access
-import './api';
+import './core/api';
 // Import quench tests - they self-register via the quenchReady hook
 import './quench-tests';
 // Import Dragonbane Roll API if using Dragonbane
