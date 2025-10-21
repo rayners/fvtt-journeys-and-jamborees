@@ -3,18 +3,22 @@ name: Release Module
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      packages: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Release Journeys & Jamborees
-        uses: rayners/foundry-module-actions@main
+        uses: rayners/foundry-module-actions/release@v6.0.0
         with:
           node-version: '20'
           build-command: 'npm run build'
