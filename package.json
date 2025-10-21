@@ -20,6 +20,7 @@
     "test:watch": "vitest --watch",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
+    "test:coverage:junit": "vitest run --coverage --reporter=junit",
     "validate": "npm run lint && npm run format:check && npm run typecheck && npm run test:run && npm run build",
     "link-module": "node ../foundry-dev-tools/scripts/link-module.js",
     "prepare": "npm run build"
@@ -28,7 +29,7 @@
   "license": "MIT",
   "devDependencies": {
     "@ethaks/fvtt-quench": "^0.10.0",
-    "@rayners/foundry-dev-tools": "^1.2.0",
+    "@rayners/foundry-dev-tools": "^1.6.1",
     "@types/jquery": "^3.5.30",
     "eslint": "^9.28.0",
     "jsdom": "^26.1.0",

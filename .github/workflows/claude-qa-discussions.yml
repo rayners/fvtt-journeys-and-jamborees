@@ -17,12 +17,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 1
 
       - name: Checkout dev-context repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: rayners/dev-context
           path: dev-context
@@ -64,5 +64,5 @@ jobs:
 
             Skip questions that already have any responses.
           claude_args: |
-            --model claude-sonnet-4-0
+            --model claude-sonnet-4-5
             --allowedTools "Bash(gh api:*),Bash(gh search:*),Read,WebFetch(domain:foundryvtt.com),WebFetch(domain:foundryvtt.wiki)"

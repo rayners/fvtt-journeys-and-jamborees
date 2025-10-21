@@ -17,12 +17,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 1
 
       - name: Checkout dev-context repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: rayners/dev-context
           path: dev-context
@@ -55,5 +55,5 @@ jobs:
             Focus on party management system issues, system compatibility problems, and travel mechanics bugs.
             Respond directly to the issue with your assessment. Use @-username (with dash) to avoid notifications during testing.
           claude_args: |
-            --model claude-sonnet-4-0
+            --model claude-sonnet-4-5
             --allowedTools "Bash(gh issue comment:*),Bash(gh issue view:*),Read,WebFetch,Glob,Grep"
