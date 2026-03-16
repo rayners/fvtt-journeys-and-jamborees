@@ -1,4 +1,4 @@
-<section class="tab formation" data-group="primary" data-tab="formation">
+<section class="tab formation {{tab.cssClass}}" data-group="primary" data-tab="formation">
     <div class="formation-layout">
         {{!-- Marching Order --}}
         <div class="marching-order-section">
@@ -40,7 +40,7 @@
                     <div class="activity-name">{{row.name}}</div>
                     <select class="activity-select" data-char-id="{{row.id}}" {{#unless row.isOwner}}disabled{{/unless}}>
                         <option value="">-- Select --</option>
-                        {{#each activityData as |cat catKey|}}
+                        {{#each @root.activityData as |cat catKey|}}
                         <optgroup label="{{cat.label}}">
                             {{#each cat.options as |option optKey|}}
                             <option value="{{optKey}}" {{#if (eq row.actKey optKey)}}selected{{/if}}>
@@ -60,15 +60,21 @@
                     {{/if}}
                     {{#if row.skillToRoll}}
                     <button type="button"
-                            class="roll-activity-btn"
+                            class="roll-activity-btn{{#if row.customSkill}} custom{{/if}}"
                             data-action="rollActivity"
                             data-char-id="{{row.id}}"
                             data-skill="{{row.skillToRoll}}"
                             data-activity="{{row.actOption.label}}"
                             data-target="{{row.targetId}}"
-                            title="Roll {{row.skillLabel}}">
+                            data-custom="{{row.customSkill}}"
+                            title="Roll {{row.skillLabel}}{{#if row.customSkill}} (custom){{/if}}">
                         <i class="fas fa-dice-d20"></i>
                     </button>
+                    {{#if row.customSkill}}
+                    <span class="custom-skill-badge" title="Custom skill: {{row.customSkill}}">
+                        <i class="fas fa-star"></i>
+                    </span>
+                    {{/if}}
                     {{/if}}
                     {{#if row.isOwner}}
                     <button type="button"

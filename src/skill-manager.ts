@@ -337,41 +337,62 @@ export class SkillManager {
    * This uses fuzzy matching to handle different naming conventions
    */
   findBestMatch(desiredSkill: string, availableSkills: Record<string, string>): string {
-    const desired = desiredSkill.toLowerCase();
+    // Normalize: lowercase + underscores to spaces (activity-data uses snake_case)
+    const desired = desiredSkill.toLowerCase().replace(/_/g, ' ');
 
-    // Direct key match (case-insensitive)
-    const exactMatch = Object.keys(availableSkills).find(key => key.toLowerCase() === desired);
+    // Direct key match (case-insensitive, underscore-normalized)
+    const exactMatch = Object.keys(availableSkills).find(
+      key => key.toLowerCase().replace(/_/g, ' ') === desired
+    );
     if (exactMatch) return exactMatch;
 
-    // Handle special characters in skill names (e.g., "hunting & fishing")
+    // Handle special characters in skill names (e.g., "hunting & fishing" → "hunting and fishing")
     const normalizedDesired = desired.replace(/[&]/g, 'and');
     const specialCharMatch = Object.keys(availableSkills).find(key => {
-      const normalizedKey = key.toLowerCase().replace(/[&]/g, 'and');
+      const normalizedKey = key.toLowerCase().replace(/_/g, ' ').replace(/[&]/g, 'and');
       return normalizedKey === normalizedDesired;
     });
     if (specialCharMatch) return specialCharMatch;
 
     // Partial match in key
     const partialMatch = Object.keys(availableSkills).find(
-      key => key.toLowerCase().includes(desired) || desired.includes(key.toLowerCase())
+      key => key.toLowerCase().replace(/_/g, ' ').includes(desired) || desired.includes(key.toLowerCase().replace(/_/g, ' '))
     );
     if (partialMatch) return partialMatch;
 
+    // Word-based matching: all words in desired must appear in key
+    // Handles "hunting fishing" matching "Hunting & Fishing"
+    const desiredWords = desired.split(/\s+/);
+    if (desiredWords.length > 1) {
+      const wordMatch = Object.keys(availableSkills).find(key => {
+        const keyLower = key.toLowerCase();
+        return desiredWords.every(word => keyLower.includes(word));
+      });
+      if (wordMatch) return wordMatch;
+    }
+
     // Common synonyms mapping (only using generic terms)
     const synonyms: Record<string, string[]> = {
-      perception: ['awareness', 'notice', 'spot', 'observe'],
+      perception: ['awareness', 'notice', 'spot', 'observe', 'spot_hidden'],
       survival: ['bushcraft', 'outdoors', 'wilderness'],
-      persuasion: ['diplomacy', 'bartering', 'negotiate', 'social'],
-      stealth: ['sneak', 'hide', 'sneaking']
+      persuasion: ['diplomacy', 'bartering', 'negotiate', 'social', 'bluffing'],
+      stealth: ['sneak', 'hide', 'sneaking'],
+      medicine: ['healing', 'first_aid', 'treat_wounds'],
+      performance: ['perform', 'entertainment', 'entertain'],
+      athletics: ['acrobatics', 'physical', 'climbing'],
+      arcana: ['learning', 'lore', 'knowledge'],
+      deception: ['bluffing', 'gambling', 'gamble'],
+      insight: ['empathy']
     };
 
-    // Check synonyms
+    // Check synonyms (normalize alternatives to spaces like desired is)
     for (const [synonym, alternatives] of Object.entries(synonyms)) {
-      if (desired === synonym || alternatives.includes(desired)) {
+      const normalizedAlts = alternatives.map(a => a.replace(/_/g, ' '));
+      if (desired === synonym || normalizedAlts.includes(desired)) {
         const synMatch = Object.keys(availableSkills).find(
           key =>
-            key.toLowerCase() === synonym ||
-            alternatives.some(alt => key.toLowerCase().includes(alt))
+            key.toLowerCase().replace(/_/g, ' ') === synonym ||
+            normalizedAlts.some(alt => key.toLowerCase().replace(/_/g, ' ').includes(alt))
         );
         if (synMatch) return synMatch;
       }
