@@ -58,5 +58,8 @@ DB-JOURNEYS.md
 DB-ROLLS.md
 .aider*
 
+# Git worktrees
+.worktrees/
+
 dev-context
 !CLAUDE.md
