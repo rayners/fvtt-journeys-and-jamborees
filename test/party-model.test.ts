@@ -51,6 +51,10 @@ describe('PartyModel', () => {
       expect(schema.journey).toBeDefined();
       expect(schema.status).toBeDefined();
       expect(schema.inventory).toBeDefined();
+      // New fields for party sheet v2
+      expect(schema.formation).toBeDefined();
+      expect(schema.activities).toBeDefined();
+      expect(schema.lightStatus).toBeDefined();
     });
   });
 

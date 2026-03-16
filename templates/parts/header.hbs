@@ -1,0 +1,42 @@
+<header class="sheet-header party-header">
+    <div class="image-container">
+        <img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}"/>
+        <h1>
+            <input name="name" type="text" value="{{actor.name}}" placeholder="Party Name"/>
+        </h1>
+    </div>
+    <div class="party-stats-container">
+        <div class="party-stats">
+            <div class="stat-panel members">
+                <label class="heading stat-label">{{localize "J&J.ui.party-sheet.members"}}</label>
+                <span class="stat-value">{{system.activeCount}}/{{system.totalMembers}}</span>
+            </div>
+            <div class="stat-panel rations">
+                <label class="heading stat-label">{{localize "J&J.ui.party-sheet.rations"}}</label>
+                <span class="stat-value {{#unless system.hasEnoughRations}}low-resource{{/unless}}">{{system.resources.rations}}</span>
+            </div>
+            <div class="stat-panel water">
+                <label class="heading stat-label">{{localize "J&J.ui.party-sheet.water"}}</label>
+                <span class="stat-value {{#unless system.hasEnoughWater}}low-resource{{/unless}}">{{system.resources.water}}</span>
+            </div>
+            <div class="stat-panel movement">
+                <label class="heading stat-label">{{localize "J&J.ui.party-sheet.movement"}}</label>
+                <span class="stat-value">{{system.movement.value}} {{localize "J&J.ui.party-sheet.km"}}</span>
+            </div>
+        </div>
+        <div class="travel-status">
+            <div class="status-panel traveling">
+                <input class="status-input" name="system.status.traveling" type="checkbox" {{checked system.status.traveling}} />
+                <label class="status-label">{{localize "J&J.travelStatus.traveling"}}</label>
+            </div>
+            <div class="status-panel resting">
+                <input class="status-input" name="system.status.resting" type="checkbox" {{checked system.status.resting}} />
+                <label class="status-label">{{localize "J&J.travelStatus.resting"}}</label>
+            </div>
+            <div class="status-panel camping">
+                <input class="status-input" name="system.status.camping" type="checkbox" {{checked system.status.camping}} />
+                <label class="status-label">{{localize "J&J.travelStatus.camping"}}</label>
+            </div>
+        </div>
+    </div>
+</header>

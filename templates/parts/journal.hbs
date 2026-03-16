@@ -1,0 +1,20 @@
+<section class="tab journal" data-group="primary" data-tab="journal">
+    <div class="party-journal">
+        <div class="section-header">
+            <h2>{{localize "J&J.ui.party-sheet.partyJournal"}}</h2>
+        </div>
+
+        <div class="form-group">
+            <label>{{localize "J&J.journal.description"}}</label>
+            {{editor system.description target="system.description" button=true owner=owner editable=editable}}
+        </div>
+
+        <div class="section-header">
+            <h2>{{localize "J&J.ui.party-sheet.notes"}}</h2>
+        </div>
+
+        <div class="form-group">
+            <textarea name="system.notes" rows="10">{{system.notes}}</textarea>
+        </div>
+    </div>
+</section>

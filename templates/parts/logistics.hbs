@@ -1,0 +1,74 @@
+<section class="tab logistics" data-group="primary" data-tab="logistics">
+    <div class="logistics-layout">
+        {{!-- Resource management bar --}}
+        <div class="logistics-resources">
+            <div class="resource-group">
+                <span class="resource-label">Rations:</span>
+                <span class="resource-value {{#unless system.hasEnoughRations}}low-resource{{/unless}}">{{system.resources.rations}}</span>
+                <button type="button" class="resource-btn" data-action="addResource" data-resource-type="rations" title="Add">+</button>
+                <button type="button" class="resource-btn" data-action="removeResource" data-resource-type="rations" title="Remove">-</button>
+                <button type="button" class="resource-btn" data-action="distributeResource" data-resource-type="rations" title="Distribute">
+                    <i class="fas fa-share-alt"></i>
+                </button>
+            </div>
+            <div class="resource-group">
+                <span class="resource-label">Water:</span>
+                <span class="resource-value {{#unless system.hasEnoughWater}}low-resource{{/unless}}">{{system.resources.water}}</span>
+                <button type="button" class="resource-btn" data-action="addResource" data-resource-type="water" title="Add">+</button>
+                <button type="button" class="resource-btn" data-action="removeResource" data-resource-type="water" title="Remove">-</button>
+                <button type="button" class="resource-btn" data-action="distributeResource" data-resource-type="water" title="Distribute">
+                    <i class="fas fa-share-alt"></i>
+                </button>
+            </div>
+        </div>
+
+        {{!-- Inventory filter bar --}}
+        <div id="filter-bar" class="filter-bar">
+            <div class="filter-btn active" data-target="all">ALL</div>
+            {{#each logistics.characterFilters as |char|}}
+            <img class="filter-btn"
+                 data-target="{{char.name}}"
+                 src="{{char.img}}"
+                 title="{{char.name}}">
+            {{/each}}
+        </div>
+
+        {{!-- Item grid --}}
+        <div id="grid-container" class="item-grid">
+            {{!-- Category dividers --}}
+            {{#each logistics.cards as |card|}}
+            {{!-- Divider placeholder — rendered/shown by JS filter logic --}}
+            {{/each}}
+
+            {{!-- Item cards --}}
+            {{#each logistics.cards as |card|}}
+            <div class="item-card"
+                 data-name="{{card.name}}"
+                 data-cat="{{card.category}}"
+                 data-total="{{card.totalQty}}"
+                 data-prepared="{{card.hasPreparedInstance}}"
+                 data-payload="{{jsonPayload card}}"
+                 style="order: {{card.sortOrder}}; border-color: {{card.catData.color}};">
+                {{#if card.hasPreparedInstance}}
+                <div class="memorized-badge"><i class="fas fa-book-open"></i></div>
+                {{/if}}
+                <img src="{{card.img}}" width="40" height="40" class="item-card-img">
+                <span class="qty-badge">x{{card.totalQty}}</span>
+                <span class="item-card-name" title="{{card.name}}">{{card.name}}</span>
+                <div class="mini-tokens">
+                    {{#each card.ownerList as |owner|}}
+                    <img src="{{owner.icon}}" title="{{owner.name}}" class="mini-token">
+                    {{/each}}
+                </div>
+            </div>
+            {{/each}}
+
+            {{#unless logistics.cards.length}}
+            <div class="logistics-empty">
+                <i class="fas fa-box-open"></i>
+                <p>No items in party inventory.</p>
+            </div>
+            {{/unless}}
+        </div>
+    </div>
+</section>

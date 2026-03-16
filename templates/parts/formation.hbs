@@ -1,0 +1,90 @@
+<section class="tab formation" data-group="primary" data-tab="formation">
+    <div class="formation-layout">
+        {{!-- Marching Order --}}
+        <div class="marching-order-section">
+            <h3 class="section-title">Marching Order</h3>
+            <div class="marching-order-container">
+                <div class="marching-order-label tail">TAIL</div>
+                <div id="formation-container" class="formation-container">
+                    {{#each formation.ordered as |char|}}
+                    <div class="formation-slot"
+                         draggable="{{isGM}}"
+                         data-char-id="{{char.id}}">
+                        <img src="{{char.img}}" class="formation-portrait" title="{{char.name}}">
+                        <div class="formation-name">{{char.name}}</div>
+                        <button type="button"
+                                class="light-toggle {{#if char.isLit}}lit{{/if}}"
+                                data-action="toggleLight"
+                                data-char-id="{{char.id}}"
+                                title="Light Status">
+                            <i class="fas fa-fire"></i>
+                        </button>
+                    </div>
+                    {{/each}}
+                    {{#unless formation.ordered.length}}
+                    <div class="formation-empty">No party members in formation.</div>
+                    {{/unless}}
+                </div>
+                <div class="marching-order-label head">HEAD</div>
+            </div>
+        </div>
+
+        {{!-- Activity Manager --}}
+        <div class="activity-manager-section">
+            <h3 class="section-title">Activity Manager</h3>
+            <div class="activity-hint">Assign activities to party members during travel or downtime.</div>
+            <div id="activity-dropzone" class="activity-dropzone">
+                {{#each formation.activityRows as |row|}}
+                <div class="activity-row" data-char-id="{{row.id}}">
+                    <img src="{{row.img}}" class="activity-portrait" title="{{row.name}}">
+                    <div class="activity-name">{{row.name}}</div>
+                    <select class="activity-select" data-char-id="{{row.id}}" {{#unless row.isOwner}}disabled{{/unless}}>
+                        <option value="">-- Select --</option>
+                        {{#each activityData as |cat catKey|}}
+                        <optgroup label="{{cat.label}}">
+                            {{#each cat.options as |option optKey|}}
+                            <option value="{{optKey}}" {{#if (eq row.actKey optKey)}}selected{{/if}}>
+                                {{option.label}}
+                            </option>
+                            {{/each}}
+                        </optgroup>
+                        {{/each}}
+                    </select>
+                    {{#if row.isTargeted}}
+                    <select class="target-select" data-char-id="{{row.id}}">
+                        <option value="">- Who? -</option>
+                        {{#each row.otherChars as |other|}}
+                        <option value="{{other.id}}" {{#if (eq row.targetId other.id)}}selected{{/if}}>{{other.name}}</option>
+                        {{/each}}
+                    </select>
+                    {{/if}}
+                    {{#if row.skillToRoll}}
+                    <button type="button"
+                            class="roll-activity-btn"
+                            data-action="rollActivity"
+                            data-char-id="{{row.id}}"
+                            data-skill="{{row.skillToRoll}}"
+                            data-activity="{{row.actOption.label}}"
+                            data-target="{{row.targetId}}"
+                            title="Roll {{row.skillLabel}}">
+                        <i class="fas fa-dice-d20"></i>
+                    </button>
+                    {{/if}}
+                    {{#if row.isOwner}}
+                    <button type="button"
+                            class="remove-activity-btn"
+                            data-action="removeActivity"
+                            data-char-id="{{row.id}}"
+                            title="Remove Activity">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    {{/if}}
+                </div>
+                {{/each}}
+                {{#unless formation.activityRows.length}}
+                <div class="activity-empty">No party members available.</div>
+                {{/unless}}
+            </div>
+        </div>
+    </div>
+</section>
