@@ -1,10 +1,14 @@
-import { createFoundryTestConfig } from '@rayners/foundry-dev-tools/configs/vitest.config.js';
+import { defineConfig } from 'vitest/config';
 import { resolve } from 'path';
 
-export default createFoundryTestConfig({
+export default defineConfig({
   test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./test/setup.ts'],
     include: ['test/**/*.{test,spec}.{js,ts}', 'src/**/*.{test,spec}.{js,ts}'],
     coverage: {
+      provider: 'v8',
       reporter: ['text', 'html', 'clover', 'json']
     }
   },
