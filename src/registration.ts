@@ -81,13 +81,26 @@ export const registerPartyActorType = function () {
     console.warn('Journeys & Jamborees | CONFIG.Actor.documentClasses not available yet');
   }
 
-  // 4. Register sheet
+  // 4. Register sheet (V2 API for Foundry v13)
   try {
-    DocumentSheetConfig.registerSheet(Actor, 'journeys-and-jamborees', PartyActorSheet, {
-      types: [cleanType, namespacedType],
-      makeDefault: true,
-      label: 'Journeys & Jamborees.PartySheet'
-    });
+    // Unregister any existing sheet registration first
+    foundry.documents.collections.Actors.unregisterSheet(
+      'journeys-and-jamborees',
+      PartyActorSheet
+    );
+  } catch {
+    // Ignore errors if sheet wasn't registered yet
+  }
+  try {
+    foundry.documents.collections.Actors.registerSheet(
+      'journeys-and-jamborees',
+      PartyActorSheet,
+      {
+        types: [cleanType, namespacedType],
+        makeDefault: true,
+        label: 'Journeys & Jamborees.PartySheet'
+      }
+    );
     console.log('Journeys & Jamborees | Party sheet registered successfully');
   } catch (error) {
     console.error('Journeys & Jamborees | Error registering party sheet:', error);
@@ -142,24 +155,21 @@ export const setupActorCreationHook = function (_partyType) {
   const doubleNamespacedType = 'journeys-and-jamborees.journeys-and-jamborees.party';
 
   // Add a hook to inject our actor type into the creation dialog
-  Hooks.on('renderDialog', (dialog, html, _data) => {
+  // Foundry v13 uses renderDialogV2 for ApplicationV2-based dialogs
+  Hooks.on('renderDialogV2', (dialog, html, _data) => {
     // Check if this is the create actor dialog
-    const title = dialog.title;
+    const title = dialog.window?.title ?? dialog.title;
     if (title === 'Create Actor') {
       // We need to modify the select dropdown options
-      const typeSelect = html.find('select[name="type"]');
-      if (typeSelect.length) {
-        // Get the original options
-        const options = Array.from(typeSelect[0].options);
-
-        // Look for our party option
+      const typeSelect = html.querySelector?.('select[name="type"]') ?? html.find?.('select[name="type"]')?.[0];
+      if (typeSelect) {
+        const options = Array.from(typeSelect.options);
         for (const option of options) {
           if (
             option.value === namespacedType ||
             option.value === doubleNamespacedType ||
             option.value.includes('party')
           ) {
-            // Just change the display text
             option.text = 'Party';
           }
         }

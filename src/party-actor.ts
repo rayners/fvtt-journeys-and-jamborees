@@ -1,4 +1,10 @@
 import { SystemConfigManager } from './system-config.js';
+import {
+  IGNORED_ITEMS,
+  TYPE_MAPPING,
+  COIN_ICONS,
+  CATEGORY_DATA
+} from './activity-data.js';
 
 /**
  * Extends the base Actor class to implement additional party-specific logic.
@@ -388,9 +394,9 @@ export class PartyActorType extends Actor {
       // Show food gathering dialog
       const _foodGatheringAvailable = true;
 
-      // Create dialog for camp activities
-      new Dialog({
-        title: game.i18n.localize('J&J.camp.makeCamp'),
+      // Create dialog for camp activities using DialogV2
+      foundry.applications.api.DialogV2.wait({
+        window: { title: game.i18n.localize('J&J.camp.makeCamp') },
         content: `
           <form>
             <p>${game.i18n.localize('J&J.camp.description')}</p>
@@ -403,12 +409,14 @@ export class PartyActorType extends Actor {
             </div>
           </form>
         `,
-        buttons: {
-          rest: {
-            icon: '<i class="fas fa-campground"></i>',
+        buttons: [
+          {
+            action: 'rest',
+            icon: 'fas fa-campground',
             label: game.i18n.localize('J&J.camp.rest'),
-            callback: () => {
-              ui.notifications.info('The party makes camp for the night.');
+            callback: async (_event, _button, dialog) => {
+              await dialog.close();
+              ui.notifications?.info('The party makes camp for the night.');
               // Consume daily resources if auto-consume is on
               if (partyActor.system.settings.autoConsume) {
                 const rationsPerDay =
@@ -420,19 +428,19 @@ export class PartyActorType extends Actor {
               }
             }
           },
-          cancel: {
-            icon: '<i class="fas fa-times"></i>',
+          {
+            action: 'cancel',
+            icon: 'fas fa-times',
             label: game.i18n.localize('Cancel')
           }
-        },
-        render: html => {
-          html.find('.gather-food').click(async () => {
-            // Close this dialog and open food gathering dialog
-            html.closest('.dialog').find('.close').click();
+        ],
+        render: (_event, dialog) => {
+          dialog.element.querySelector('.gather-food')?.addEventListener('click', async () => {
+            await dialog.close();
             await partyActor.openFoodGatheringDialog();
           });
         }
-      }).render(true);
+      });
     } else {
       // Non-Dragonbane camp making
       ui.notifications.info('The party makes camp for the night.');
@@ -492,17 +500,18 @@ export class PartyActorType extends Actor {
       </form>
     `;
 
-    new Dialog({
-      title: game.i18n.localize('J&J.FoodGathering.GatherFood'),
+    foundry.applications.api.DialogV2.wait({
+      window: { title: game.i18n.localize('J&J.FoodGathering.GatherFood') },
       content,
-      buttons: {
-        gather: {
-          icon: '<i class="fas fa-dice-d20"></i>',
+      buttons: [
+        {
+          action: 'gather',
+          icon: 'fas fa-dice-d20',
           label: game.i18n.localize('J&J.FoodGathering.Gather'),
-          callback: async html => {
-            const formData = new FormDataExtended(html[0].querySelector('form')).object;
-            const character = game.actors.get(formData.character);
-            const activity = formData.activity;
+          callback: async (_event, _button, dialog) => {
+            const formData = new FormDataExtended(dialog.element.querySelector('form')).object;
+            const character = game.actors?.get(formData.character as string);
+            const activity = formData.activity as string;
 
             if (!character) return;
 
@@ -535,17 +544,18 @@ export class PartyActorType extends Actor {
               // Add rations to party if successful
               if (result.success && result.rations > 0) {
                 await this.addResource('rations', result.rations);
-                ui.notifications.info(`Added ${result.rations} rations to party supplies`);
+                ui.notifications?.info(`Added ${result.rations} rations to party supplies`);
               }
             }
           }
         },
-        cancel: {
-          icon: '<i class="fas fa-times"></i>',
+        {
+          action: 'cancel',
+          icon: 'fas fa-times',
           label: game.i18n.localize('Cancel')
         }
-      }
-    }).render(true);
+      ]
+    });
   }
 
   /**
@@ -1022,4 +1032,160 @@ export class PartyActorType extends Actor {
 
     await this.update({ ownership: ownership });
   }
+
+  /**
+   * Save the marching order for the party
+   */
+  async setFormationOrder(orderedIds: string[]) {
+    return this.update({ 'system.formation': orderedIds });
+  }
+
+  /**
+   * Assign an activity to a character
+   */
+  async setCharacterActivity(
+    characterId: string,
+    activity: string,
+    target?: string,
+    customSkill?: string
+  ) {
+    const activities = { ...(this.system.activities || {}) };
+    activities[characterId] = { activity, target, customSkill };
+    return this.update({ 'system.activities': activities });
+  }
+
+  /**
+   * Remove a character's activity assignment
+   */
+  async clearCharacterActivity(characterId: string) {
+    return this.update({ [`system.activities.-=${characterId}`]: null });
+  }
+
+  /**
+   * Toggle whether a character is carrying a light source
+   */
+  async toggleCharacterLight(characterId: string) {
+    const lightStatus = { ...(this.system.lightStatus || {}) };
+    lightStatus[characterId] = !lightStatus[characterId];
+    return this.update({ 'system.lightStatus': lightStatus });
+  }
+
+  /**
+   * Scan and aggregate inventory from all party members.
+   * Returns a record keyed by item name with aggregated owner/quantity data.
+   */
+  scanPartyInventory(): Record<string, PartyInventoryEntry> {
+    const inventory: Record<string, PartyInventoryEntry> = {};
+    const characters = this.getCharacters();
+
+    for (const actor of characters) {
+      // Currency
+      if (actor.system.currency) {
+        const c = actor.system.currency;
+        const portrait = actor.img || '';
+        if (c.gc > 0) _addInventoryLoot(inventory, 'Gold', c.gc, COIN_ICONS.gold, actor.name, portrait, null, false, 'currency');
+        if (c.sc > 0) _addInventoryLoot(inventory, 'Silver', c.sc, COIN_ICONS.silver, actor.name, portrait, null, false, 'currency');
+        if (c.cc > 0) _addInventoryLoot(inventory, 'Copper', c.cc, COIN_ICONS.copper, actor.name, portrait, null, false, 'currency');
+      }
+
+      for (const item of actor.items) {
+        if (IGNORED_ITEMS.includes(item.name)) continue;
+        const portrait = actor.img || '';
+
+        if (item.type === 'spell') {
+          const img = item.img || 'icons/svg/daze.svg';
+          const rank = item.system.rank || 0;
+          const isMemorized = item.system.memorized === true;
+          const cat = rank === 0 ? 'magic_trick' : 'spell_book';
+          _addInventoryLoot(inventory, item.name, 1, img, actor.name, portrait, item, false, cat, isMemorized);
+          continue;
+        }
+
+        // Skip stored items (Dragonbane v3 storage feature)
+        if (item.system.storage === true) continue;
+
+        const mappedCat = item.system.memento === true ? 'memento' : TYPE_MAPPING[item.type];
+        if (!mappedCat) continue;
+
+        const img = item.img || (item.type === 'ability' ? 'icons/svg/book.svg' : 'icons/svg/item-bag.svg');
+        const isWorn = item.system.worn === true;
+        const qty = item.system.quantity || 1;
+        _addInventoryLoot(inventory, item.name, qty, img, actor.name, portrait, item, isWorn, mappedCat);
+      }
+    }
+
+    return inventory;
+  }
+}
+
+export interface PartyInventoryOwner {
+  count: number;
+  icon: string;
+  equipped: boolean;
+  memorized: boolean;
+}
+
+export interface PartyInventoryEntry {
+  totalQty: number;
+  img: string;
+  owners: Record<string, PartyInventoryOwner>;
+  desc: string;
+  stats: Record<string, unknown>;
+  category: string;
+  hasPreparedInstance: boolean;
+}
+
+function _addInventoryLoot(
+  inventory: Record<string, PartyInventoryEntry>,
+  name: string,
+  qty: number,
+  img: string,
+  ownerName: string,
+  ownerIcon: string,
+  itemObj: unknown | null,
+  isEquipped: boolean,
+  category: string,
+  isMemorized = false
+) {
+  if (!inventory[name]) {
+    inventory[name] = {
+      totalQty: 0,
+      img,
+      owners: {},
+      desc: '',
+      stats: {},
+      category,
+      hasPreparedInstance: false
+    };
+
+    if (itemObj) {
+      const s = (itemObj as any).system;
+      inventory[name].desc = s.itemDescription || s.description || '';
+      const stats: Record<string, unknown> = {};
+      if (s.weight) stats['Weight'] = s.weight;
+      if (s.cost) stats['Cost'] = s.cost;
+      if (s.damage) stats['Damage'] = s.damage;
+      if (s.protection) stats['Armor'] = s.protection;
+      if (s.range) stats['Range'] = s.range;
+      if (s.rank !== undefined) stats['Rank'] = s.rank;
+      if (s.powerCost) stats['WP'] = s.powerCost;
+      if (s.castingTime) stats['Time'] = s.castingTime;
+      if (s.duration) stats['Dur'] = s.duration;
+      if (s.requirement) stats['Req'] = s.requirement;
+      if (s.features) {
+        stats['Features'] = Array.isArray(s.features) ? s.features.join(', ') : s.features;
+      }
+      inventory[name].stats = stats;
+    }
+  }
+
+  inventory[name].totalQty += qty;
+  if (isMemorized) inventory[name].hasPreparedInstance = true;
+
+  if (!inventory[name].owners[ownerName]) {
+    inventory[name].owners[ownerName] = { count: 0, icon: ownerIcon, equipped: false, memorized: false };
+  }
+  inventory[name].owners[ownerName].count += qty;
+  if (isEquipped) inventory[name].owners[ownerName].equipped = true;
+  if (isMemorized) inventory[name].owners[ownerName].memorized = true;
 }

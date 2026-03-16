@@ -1,925 +1,654 @@
-declare let ActorSheet: any; // Use global ActorSheet but suppress the warning
-declare global {
-  let Dialog: any; // Use global Dialog but suppress the warning
-}
+import {
+  ACTIVITY_DATA,
+  TARGETED_ACTIVITIES,
+  CATEGORY_DATA,
+  ORDER_ALL,
+  ORDER_CHAR,
+  TOGGLE_IDS,
+  ATTR_CONDS,
+  findActivityOption
+} from './activity-data.js';
+import type { PartyInventoryEntry } from './party-actor.js';
+import { PartyActorType } from './party-actor.js';
 
-import { patchPartyActor } from './utils';
-import { getSkillValue } from './helpers';
-import { SystemConfigManager } from './system-config';
-import { SkillManager } from './skill-manager';
+const { HandlebarsApplicationMixin } = foundry.applications.api;
+const { ActorSheetV2 } = foundry.applications.sheets;
 
 /**
- * Extends the basic ActorSheet with specific logic for the party actor sheet.
+ * Party actor sheet implemented as ActorSheetV2 (Foundry v13 API).
+ * Replaces the legacy ActorSheet with 5-tab layout:
+ * 1. Command Center — per-character rows with HP/WP/ENC bars and condition toggles
+ * 2. Logistics — aggregated party inventory with filtering
+ * 3. Formation & Tasks — marching order + activity manager
+ * 4. Journal — party description/notes
+ * 5. Settings — party configuration
  */
-export class PartyActorSheet extends ActorSheet {
-  // Add a constructor to properly initialize our sheet
-  constructor(object, options) {
-    super(object, options);
-
-    // Ensure our actor is properly initialized
-    if (object && !object.setCharacterStatus) {
-      console.warn("Party actor doesn't have required methods - patching", object);
-      patchPartyActor(object);
+export class PartyActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
+  static DEFAULT_OPTIONS = {
+    classes: ['journeys-and-jamborees', 'sheet', 'party'],
+    position: { width: 700, height: 800 },
+    window: { resizable: true },
+    form: { submitOnChange: true, closeOnSubmit: false },
+    actions: {
+      toggleCondition: PartyActorSheet.#onToggleCondition,
+      toggleLight: PartyActorSheet.#onToggleLight,
+      rollActivity: PartyActorSheet.#onRollActivity,
+      removeActivity: PartyActorSheet.#onRemoveActivity,
+      addAllCharacters: PartyActorSheet.#onAddAllCharacters,
+      removeCharacter: PartyActorSheet.#onRemoveCharacter,
+      removeAllCharacters: PartyActorSheet.#onRemoveAllCharacters,
+      makeCamp: PartyActorSheet.#onMakeCamp,
+      addResource: PartyActorSheet.#onAddResource,
+      removeResource: PartyActorSheet.#onRemoveResource,
+      distributeResource: PartyActorSheet.#onDistributeResource,
+      rollPathfinding: PartyActorSheet.#onRollPathfinding,
+      toggleMounted: PartyActorSheet.#onToggleMounted,
+      saveFormation: PartyActorSheet.#onSaveFormation
     }
+  };
+
+  static PARTS = {
+    header: { template: 'modules/journeys-and-jamborees/templates/parts/header.hbs' },
+    tabs: { template: 'modules/journeys-and-jamborees/templates/parts/tabs.hbs' },
+    'command-center': {
+      scrollable: [''],
+      template: 'modules/journeys-and-jamborees/templates/parts/command-center.hbs'
+    },
+    logistics: {
+      scrollable: [''],
+      template: 'modules/journeys-and-jamborees/templates/parts/logistics.hbs'
+    },
+    formation: {
+      scrollable: [''],
+      template: 'modules/journeys-and-jamborees/templates/parts/formation.hbs'
+    },
+    journal: {
+      scrollable: [''],
+      template: 'modules/journeys-and-jamborees/templates/parts/journal.hbs'
+    },
+    settings: {
+      scrollable: [''],
+      template: 'modules/journeys-and-jamborees/templates/parts/settings.hbs'
+    }
+  };
+
+  static TABS = {
+    primary: {
+      tabs: [
+        { id: 'command-center', group: 'primary', label: 'J&J.tabs.commandCenter', icon: 'fas fa-users' },
+        { id: 'logistics', group: 'primary', label: 'J&J.tabs.logistics', icon: 'fas fa-boxes' },
+        { id: 'formation', group: 'primary', label: 'J&J.tabs.formation', icon: 'fas fa-map-signs' },
+        { id: 'journal', group: 'primary', label: 'J&J.tabs.journal', icon: 'fas fa-book' },
+        { id: 'settings', group: 'primary', label: 'J&J.tabs.settings', icon: 'fas fa-cog' }
+      ],
+      initial: 'command-center'
+    }
+  };
+
+  /** Hook IDs for cleanup on close */
+  #hookIds: number[] = [];
+
+  get actor(): PartyActorType {
+    return super.actor as PartyActorType;
   }
+
   /** @override */
-  static get defaultOptions() {
-    return mergeObject(super.defaultOptions, {
-      classes: ['sheet', 'actor', 'party'],
-      template: 'modules/journeys-and-jamborees/templates/party-sheet.hbs',
-      width: 680,
-      height: 650,
-      tabs: [{ navSelector: '.sheet-tabs', contentSelector: '.sheet-body', initial: 'management' }],
-      dragDrop: [{ dragSelector: null, dropSelector: null }] // Enable drag-drop
-    });
+  async _prepareContext(options: unknown): Promise<Record<string, unknown>> {
+    const context = await super._prepareContext(options);
+    const actor = this.actor;
+    const system = actor.system;
+
+    // Get party members
+    const memberStatus = system.memberStatus || {};
+    const characters = this._prepareCharacterData(memberStatus);
+
+    // Prepare inventory for logistics tab
+    const inventoryData = actor.scanPartyInventory();
+    const logistics = this._prepareLogisticsData(inventoryData, characters);
+
+    // Prepare formation data
+    const formationData = this._prepareFormationData(characters, system);
+
+    return {
+      ...context,
+      actor,
+      system,
+      // Tab system
+      tabs: this._prepareTabs(),
+      // Command Center data
+      characters,
+      toggleIds: TOGGLE_IDS,
+      attrConds: ATTR_CONDS,
+      // Logistics data
+      logistics,
+      categoryData: CATEGORY_DATA,
+      orderAll: ORDER_ALL,
+      orderChar: ORDER_CHAR,
+      // Formation & Tasks data
+      formation: formationData,
+      activityData: ACTIVITY_DATA,
+      targetedActivities: TARGETED_ACTIVITIES,
+      // Metadata
+      isGM: game.user?.isGM ?? false,
+      isEditable: this.isEditable
+    };
   }
 
-  /** @override */
-  getData() {
-    console.log('PartySheet.getData() called');
-    const data = super.getData();
-    const actorData = this.actor.toObject(false);
+  /** Prepare character rows for Command Center */
+  private _prepareCharacterData(memberStatus: Record<string, string>) {
+    return Object.keys(memberStatus)
+      .map(id => game.actors?.get(id))
+      .filter(Boolean)
+      .map(actor => {
+        const s = actor.system;
+        const hpVal = s.hitPoints?.value ?? 0;
+        const hpBase = s.hitPoints?.base ?? hpVal;
+        const hpMax = s.hitPoints?.max ?? 10;
+        const wpVal = s.willPoints?.value ?? 0;
+        const wpBase = s.willPoints?.base ?? wpVal;
+        const wpMax = s.willPoints?.max ?? 10;
+        const encVal = s.encumbrance?.value ?? 0;
+        const encMax = s.maxEncumbrance?.value ?? 10;
+        const mvVal = s.movement?.base ?? s.movement?.value ?? '?';
 
-    // Add actor and system data
-    data.actor = actorData;
-    data.system = actorData.system;
+        const hpPct = Math.max(0, Math.min(100, (hpVal / (hpMax || 1)) * 100));
+        const wpPct = Math.max(0, Math.min(100, (wpVal / (wpMax || 1)) * 100));
+        const encPct = Math.max(0, Math.min(100, (encVal / (encMax || 1)) * 100));
+        const isOverEncumbered = encVal > encMax;
 
-    // Log memberStatus for debugging
-    console.log(
-      'getData() - Current memberStatus:',
-      JSON.stringify(data.system.memberStatus, null, 2)
-    );
+        // Conditions — check actor.statuses (Foundry v13) and active effects
+        const toggleStates = TOGGLE_IDS.map(t => ({
+          ...t,
+          active: actor.statuses?.has(t.id) || actor.effects?.some(
+            e => (e.statusId === t.id || e.flags?.core?.statusId === t.id) && !e.disabled
+          ) || false
+        }));
 
-    // Add isItem flag to items and check if we have any items
-    let hasItems = false;
-    if (data.actor.items) {
-      data.actor.items = data.actor.items.map(item => {
-        const isItem = item.type === 'item';
-        if (isItem) hasItems = true;
+        const attrStates = ATTR_CONDS.map(a => ({
+          ...a,
+          active: actor.statuses?.has(a.id) || actor.effects?.some(
+            e => (e.statusId === a.id || e.flags?.core?.statusId === a.id) && !e.disabled
+          ) || false
+        }));
+
         return {
-          ...item,
-          isItem
+          id: actor.id,
+          name: actor.name,
+          img: actor.img,
+          status: memberStatus[actor.id],
+          isOwner: actor.isOwner,
+          hp: { value: hpVal, base: hpBase, max: hpMax, pct: hpPct },
+          wp: { value: wpVal, base: wpBase, max: wpMax, pct: wpPct },
+          enc: { value: encVal, max: encMax, pct: encPct, isOverEncumbered },
+          movement: mvVal,
+          toggleStates,
+          attrStates
         };
       });
-    }
-    data.hasItems = hasItems;
-
-    // Get the configured skill names from settings
-    const pathfinderSkillName = game.settings.get('journeys-and-jamborees', 'pathfinderSkillName');
-    const lookoutSkillName = game.settings.get('journeys-and-jamborees', 'lookoutSkillName');
-    const quartermasterSkillName = game.settings.get(
-      'journeys-and-jamborees',
-      'quartermasterSkillName'
-    );
-
-    data.pathfinderSkillName = pathfinderSkillName;
-    data.lookoutSkillName = lookoutSkillName;
-    data.quartermasterSkillName = quartermasterSkillName;
-
-    // Add character data with the correct skill values
-    const characters = this._getPartyCharacters(pathfinderSkillName);
-    data.characters = characters;
-
-    // Add filtered character lists for travel roles
-    data.activeCharacters = characters.filter(char => char.isActive);
-    data.travelingCharacters = characters.filter(char => char.isTraveling);
-
-    // Log the character lists for debugging
-    console.log('getData() - Total characters found:', characters.length);
-    console.log('getData() - Active characters:', data.activeCharacters.length);
-    console.log('getData() - Traveling characters:', data.travelingCharacters.length);
-
-    // Add travel roles with skill values
-    data.travelRoles = this._getTravelRolesWithSkills(
-      pathfinderSkillName,
-      lookoutSkillName,
-      quartermasterSkillName
-    );
-
-    // Add member counts from the party model
-    data.activeMembers = this.actor.system.activeCount || 0;
-    data.totalMembers = this.actor.system.totalMembers || 0;
-
-    // Add user-specific data
-    data.isGM = game.user.isGM;
-    data.currentUserCharacterId = this._getCurrentUserCharacterId();
-
-    // Check if user has any characters to remove
-    if (data.isGM) {
-      // GM can remove all characters
-      data.hasCharactersToRemove = characters.length > 0;
-    } else {
-      // Players can only remove their own characters
-      data.hasCharactersToRemove = characters.some(char => char.owner);
-    }
-
-    // Check if there are characters available to add
-    const memberStatus = data.system.memberStatus || {};
-    const allCharacterActors = game.actors.filter(a => a.type === 'character');
-
-    if (data.isGM) {
-      // GM can add any character not already in party
-      data.hasCharactersToAdd = allCharacterActors.some(a => !memberStatus[a.id]);
-    } else {
-      // Players can only add their own characters not already in party
-      data.hasCharactersToAdd = allCharacterActors.some(a => a.isOwner && !memberStatus[a.id]);
-    }
-
-    // Return the data for rendering
-    return data;
   }
 
-  /**
-   * Get character actors that are actually in the party
-   */
-  _getPartyCharacters(pathfinderSkillName) {
-    const data = this.actor.system;
-    const memberStatus = data.memberStatus || {};
-
-    // Get all character IDs that are in the party
-    const partyCharacterIds = Object.keys(memberStatus);
-
-    // Get all 'character' type actors that are in the party
-    const characters = game.actors.filter(
-      a => a.type === 'character' && partyCharacterIds.includes(a.id)
-    );
-
-    // Log raw character data for debugging
-    console.log('Character actors found:', characters.length);
-
-    // Map them to a usable format
-    const mappedCharacters = characters.map(c => {
-      // Get player information
-      const ownerUser = this._getCharacterOwner(c);
-
-      // Get status information
-      const isActive = this._isCharacterActive(c.id);
-      const isTraveling = this._isCharacterTraveling(c.id);
-      const isStayingBehind = this._isCharacterStayingBehind(c.id);
-
-      // Get skill values using the helper function with configured skill names
-      const pathfinderSkillValue = getSkillValue(c, pathfinderSkillName);
-      const lookoutSkillName = game.settings.get('journeys-and-jamborees', 'lookoutSkillName');
-      const quartermasterSkillName = game.settings.get(
-        'journeys-and-jamborees',
-        'quartermasterSkillName'
-      );
-      const lookoutValue = getSkillValue(c, lookoutSkillName);
-      const quartermasterValue = getSkillValue(c, quartermasterSkillName);
-
-      // Log character status for debugging
-      console.log(`Character ${c.name} (${c.id}) status:`, {
-        isActive,
-        isTraveling,
-        isStayingBehind
-      });
-      console.log(`Character ${c.name} skills:`, {
-        pathfinder: pathfinderSkillValue,
-        lookout: lookoutValue,
-        quartermaster: quartermasterValue
+  /** Prepare inventory cards for Logistics tab */
+  private _prepareLogisticsData(
+    inventory: Record<string, PartyInventoryEntry>,
+    characters: ReturnType<typeof this._prepareCharacterData>
+  ) {
+    const cards = Object.entries(inventory)
+      .sort(([nameA, dataA], [nameB, dataB]) => {
+        const ordA = ORDER_ALL[dataA.category] ?? 999;
+        const ordB = ORDER_ALL[dataB.category] ?? 999;
+        if (ordA !== ordB) return ordA - ordB;
+        return nameA.localeCompare(nameB);
+      })
+      .map(([name, data]) => {
+        const catData = CATEGORY_DATA[data.category] ?? CATEGORY_DATA['item'];
+        return {
+          name,
+          ...data,
+          catData,
+          sortOrder: ORDER_ALL[data.category] ?? 500,
+          ownerList: Object.entries(data.owners).map(([oName, oData]) => ({
+            name: oName,
+            ...oData
+          }))
+        };
       });
 
-      // Get skill display names from skill manager
-      const skillManager = SkillManager.getInstance();
-      const availableSkills = skillManager.getAvailableSkills();
-      const pathfinderSkillDisplayName =
-        availableSkills[pathfinderSkillName] || pathfinderSkillName;
-      const lookoutSkillDisplayName = availableSkills[lookoutSkillName] || lookoutSkillName;
-      const quartermasterSkillDisplayName =
-        availableSkills[quartermasterSkillName] || quartermasterSkillName;
+    return { cards, characterFilters: characters };
+  }
+
+  /** Prepare formation and activity data */
+  private _prepareFormationData(
+    characters: ReturnType<typeof this._prepareCharacterData>,
+    system: any
+  ) {
+    const formation: string[] = system.formation ?? [];
+    const activities: Record<string, any> = system.activities ?? {};
+    const lightStatus: Record<string, boolean> = system.lightStatus ?? {};
+
+    // Sort characters by formation order
+    const ordered = [...characters].sort((a, b) => {
+      const ia = formation.indexOf(a.id);
+      const ib = formation.indexOf(b.id);
+      if (ia === -1 && ib === -1) return 0;
+      if (ia === -1) return 1;
+      if (ib === -1) return -1;
+      return ia - ib;
+    });
+
+    const activityRows = characters.map(char => {
+      const assignment = activities[char.id] ?? null;
+      const actKey = assignment?.activity ?? '';
+      const targetId = assignment?.target ?? '';
+      const customSkill = assignment?.customSkill ?? null;
+
+      const actOption = actKey ? findActivityOption(actKey) : null;
+      const skillToRoll = customSkill ?? actOption?.skill ?? null;
 
       return {
-        id: c.id,
-        name: c.name,
-        img: c.img,
-        owner: this._isCharacterOwnedByCurrentUser(c),
-        isActive: isActive,
-        isTraveling: isTraveling,
-        isStayingBehind: isStayingBehind,
-        travelRole: this._getCharacterTravelRole(c.id),
-        pathfinderSkillValue: pathfinderSkillValue,
-        pathfinderSkillName: pathfinderSkillDisplayName,
-        lookoutSkillValue: lookoutValue,
-        lookoutSkillName: lookoutSkillDisplayName,
-        quartermasterSkillValue: quartermasterValue,
-        quartermasterSkillName: quartermasterSkillDisplayName,
-        // Backward compatibility properties
-        bushcraft: pathfinderSkillValue,
-        awareness: lookoutValue,
-        bartering: quartermasterValue,
-        playerName: ownerUser ? ownerUser.name : 'No Player',
-        userColor: ownerUser ? ownerUser.color : '#7a7971'
+        ...char,
+        assignment,
+        actKey,
+        targetId,
+        customSkill,
+        actOption,
+        skillToRoll,
+        skillLabel: skillToRoll ? skillToRoll.replace(/_/g, ' ').toUpperCase() : '',
+        isTargeted: TARGETED_ACTIVITIES.includes(actKey),
+        isLit: lightStatus[char.id] ?? false,
+        otherChars: characters.filter(c => c.id !== char.id)
       };
     });
 
-    // Log final mapped characters
-    console.log('Mapped characters:', mappedCharacters);
-
-    return mappedCharacters;
+    return { ordered, activityRows, formation, lightStatus };
   }
 
-  /**
-   * Get travel roles with the assigned character's skill value
-   */
-  _getTravelRolesWithSkills(pathfinderSkillName, lookoutSkillName, quartermasterSkillName) {
-    const data = this.actor.system;
-    const roles = {};
-
-    // Pathfinder role
-    roles.pathfinder = {
-      name: 'Pathfinder',
-      characterId: data.roles.pathfinder,
-      characterName: this._getCharacterNameById(data.roles.pathfinder),
-      skill: pathfinderSkillName,
-      skillValue: this._getAssignedCharacterSkillValue(data.roles.pathfinder, pathfinderSkillName)
-    };
-
-    // Lookout role
-    roles.lookout = {
-      name: 'Lookout',
-      characterId: data.roles.lookout,
-      characterName: this._getCharacterNameById(data.roles.lookout),
-      skill: lookoutSkillName,
-      skillValue: this._getAssignedCharacterSkillValue(data.roles.lookout, lookoutSkillName)
-    };
-
-    // Quartermaster role
-    roles.quartermaster = {
-      name: 'Quartermaster',
-      characterId: data.roles.quartermaster,
-      characterName: this._getCharacterNameById(data.roles.quartermaster),
-      skill: quartermasterSkillName,
-      skillValue: this._getAssignedCharacterSkillValue(
-        data.roles.quartermaster,
-        quartermasterSkillName
-      )
-    };
-
-    return roles;
-  }
-
-  /**
-   * Check if a character is owned by the current user
-   */
-  _isCharacterOwnedByCurrentUser(character) {
-    return character.isOwner;
-  }
-
-  /**
-   * Get the current user's character ID
-   */
-  _getCurrentUserCharacterId() {
-    // Find a character actor owned by the current user
-    const userCharacter = game.actors.find(a => a.isOwner && a.type === 'character');
-    return userCharacter ? userCharacter.id : null;
-  }
-
-  /**
-   * Check if a character is in active status
-   */
-  _isCharacterActive(characterId) {
-    const data = this.actor.system;
-    return data.memberStatus && data.memberStatus[characterId] === 'active';
-  }
-
-  /**
-   * Check if a character is in traveling status
-   */
-  _isCharacterTraveling(characterId) {
-    const data = this.actor.system;
-    return data.memberStatus && data.memberStatus[characterId] === 'traveling';
-  }
-
-  /**
-   * Check if a character is staying behind
-   */
-  _isCharacterStayingBehind(characterId) {
-    const data = this.actor.system;
-    return data.memberStatus && data.memberStatus[characterId] === 'stayingBehind';
-  }
-
-  /**
-   * Get a character's travel role
-   */
-  _getCharacterTravelRole(characterId) {
-    const data = this.actor.system;
-
-    for (const [role, id] of Object.entries(data.roles)) {
-      if (id === characterId) return role;
+  /** Build tab navigation context */
+  private _prepareTabs() {
+    const tabs: Record<string, any> = {};
+    const tabDefs = (PartyActorSheet.TABS as any).primary.tabs;
+    const active = (this.tabGroups as any)?.primary ?? 'command-center';
+    for (const tab of tabDefs) {
+      tabs[tab.id] = {
+        ...tab,
+        active: tab.id === active,
+        cssClass: tab.id === active ? 'active' : ''
+      };
     }
-
-    return null;
-  }
-
-  /**
-   * Get a character's skill value
-   */
-  _getCharacterSkillValue(character, skillName) {
-    return getSkillValue(character, skillName);
-  }
-
-  /**
-   * Get the skill value for an assigned character
-   */
-  _getAssignedCharacterSkillValue(characterId, skillName) {
-    if (!characterId) return null;
-
-    const character = game.actors.get(characterId);
-    if (!character) return null;
-
-    return this._getCharacterSkillValue(character, skillName);
-  }
-
-  /**
-   * Get a character's name by ID
-   */
-  _getCharacterNameById(characterId) {
-    if (!characterId) return null;
-
-    const character = game.actors.get(characterId);
-    return character ? character.name : null;
-  }
-
-  /**
-   * Get the user who owns a character, preferring non-GM users
-   */
-  _getCharacterOwner(character) {
-    if (!character) return null;
-
-    // Find all users with owner permission (level 3)
-    const ownerIds = Object.entries(character.ownership || {})
-      .filter(([_id, level]) => level === 3)
-      .map(([id]) => id);
-
-    if (ownerIds.length === 0) return null;
-
-    // Get all owner users
-    const ownerUsers = ownerIds.map(id => game.users.get(id)).filter(user => user); // Remove any undefined users
-
-    // Prefer non-GM users over GMs
-    const regularUsers = ownerUsers.filter(user => !user.isGM);
-    if (regularUsers.length > 0) {
-      return regularUsers[0]; // Return the first non-GM user
-    }
-
-    // Fall back to GM if no regular users are owners
-    return ownerUsers[0];
+    return tabs;
   }
 
   /** @override */
-  activateListeners(html) {
-    super.activateListeners(html);
+  _onRender(context: unknown, options: unknown) {
+    super._onRender(context, options);
+    const html = this.element;
 
-    // Fix character portrait sizes
-    this._fixPortraitSizes(html);
+    // Inventory filter buttons
+    html.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', ev => {
+        ev.preventDefault();
+        html.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        (btn as HTMLElement).classList.add('active');
+        this._applyInventoryFilter((btn as HTMLElement).dataset.target ?? 'all');
+      });
+    });
+    this._applyInventoryFilter('all');
 
-    // Character status management
-    html.find('.character-status-select').change(this._onCharacterStatusChange.bind(this));
-
-    // Travel role management
-    html.find('.assign-role').click(this._onAssignRoleClick.bind(this));
-    html.find('.pathfinder-select').change(this._onPathfinderSelectChange.bind(this));
-    html.find('.lookout-select').change(this._onLookoutSelectChange.bind(this));
-    html.find('.quartermaster-select').change(this._onQuartermasterSelectChange.bind(this));
-
-    // Resource management
-    html.find('.add-resource').click(this._onAddResourceClick.bind(this));
-    html.find('.remove-resource').click(this._onRemoveResourceClick.bind(this));
-
-    // Party actions
-    html.find('.make-camp').click(this._onMakeCampClick.bind(this));
-    html.find('.distribute-resources').click(this._onDistributeResourcesClick.bind(this));
-    html.find('.roll-pathfinding').click(this._onRollPathfindingClick.bind(this));
-    html.find('.random-encounter').click(this._onRandomEncounterClick.bind(this));
-    html.find('.roll-weather').click(this._onRollWeatherClick.bind(this));
-    html.find('.toggle-mounted').click(this._onToggleMountedClick.bind(this));
-    html.find('.add-all-characters').click(this._onAddAllCharactersClick.bind(this));
-    html.find('.remove-character').click(this._onRemoveCharacterClick.bind(this));
-    html.find('.remove-all-characters').click(this._onRemoveAllCharactersClick.bind(this));
-
-    // Enable drag-and-drop for adding characters
-    this._activateDragDrop(html);
-
-    // If the sheet is editable
-    if (this.isEditable) {
-      // Add inventory item
-      html.find('.item-create').click(this._onItemCreate.bind(this));
-
-      // Inventory item management
-      html.find('.item-edit').click(this._onItemEdit.bind(this));
-      html.find('.item-delete').click(this._onItemDelete.bind(this));
-    }
-  }
-
-  /**
-   * Fix portrait sizes to match the actor directory
-   */
-  _fixPortraitSizes(html) {
-    // Set size for all character portraits
-    const portraits = html.find('.character-portrait, .thumbnail');
-    portraits.each((_i, img) => {
-      img.style.width = '48px';
-      img.style.height = '48px';
-      img.style.maxWidth = '48px';
-      img.style.maxHeight = '48px';
-      img.style.objectFit = 'cover';
-      img.style.borderRadius = '3px';
-      img.style.border = '1px solid var(--color-border-light-tertiary)';
+    // Activity select changes
+    html.querySelectorAll('.activity-select').forEach(select => {
+      select.addEventListener('change', async ev => {
+        const el = ev.currentTarget as HTMLSelectElement;
+        const charId = el.dataset.charId ?? '';
+        const activity = el.value;
+        if (charId) await this.actor.setCharacterActivity(charId, activity);
+      });
     });
 
-    // Also target any images with 'mage.webp' or similar in src
-    const characterImages = html.find('img[src*="actors/"]');
-    characterImages.each((_i, img) => {
-      // Skip profile image
-      if (img.classList.contains('profile-img')) return;
-
-      img.style.width = '48px';
-      img.style.height = '48px';
-      img.style.maxWidth = '48px';
-      img.style.maxHeight = '48px';
-      img.style.objectFit = 'cover';
-      img.style.borderRadius = '3px';
-      img.style.border = '1px solid var(--color-border-light-tertiary)';
+    // Target select changes
+    html.querySelectorAll('.target-select').forEach(select => {
+      select.addEventListener('change', async ev => {
+        const el = ev.currentTarget as HTMLSelectElement;
+        const charId = el.dataset.charId ?? '';
+        const targetId = el.value;
+        const curActivity = this.actor.system.activities?.[charId]?.activity ?? 'support';
+        if (charId) await this.actor.setCharacterActivity(charId, curActivity, targetId);
+      });
     });
 
-    // Keep profile image larger
-    const profileImg = html.find('.profile-img');
-    if (profileImg.length) {
-      profileImg[0].style.width = '60px';
-      profileImg[0].style.height = '60px';
-      profileImg[0].style.maxWidth = '60px';
-      profileImg[0].style.maxHeight = '60px';
-      profileImg[0].style.objectFit = 'cover';
-    }
-  }
+    // Formation drag-and-drop
+    this._activateFormationDragDrop(html);
 
-  /**
-   * Handle changing a character's status
-   */
-  async _onCharacterStatusChange(event) {
-    event.preventDefault();
-
-    const element = event.currentTarget;
-    const characterId = element.dataset.characterId;
-    const status = element.value;
-
-    // Access the actor correctly - ensure we access the extended methods
-    const partyActor = this.actor;
-
-    // Check if the method exists before calling it
-    if (typeof partyActor.setCharacterStatus === 'function') {
-      await partyActor.setCharacterStatus(characterId, status);
-    } else {
-      console.error("Party actor doesn't have setCharacterStatus method", partyActor);
-      ui.notifications.error('Could not change character status. See console for details.');
-    }
-  }
-
-  /**
-   * Handle pathfinder selection change
-   */
-  async _onPathfinderSelectChange(event) {
-    event.preventDefault();
-
-    const select = event.currentTarget;
-    const characterId = select.value;
-
-    // Update the travel role
-    await this.actor.update({
-      'system.roles.pathfinder': characterId
+    // Item card detail popups
+    html.querySelectorAll('.item-card').forEach(card => {
+      card.addEventListener('click', ev => {
+        ev.preventDefault();
+        const payload = (card as HTMLElement).dataset.payload;
+        if (payload) this._showItemDetail(JSON.parse(payload));
+      });
     });
+
+    // Drag-drop for adding characters to party
+    this._activateCharacterDragDrop(html);
   }
 
-  /**
-   * Handle lookout selection change
-   */
-  async _onLookoutSelectChange(event) {
-    event.preventDefault();
+  /** @override */
+  _onFirstRender(context: unknown, options: unknown) {
+    super._onFirstRender(context, options);
 
-    const select = event.currentTarget;
-    const characterId = select.value;
-
-    // Update the travel role
-    await this.actor.update({
-      'system.roles.lookout': characterId
+    // Register hooks to auto-refresh when relevant data changes
+    const id1 = Hooks.on('updateActor', (actor: Actor) => {
+      if (this._isRelevantActor(actor)) this.render();
     });
-  }
-
-  /**
-   * Handle quartermaster selection change
-   */
-  async _onQuartermasterSelectChange(event) {
-    event.preventDefault();
-
-    const select = event.currentTarget;
-    const characterId = select.value;
-
-    // Update the travel role
-    await this.actor.update({
-      'system.roles.quartermaster': characterId
+    const id2 = Hooks.on('createActiveEffect', (effect: ActiveEffect) => {
+      if (this._isRelevantActor(effect.parent as Actor)) this.render();
     });
-  }
-
-  /**
-   * Handle assigning a travel role
-   */
-  async _onAssignRoleClick(event) {
-    event.preventDefault();
-
-    const element = event.currentTarget;
-    const characterId = element.dataset.characterId;
-    const role = element.dataset.role;
-
-    const partyActor = this.actor;
-    if (typeof partyActor.assignTravelRole === 'function') {
-      await partyActor.assignTravelRole(characterId, role);
-    } else {
-      console.error("Party actor doesn't have assignTravelRole method", partyActor);
-      ui.notifications.error('Could not assign travel role. See console for details.');
-    }
-  }
-
-  /**
-   * Handle adding a resource
-   */
-  async _onAddResourceClick(event) {
-    event.preventDefault();
-
-    const element = event.currentTarget;
-    const resourceType = element.dataset.resourceType;
-
-    const partyActor = this.actor;
-    if (typeof partyActor.addResource === 'function') {
-      await partyActor.addResource(resourceType);
-    } else {
-      console.error("Party actor doesn't have addResource method", partyActor);
-      ui.notifications.error('Could not add resource. See console for details.');
-    }
-  }
-
-  /**
-   * Handle removing a resource
-   */
-  async _onRemoveResourceClick(event) {
-    event.preventDefault();
-
-    const element = event.currentTarget;
-    const resourceType = element.dataset.resourceType;
-
-    const partyActor = this.actor;
-    if (typeof partyActor.removeResource === 'function') {
-      await partyActor.removeResource(resourceType);
-    } else {
-      console.error("Party actor doesn't have removeResource method", partyActor);
-      ui.notifications.error('Could not remove resource. See console for details.');
-    }
-  }
-
-  /**
-   * Handle making camp
-   */
-  async _onMakeCampClick(event) {
-    event.preventDefault();
-
-    const partyActor = this.actor;
-    if (typeof partyActor.makeCamp === 'function') {
-      await partyActor.makeCamp();
-    } else {
-      console.error("Party actor doesn't have makeCamp method", partyActor);
-      ui.notifications.error('Could not make camp. See console for details.');
-    }
-  }
-
-  /**
-   * Handle distributing resources
-   */
-  async _onDistributeResourcesClick(event) {
-    event.preventDefault();
-
-    const element = event.currentTarget;
-    const resourceType = element.dataset.resourceType;
-
-    const partyActor = this.actor;
-    if (typeof partyActor.distributeResources === 'function') {
-      await partyActor.distributeResources(resourceType);
-    } else {
-      console.error("Party actor doesn't have distributeResources method", partyActor);
-      ui.notifications.error('Could not distribute resources. See console for details.');
-    }
-  }
-
-  /**
-   * Handle rolling pathfinding
-   */
-  async _onRollPathfindingClick(event) {
-    event.preventDefault();
-
-    const partyActor = this.actor;
-    if (typeof partyActor.rollPathfinding === 'function') {
-      await partyActor.rollPathfinding();
-    } else {
-      console.error("Party actor doesn't have rollPathfinding method", partyActor);
-      ui.notifications.error('Could not roll pathfinding. See console for details.');
-    }
-  }
-
-  /**
-   * Handle rolling for random encounters
-   */
-  async _onRandomEncounterClick(event) {
-    event.preventDefault();
-
-    // Only GMs can trigger random encounters
-    if (!game.user.isGM) {
-      ui.notifications.warn(game.i18n.localize('J&J.errors.gmOnly'));
-      return;
-    }
-
-    // Use system-specific dice formulas
-    const encounterFormula = SystemConfigManager.getInstance().getDiceFormula('randomEncounter');
-    const encounterThreshold =
-      SystemConfigManager.getInstance().getDiceFormula('encounterThreshold');
-    const roll = new Roll(String(encounterFormula));
-    await roll.evaluate();
-
-    ChatMessage.create({
-      speaker: { actor: this.actor.id, alias: this.actor.name },
-      content: `<h3>Random Encounter Check</h3><p>Roll: ${roll.total}</p><p>${roll.total >= encounterThreshold ? 'An encounter occurs!' : 'No encounter.'}</p>`
+    const id3 = Hooks.on('deleteActiveEffect', (effect: ActiveEffect) => {
+      if (this._isRelevantActor(effect.parent as Actor)) this.render();
     });
-  }
-
-  /**
-   * Handle rolling for weather
-   */
-  async _onRollWeatherClick(event) {
-    event.preventDefault();
-
-    // Only GMs can roll for weather
-    if (!game.user.isGM) {
-      ui.notifications.warn(game.i18n.localize('J&J.errors.gmOnly'));
-      return;
-    }
-
-    // Use system-specific weather dice formula
-    const weatherFormula = SystemConfigManager.getInstance().getDiceFormula('weather');
-    const roll = new Roll(String(weatherFormula));
-    await roll.evaluate();
-
-    const weather =
-      {
-        1: 'Clear skies',
-        2: 'Partly cloudy',
-        3: 'Overcast',
-        4: 'Light rain',
-        5: 'Heavy rain',
-        6: 'Storm'
-      }[roll.total] || `Weather condition ${roll.total}`;
-
-    ChatMessage.create({
-      speaker: { actor: this.actor.id, alias: this.actor.name },
-      content: `<h3>Weather Roll</h3><p>Result: ${weather}</p>`
+    const id4 = Hooks.on('updateItem', (_item: Item, _changes: unknown, _options: unknown, userId: string) => {
+      this.render();
     });
+
+    this.#hookIds = [id1, id2, id3, id4];
   }
 
-  /**
-   * Handle toggling mounted status
-   */
-  async _onToggleMountedClick(event) {
-    event.preventDefault();
-
-    const partyActor = this.actor;
-    if (typeof partyActor.toggleMounted === 'function') {
-      await partyActor.toggleMounted();
-    } else {
-      console.error("Party actor doesn't have toggleMounted method", partyActor);
-      ui.notifications.error('Could not toggle mounted status. See console for details.');
-    }
+  /** @override */
+  async _preClose(options: unknown) {
+    this.#hookIds.forEach(id => Hooks.off('updateActor', id));
+    this.#hookIds.forEach(id => Hooks.off('createActiveEffect', id));
+    this.#hookIds.forEach(id => Hooks.off('deleteActiveEffect', id));
+    this.#hookIds.forEach(id => Hooks.off('updateItem', id));
+    this.#hookIds = [];
+    return super._preClose(options);
   }
 
-  /**
-   * Handle adding all characters to the party
-   */
-  async _onAddAllCharactersClick(event) {
-    event.preventDefault();
-
-    const partyActor = this.actor;
-    if (typeof partyActor.addAllCharactersAsActive === 'function') {
-      await partyActor.addAllCharactersAsActive();
-    } else {
-      console.error("Party actor doesn't have addAllCharactersAsActive method", partyActor);
-      ui.notifications.error('Could not add all characters. See console for details.');
-    }
+  private _isRelevantActor(actor: Actor | null) {
+    if (!actor) return false;
+    if (actor.id === this.actor.id) return true;
+    return !!this.actor.system.memberStatus?.[actor.id];
   }
 
-  /**
-   * Handle removing a character from the party
-   */
-  async _onRemoveCharacterClick(event) {
-    event.preventDefault();
+  /** Apply inventory filter by character name or 'all' */
+  private _applyInventoryFilter(target: string) {
+    const html = this.element;
+    const isAll = target === 'all';
 
-    const element = event.currentTarget;
-    const characterId = element.dataset.characterId;
-
-    if (!characterId) {
-      ui.notifications.error('No character ID specified.');
-      return;
-    }
-
-    // Get character name for debugging
-    const character = game.actors.get(characterId);
-    const characterName = character ? character.name : 'Unknown Character';
-
-    console.log(`Attempting to remove character: ${characterName} (${characterId})`);
-
-    // Use the party actor's removeCharacter method instead of handling it in the sheet
-    const partyActor = this.actor;
-
-    // Ensure the actor is properly patched before attempting to call methods
-    if (typeof partyActor.removeCharacter !== 'function') {
-      console.error("Party actor doesn't have removeCharacter method", partyActor);
-      ui.notifications.error('Could not remove character. See console for details.');
-      return;
-    }
-
-    try {
-      const result = await partyActor.removeCharacter(characterId, true);
-
-      if (result) {
-        // Successfully removed, the actor method handles notifications
-        // Force a re-render to ensure UI is updated with fresh data
-        // Use setTimeout to ensure the actor update has fully propagated
-        setTimeout(() => {
-          console.log('Re-rendering sheet after character removal');
-          this.render(true); // Force full re-render
-        }, 200);
+    html.querySelectorAll('.item-card').forEach(card => {
+      const el = card as HTMLElement;
+      const payload = JSON.parse(el.dataset.payload ?? '{}');
+      if (isAll || payload.owners?.[target]) {
+        el.style.display = '';
+      } else {
+        el.style.display = 'none';
       }
-    } catch (error) {
-      console.error('Error removing character:', error);
-      ui.notifications.error(`Failed to remove ${characterName}. See console for details.`);
-    }
-  }
-
-  /**
-   * Handle removing all characters from the party
-   */
-  async _onRemoveAllCharactersClick(event) {
-    event.preventDefault();
-
-    // Determine which method to call based on user type
-    const isGM = game.user.isGM;
-    const methodName = isGM ? 'removeAllCharacters' : 'removeOwnCharacters';
-    const dialogTitle = isGM ? 'Remove All Characters' : 'Remove Your Characters';
-    const dialogContent = isGM
-      ? '<p>Are you sure you want to remove all characters from the party?</p>'
-      : '<p>Are you sure you want to remove all your characters from the party?</p>';
-
-    // Ask for confirmation
-    const confirmed = await Dialog.confirm({
-      title: dialogTitle,
-      content: dialogContent,
-      yes: () => true,
-      no: () => false,
-      defaultYes: false
     });
 
-    if (!confirmed) return;
-
-    const partyActor = this.actor;
-
-    // Ensure the actor is properly patched before attempting to call methods
-    patchPartyActor(partyActor);
-
-    if (typeof partyActor[methodName] === 'function') {
-      await partyActor[methodName]();
-    } else {
-      console.error(`Party actor doesn't have ${methodName} method`, partyActor);
-      ui.notifications.error('Could not remove characters. See console for details.');
-    }
+    // Show/hide category dividers
+    html.querySelectorAll('.grid-divider').forEach(div => {
+      const cat = (div as HTMLElement).dataset.cat;
+      const hasVisible = html.querySelector(`.item-card[data-cat="${cat}"]`);
+      (div as HTMLElement).style.display = hasVisible ? '' : 'none';
+    });
   }
 
-  /**
-   * Handle creating a new item
-   */
-  _onItemCreate(event) {
-    event.preventDefault();
+  /** Formation drag-and-drop reordering */
+  private _activateFormationDragDrop(html: HTMLElement) {
+    const container = html.querySelector('#formation-container');
+    if (!container) return;
 
-    const header = event.currentTarget;
-    const type = header.dataset.type;
+    let dragSrcId: string | null = null;
 
-    const itemData = {
-      name: `New ${type.capitalize()}`,
-      type: type
-    };
+    container.querySelectorAll('.formation-slot[draggable="true"]').forEach(slot => {
+      slot.addEventListener('dragstart', ev => {
+        dragSrcId = (slot as HTMLElement).dataset.charId ?? null;
+        (slot as HTMLElement).style.opacity = '0.4';
+        (ev as DragEvent).dataTransfer?.setData('text/plain', dragSrcId ?? '');
+      });
 
-    this.actor.createEmbeddedDocuments('Item', [itemData]);
-  }
+      slot.addEventListener('dragover', ev => {
+        ev.preventDefault();
+      });
 
-  /**
-   * Handle editing an item
-   */
-  _onItemEdit(event) {
-    event.preventDefault();
+      slot.addEventListener('drop', async ev => {
+        ev.stopPropagation();
+        (slot as HTMLElement).style.opacity = '1';
+        const targetId = (slot as HTMLElement).dataset.charId;
+        if (!dragSrcId || !targetId || dragSrcId === targetId) return;
 
-    const li = event.currentTarget.closest('.item');
-    const item = this.actor.items.get(li.dataset.itemId);
+        const formation = [...(this.actor.system.formation ?? [])];
+        const characters = Object.keys(this.actor.system.memberStatus ?? {});
 
-    item.sheet.render(true);
-  }
+        // Get current ordered list (fill missing from memberStatus order)
+        const orderedIds = characters.sort((a, b) => {
+          const ia = formation.indexOf(a);
+          const ib = formation.indexOf(b);
+          if (ia === -1 && ib === -1) return 0;
+          if (ia === -1) return 1;
+          if (ib === -1) return -1;
+          return ia - ib;
+        });
 
-  /**
-   * Handle deleting an item
-   */
-  _onItemDelete(event) {
-    event.preventDefault();
-
-    const li = event.currentTarget.closest('.item');
-    const itemId = li.dataset.itemId;
-
-    new Dialog({
-      title: 'Confirm Deletion',
-      content: '<p>Are you sure you want to delete this item?</p>',
-      buttons: {
-        delete: {
-          icon: '<i class="fas fa-trash"></i>',
-          label: 'Delete',
-          callback: () => this.actor.deleteEmbeddedDocuments('Item', [itemId])
-        },
-        cancel: {
-          icon: '<i class="fas fa-times"></i>',
-          label: 'Cancel'
+        const fromIdx = orderedIds.indexOf(dragSrcId);
+        const toIdx = orderedIds.indexOf(targetId);
+        if (fromIdx >= 0 && toIdx >= 0) {
+          const [moved] = orderedIds.splice(fromIdx, 1);
+          orderedIds.splice(toIdx, 0, moved);
+          await this.actor.setFormationOrder(orderedIds);
         }
-      },
-      default: 'cancel'
-    }).render(true);
+      });
+
+      slot.addEventListener('dragend', () => {
+        (slot as HTMLElement).style.opacity = '1';
+        dragSrcId = null;
+      });
+    });
   }
 
-  /**
-   * Activate drag-and-drop functionality for the party sheet
-   */
-  _activateDragDrop(html) {
-    // Create a new DragDrop instance
-    const dragDrop = new DragDrop({
-      dragSelector: '.character', // Allow dragging characters (not implemented for this sheet)
-      dropSelector: '.party-sheet', // Allow dropping on the entire sheet
-      permissions: {
-        dragstart: () => false, // Don't allow dragging from this sheet
-        drop: () => this.isEditable // Only allow dropping if editable
-      },
-      callbacks: {
-        drop: this._onDrop.bind(this)
+  /** Enable dropping character actors onto the sheet */
+  private _activateCharacterDragDrop(html: HTMLElement) {
+    html.addEventListener('dragover', ev => ev.preventDefault());
+    html.addEventListener('drop', async ev => {
+      let data: any;
+      try {
+        data = JSON.parse(ev.dataTransfer?.getData('text/plain') ?? '{}');
+      } catch {
+        return;
+      }
+      if (data.type !== 'Actor') return;
+
+      const actor = await Actor.implementation.fromDropData(data);
+      if (!actor || actor.type !== 'character') {
+        ui.notifications?.warn('Only character actors can be added to the party.');
+        return;
+      }
+      if (!game.user?.isGM && !actor.isOwner) {
+        ui.notifications?.error('You can only add characters you own to the party.');
+        return;
+      }
+      await this.actor.addCharacter(actor.id, 'active', true);
+    });
+  }
+
+  /** Show item detail popup using DialogV2 */
+  private _showItemDetail(payload: any) {
+    const { DialogV2 } = foundry.applications.api;
+
+    let statsHtml = '';
+    if (payload.stats && Object.keys(payload.stats).length > 0) {
+      const statItems = Object.entries(payload.stats)
+        .filter(([, val]) => val && val !== '0' && val !== 0)
+        .map(([key, val]) => `<b>${key}:</b> ${val}`);
+      if (statItems.length > 0) {
+        statsHtml = `<div class="item-stats">${statItems.join(' | ')}</div>`;
+      }
+    }
+
+    const descHtml = payload.desc
+      ? `<div class="item-desc">${payload.desc}</div>`
+      : '';
+
+    const ownersHtml = Object.entries(payload.owners ?? {})
+      .map(([owner, data]: [string, any]) => `
+        <div class="item-owner-row">
+          <img src="${data.icon}" class="owner-portrait">
+          <div class="owner-name">${owner} ${data.equipped ? '<i class="fas fa-shield-alt"></i>' : ''}</div>
+          <div class="owner-count">${!['magic_trick', 'spell_book', 'ability'].includes(payload.category) ? data.count : ''}</div>
+        </div>`)
+      .join('');
+
+    const content = `
+      <div class="item-detail-popup">
+        <button class="btn-share-chat">
+          <i class="fas fa-comment"></i> Share to Chat
+        </button>
+        ${statsHtml}
+        ${descHtml}
+        <h3>Carriers</h3>
+        ${ownersHtml}
+      </div>`;
+
+    DialogV2.wait({
+      window: { title: payload.name },
+      content,
+      buttons: [{ action: 'close', label: 'Close', default: true }],
+      render: (event: Event, html: HTMLElement) => {
+        html.querySelector('.btn-share-chat')?.addEventListener('click', ev => {
+          ev.preventDefault();
+          const chatContent = `
+            <div class="item-chat-share">
+              <header class="item-chat-header">
+                <img src="${payload.img}" class="item-chat-img">
+                <h3>${payload.name}</h3>
+              </header>
+              <div>${statsHtml}<div>${payload.desc || 'No description.'}</div></div>
+            </div>`;
+          ChatMessage.create({ content: chatContent });
+          ui.notifications?.info(`Shared ${payload.name} to chat.`);
+        });
       }
     });
-
-    // Bind the DragDrop to the HTML element
-    dragDrop.bind(html[0]);
   }
 
-  /**
-   * Handle drop events
-   */
-  async _onDrop(event) {
+  // ===== STATIC ACTION HANDLERS =====
+
+  static async #onToggleCondition(this: PartyActorSheet, event: Event, target: HTMLElement) {
     event.preventDefault();
+    const actorId = (target.closest('[data-actor-id]') as HTMLElement)?.dataset.actorId;
+    const effectId = target.dataset.effectId;
+    if (!actorId || !effectId) return;
+    const actor = game.actors?.get(actorId);
+    if (actor) await actor.toggleStatusEffect(effectId);
+  }
 
-    let data;
-    try {
-      data = JSON.parse(event.dataTransfer.getData('text/plain'));
-    } catch (err) {
-      console.error('Invalid drop data:', err);
-      return false;
+  static async #onToggleLight(this: PartyActorSheet, event: Event, target: HTMLElement) {
+    event.preventDefault();
+    const charId = target.dataset.charId;
+    if (charId) await this.actor.toggleCharacterLight(charId);
+  }
+
+  static async #onRollActivity(this: PartyActorSheet, event: Event, target: HTMLElement) {
+    event.preventDefault();
+    const charId = target.dataset.charId;
+    const skillName = target.dataset.skill;
+    const activityName = target.dataset.activity;
+    const targetId = target.dataset.target;
+
+    if (!charId || !skillName) return;
+    const char = game.actors?.get(charId);
+    if (!char) return;
+
+    let displayContext = activityName ?? skillName;
+    if (targetId) {
+      const targetChar = game.actors?.get(targetId);
+      if (targetChar) displayContext += ` for ${targetChar.name}`;
     }
 
-    // Only handle Actor drops
-    if (data.type !== 'Actor') {
-      return false;
-    }
+    ChatMessage.create({
+      content: `
+        <div class="skill-request-card">
+          <header class="skill-request-header">
+            <i class="fas fa-dice-d20"></i>
+            <span>Skill Request</span>
+          </header>
+          <div class="skill-request-body">
+            <img src="${char.img}" class="skill-request-portrait">
+            <div>
+              <div class="skill-request-name">${char.name}</div>
+              <div>Please roll <strong>${skillName}</strong></div>
+              <div class="skill-request-context">Context: ${displayContext}</div>
+            </div>
+          </div>
+        </div>`
+    });
+  }
 
-    // Get the dropped actor
-    const actor = await Actor.implementation.fromDropData(data);
-    if (!actor) {
-      ui.notifications.error('Invalid actor data.');
-      return false;
-    }
+  static async #onRemoveActivity(this: PartyActorSheet, event: Event, target: HTMLElement) {
+    event.preventDefault();
+    const charId = target.dataset.charId;
+    if (charId) await this.actor.clearCharacterActivity(charId);
+  }
 
-    // Only allow character actors
-    if (actor.type !== 'character') {
-      ui.notifications.warn('Only character actors can be added to the party.');
-      return false;
-    }
+  static async #onAddAllCharacters(this: PartyActorSheet, event: Event) {
+    event.preventDefault();
+    await this.actor.addAllCharactersAsActive();
+  }
 
-    // Check permissions - only allow adding own characters or if GM
-    if (!game.user.isGM && !actor.isOwner) {
-      ui.notifications.error('You can only add characters you own to the party.');
-      return false;
-    }
+  static async #onRemoveCharacter(this: PartyActorSheet, event: Event, target: HTMLElement) {
+    event.preventDefault();
+    const charId = target.dataset.charId;
+    if (charId) await this.actor.removeCharacter(charId, true);
+  }
 
-    // Add the character to the party (grantOwnership is handled automatically in addCharacter)
-    const partyActor = this.actor;
-    if (typeof partyActor.addCharacter === 'function') {
-      return await partyActor.addCharacter(actor.id, 'active', true);
-    } else {
-      console.error("Party actor doesn't have addCharacter method", partyActor);
-      ui.notifications.error('Could not add character. See console for details.');
-      return false;
-    }
+  static async #onRemoveAllCharacters(this: PartyActorSheet, event: Event) {
+    event.preventDefault();
+    const { DialogV2 } = foundry.applications.api;
+    const isGM = game.user?.isGM ?? false;
+    const confirmed = await DialogV2.confirm({
+      window: { title: isGM ? 'Remove All Characters' : 'Remove Your Characters' },
+      content: isGM
+        ? '<p>Are you sure you want to remove all characters from the party?</p>'
+        : '<p>Are you sure you want to remove all your characters from the party?</p>'
+    });
+    if (!confirmed) return;
+    if (isGM) await this.actor.removeAllCharacters();
+    else await this.actor.removeOwnCharacters();
+  }
+
+  static async #onMakeCamp(this: PartyActorSheet, event: Event) {
+    event.preventDefault();
+    await this.actor.makeCamp();
+  }
+
+  static async #onAddResource(this: PartyActorSheet, event: Event, target: HTMLElement) {
+    event.preventDefault();
+    const type = target.dataset.resourceType;
+    if (type) await this.actor.addResource(type);
+  }
+
+  static async #onRemoveResource(this: PartyActorSheet, event: Event, target: HTMLElement) {
+    event.preventDefault();
+    const type = target.dataset.resourceType;
+    if (type) await this.actor.removeResource(type);
+  }
+
+  static async #onDistributeResource(this: PartyActorSheet, event: Event, target: HTMLElement) {
+    event.preventDefault();
+    const type = target.dataset.resourceType;
+    if (type) await this.actor.distributeResources(type);
+  }
+
+  static async #onRollPathfinding(this: PartyActorSheet, event: Event) {
+    event.preventDefault();
+    await this.actor.rollPathfinding();
+  }
+
+  static async #onToggleMounted(this: PartyActorSheet, event: Event) {
+    event.preventDefault();
+    await this.actor.toggleMounted();
+  }
+
+  static async #onSaveFormation(this: PartyActorSheet, event: Event) {
+    event.preventDefault();
+    // Formation order is saved via drag-drop; this button just confirms
+    ui.notifications?.info('Marching order saved.');
   }
 }

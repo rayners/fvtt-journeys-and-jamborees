@@ -1,0 +1,86 @@
+<section class="tab command-center" data-group="primary" data-tab="command-center">
+    <div class="pcc-wrapper">
+        {{#if characters.length}}
+            {{#each characters as |char|}}
+            <div class="pcc-row" data-actor-id="{{char.id}}">
+                <img src="{{char.img}}" class="pcc-img" title="{{char.name}}">
+                <div class="pcc-info">
+                    <div class="pcc-header-row">
+                        <span class="pcc-name">{{char.name}}</span>
+                        <span class="pcc-badge" title="Movement"><i class="fas fa-running"></i> {{char.movement}}</span>
+                    </div>
+                    <div class="pcc-content-area">
+                        <div class="pcc-bars">
+                            <div class="pcc-bar-bg">
+                                <div class="pcc-bar-fill pcc-bar-hp" style="width: {{char.hp.pct}}%;"></div>
+                                <div class="pcc-bar-text">HP {{char.hp.value}}/{{char.hp.max}}</div>
+                            </div>
+                            <div class="pcc-bar-bg">
+                                <div class="pcc-bar-fill pcc-bar-wp" style="width: {{char.wp.pct}}%;"></div>
+                                <div class="pcc-bar-text">WP {{char.wp.value}}/{{char.wp.max}}</div>
+                            </div>
+                            <div class="pcc-bar-bg">
+                                <div class="pcc-bar-fill {{#if char.enc.isOverEncumbered}}pcc-bar-enc-over{{else}}pcc-bar-enc{{/if}}" style="width: {{char.enc.pct}}%;"></div>
+                                <div class="pcc-bar-text">ENC {{char.enc.value}}/{{char.enc.max}}</div>
+                            </div>
+                        </div>
+                        <div class="pcc-grid">
+                            {{!-- Status condition toggles (3 buttons) --}}
+                            {{#each char.toggleStates as |toggle|}}
+                            <div class="grid-item toggle-btn {{toggle.class}} {{#if toggle.active}}active{{/if}}"
+                                 data-action="toggleCondition"
+                                 data-effect-id="{{toggle.id}}"
+                                 title="{{toggle.title}} (Toggle)">
+                                <i class="{{toggle.icon}}"></i>
+                            </div>
+                            {{/each}}
+                            {{!-- Attribute condition indicators (6 images) --}}
+                            {{#each char.attrStates as |cond|}}
+                            <img src="{{cond.img}}"
+                                 class="grid-item passive-img {{#if cond.active}}active{{/if}}"
+                                 title="{{cond.title}}">
+                            {{/each}}
+                        </div>
+                    </div>
+                </div>
+                <div class="pcc-actions">
+                    <button class="pcc-btn"
+                            data-action="toggleLight"
+                            data-char-id="{{char.id}}"
+                            title="Character Sheet">
+                        <i class="fas fa-scroll"></i>
+                    </button>
+                    {{#if isGM}}
+                    <button class="pcc-btn remove-char-btn"
+                            data-action="removeCharacter"
+                            data-char-id="{{char.id}}"
+                            title="Remove from Party">
+                        <i class="fas fa-user-minus"></i>
+                    </button>
+                    {{/if}}
+                </div>
+            </div>
+            {{/each}}
+        {{else}}
+            <div class="pcc-empty">
+                <i class="fas fa-users"></i>
+                <p>No party members. Drag characters here to add them.</p>
+            </div>
+        {{/if}}
+
+        <div class="pcc-footer">
+            <button type="button" class="pcc-footer-btn" data-action="addAllCharacters">
+                <i class="fas fa-user-plus"></i> Add Characters
+            </button>
+            <button type="button" class="pcc-footer-btn" data-action="makeCamp">
+                <i class="fas fa-campground"></i> Make Camp
+            </button>
+            <button type="button" class="pcc-footer-btn" data-action="rollPathfinding">
+                <i class="fas fa-compass"></i> Pathfind
+            </button>
+            <button type="button" class="pcc-footer-btn" data-action="toggleMounted">
+                <i class="fas fa-horse"></i> {{#if system.movement.isMounted}}Dismount{{else}}Mount{{/if}}
+            </button>
+        </div>
+    </div>
+</section>

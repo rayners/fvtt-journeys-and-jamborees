@@ -80,7 +80,16 @@ export class PartyModel extends foundry.abstract.TypeDataModel {
           img: new fields.FilePathField({ required: false, categories: ['IMAGE'] }),
           quantity: new fields.NumberField({ initial: 1, min: 0, integer: true })
         })
-      )
+      ),
+
+      // Marching order - ordered array of character IDs
+      formation: new fields.ArrayField(new fields.StringField()),
+
+      // Per-character activity assignments: { [characterId]: { activity: string, target?: string, customSkill?: string } }
+      activities: new fields.ObjectField(),
+
+      // Per-character light status: { [characterId]: boolean }
+      lightStatus: new fields.ObjectField()
     };
   }
 
